@@ -192,6 +192,13 @@ public class Helper {
 			}
 		}
 	}
+	public String incrRefCount(String var) {
+		String code = "if (" + var + "!= NULL) {\n";
+		//increase ref count
+		code +=    "\t" + "(*(int *)" + var + ")++;\n";
+		code +=     "}\n";
+		return code;
+	}
 	
 	public String decRefCount(String var) {
 		String code = "if (" + var + "!= NULL) {\n";
