@@ -12,6 +12,9 @@ public abstract class CuExpr {
 	protected String cText = "";
 	protected String name = "";
 	protected String castType = "", iterType = "";
+	protected ArrayList<String> def = new ArrayList<>();
+	protected ArrayList<String> use = new ArrayList<>();
+	protected Pair<List<CuStat>, CuExpr> hir;
 	private CuType type = null;
 	public void add(List<CuType> pt, List<CuExpr> es) {}
 	public final CuType getType(CuContext context) throws NoSuchTypeException {
@@ -36,6 +39,18 @@ public abstract class CuExpr {
 	
 	public String getIterType(){
 		return iterType;
+	}
+	
+	public ArrayList<String> getDef(){
+		return def;
+	}
+	
+	public ArrayList<String> getUse(){
+		return use;
+	}
+	
+	public Pair<List<CuStat>, CuExpr> toHIR() {
+		return hir;
 	}
 	
 	public boolean isFunCall () {
@@ -124,6 +139,34 @@ class AndExpr extends CuExpr{
 	}
 	
 	@Override
+	public Pair<List<CuStat>, CuExpr> toHIR() {
+		List<CuStat> stats = new ArrayList<>();
+		Pair<List<CuStat>, CuExpr> leftToHir = new Pair<List<CuStat>, CuExpr>();
+		Pair<List<CuStat>, CuExpr> rightToHir = new Pair<List<CuStat>, CuExpr>();
+		String name1 = Helper.getVarName(), name2 = Helper.getVarName();
+		
+		leftToHir = left.toHIR();
+		rightToHir = right.toHIR();
+		stats.addAll(leftToHir.getFirst());
+		stats.addAll(rightToHir.getFirst());
+		
+		CuVvc temp1 = new Vv(name1);
+		CuVvc temp2 = new Vv(name2);
+		CuStat a = new AssignStat(temp1, leftToHir.getSecond());
+		CuStat b = new AssignStat(temp2, rightToHir.getSecond());
+		stats.add(a);
+		stats.add(b);
+		
+		CuExpr var1 = new VvExp(name1);
+		CuExpr var2 = new VvExp(name2);
+		CuExpr expr = new AndExpr(var1, var2);		
+		
+		Pair<List<CuStat>, CuExpr> temp = new Pair<List<CuStat>, CuExpr>(stats, expr);
+		
+		return temp;
+	}
+	
+	@Override
 	public String toC(ArrayList<String> localVars) {
 		String temp = Helper.getVarName();
 		
@@ -140,9 +183,16 @@ class AndExpr extends CuExpr{
 				+ "%s->nrefs = 1;\n"
 				+ "%s->value=", temp, temp, temp, temp);
 		super.name += String.format("((%s*)%s)->value && ((%s*)%s)->value;\n", "Boolean", leftToC, "Boolean", rightToC);
-		if (!localVars.contains(temp))
-			localVars.add(temp);
+		//if (!localVars.contains(temp))
+			//localVars.add(temp);
 		Helper.cVarType.put(temp, "Boolean");
+		
+		if (leftC.equals(""))
+			use.add(leftToC);
+		if (rightC.equals(""))
+			use.add(rightToC);
+		
+		def.add(temp);
 
 		/*if (leftC.equals("") && rightC.equals("")){
 		//both are variables
@@ -241,17 +291,17 @@ Helper.P("common parent of types is " + type.toString());
 		}*/
 		
 
-		name += left.construct();
-		name += right.construct();
+		String rightC = left.construct();
+		String leftC = right.construct();
 		
-		
+		name += leftC + rightC;
 		String iter_name1 = Helper.getVarName();
 		super.name += "void *" + iter_name1 + ";\n";
 		super.name += iter_name1 + " = " + leftToC + ";\n";
 		super.name += "if ("+ iter_name1 +"!=NULL) {\n";
 		super.name += "(*((int *)" + iter_name1 + "))++;\n";
-		super.name += "if (" + "(*((int *)" + leftToC +"+1)) == 0) {\n";
-		super.name += "(*((int *)" + iter_name1 + "))--;\n";
+		super.name += "if (" + "(*((int *)" + leftToC +"+1)) == 0) {\n";		//checking if isIter is false 
+		super.name += Helper.decRefCount(iter_name1);
 		super.name += iter_name1+ " = strToIter( ((String *)" + leftToC + ")->value, ((String *)" + leftToC + ")->len);\n";
 		super.name += "}\n}\n";
 		
@@ -260,8 +310,8 @@ Helper.P("common parent of types is " + type.toString());
 		super.name += iter_name2 + " = " + rightToC + ";\n";
 		super.name += "if ("+ iter_name2 +"!=NULL) {\n";
 		super.name += "(*((int *)" + iter_name2 + "))++;\n";
-		super.name += "if (" + "(*((int *)" + rightToC +"+1)) == 0) {\n";
-		super.name += "(*((int *)" + iter_name1 + "))--;\n";
+		super.name += "if (" + "(*((int *)" + rightToC +"+1)) == 0) {\n";		//checking if isIter is false
+		super.name += Helper.decRefCount(iter_name1);
 		super.name += iter_name2+ " = strToIter( ((String *)" + rightToC + ")->value, ((String *)" + rightToC + ")->len);\n";
 		super.name += "}\n}\n";
 
@@ -284,8 +334,27 @@ Helper.P("common parent of types is " + type.toString());
 		
 		
 		name +=  "Iterable* " + iter + ";\n" + iter + " = concatenate((Iterable*)" + iter_name1 + ", (Iterable*) " + iter_name2 + ");\n";
+		name += Helper.incrRefCount(iter);
 		
 		cText = iter;
+		
+		if (!left.getDef().isEmpty())
+			def.addAll(left.getDef());
+		if (!right.getDef().isEmpty())
+			def.addAll(right.getDef());
+		if (!left.getUse().isEmpty())
+			use.addAll(left.getUse());
+		if (!right.getUse().isEmpty())
+			use.addAll(right.getUse());
+
+		def.add(iter);
+		def.add(iter_name1);
+		def.add(iter_name2);
+		if (leftC.equals(""))
+			use.add(leftToC);
+		if (rightC.equals(""))
+			use.add(rightToC);
+		
 		return super.toC(localVars);
 	}
 }
@@ -321,6 +390,11 @@ class BrkExpr extends CuExpr {
 			eToC = e.toC(localVars);
 			name += e.construct();
 			
+			if (!e.getDef().isEmpty())
+				def.addAll(e.getDef());
+			if (!e.getUse().isEmpty())
+				use.addAll(e.getUse());
+			
 			String eCastType = e.getCastType();
 			if (eCastType.equals(""))
 				eCastType = Helper.cVarType.get(e.toString());
@@ -342,7 +416,8 @@ class BrkExpr extends CuExpr {
 		}
 		tempNameArr.add("NULL");
 
-		for (int i = val.size() - 1; i >= 0; i--) {
+		int i;
+		for (i= val.size() - 1; i >= 0; i--) {
 			name += "Iterable* " + tempNameArr.get(i) + ";\n" 
 					+ tempNameArr.get(i) + " = (Iterable*) x3malloc(sizeof(Iterable));\n"
 					+ tempNameArr.get(i) + "->isIter = 1;\n"
@@ -351,13 +426,20 @@ class BrkExpr extends CuExpr {
 					+ tempNameArr.get(i) + "->additional = " + tempNameArr.get(i + 1) + ";\n" 
 					+ tempNameArr.get(i) + "->next = NULL;\n" 
 					+ tempNameArr.get(i)+ "->concat = NULL;\n";
+			
+			name += Helper.incrRefCount(tempDataArr.get(i+1));
+			
+			def.add(tempNameArr.get(i+1));
 		}	
 			
+		name += Helper.incrRefCount(tempDataArr.get(0));
+		def.add(tempNameArr.get(0));
+		
 		cText = tempNameArr.get(0);
 		
 		if(val.size() == 0) 
 			iterType = "Empty";
-			
+		
 		super.castType = "Iterable";
 		return super.toC(localVars);
 	}
@@ -391,10 +473,21 @@ class CBoolean extends CuExpr{
 					+ "(%s->nrefs) = 1;\n"
 					+ "%s->value = %d;\n", temp, temp, temp, temp, 0);
 	
-		if (!localVars.contains(temp))
-			localVars.add(temp);
+		//if (!localVars.contains(temp))
+			//localVars.add(temp);
 		Helper.cVarType.put(temp, "Boolean");
+		
+		def.add(temp);
+		
 		return super.toC(localVars);
+	}
+	
+	@Override
+	public Pair<List<CuStat>, CuExpr> toHIR() {
+		List<CuStat> cuStat = new ArrayList<>();
+		CuExpr cuExpr = this;
+		
+		return new Pair<List<CuStat>, CuExpr>(cuStat, cuExpr);
 	}
 }
 
@@ -411,6 +504,14 @@ class CInteger extends CuExpr {
 	}
 	
 	@Override
+	public Pair<List<CuStat>, CuExpr> toHIR() {
+		List<CuStat> cuStat = new ArrayList<>();
+		CuExpr cuExpr = this;
+		
+		return new Pair<List<CuStat>, CuExpr>(cuStat, cuExpr);
+	}
+	
+	@Override
 	public String toC(ArrayList<String> localVars) {
 		String temp = Helper.getVarName();
 		super.name = String.format("Integer* %s;\n%s = (Integer*) x3malloc(sizeof(Integer));\n"
@@ -418,9 +519,11 @@ class CInteger extends CuExpr {
 				+ "%s->value = %d;\n", temp, temp, temp, temp, val);		
 		super.cText = temp;
 		super.castType = "Integer";
-		if (!localVars.contains(temp))
-			localVars.add(temp);
+		//if (!localVars.contains(temp))
+			//localVars.add(temp);
 		Helper.cVarType.put(temp, "Integer");
+		
+		def.add(temp);
 		return super.toC(localVars);
 	}
 }
@@ -435,6 +538,13 @@ class CString extends CuExpr {
 	@Override protected CuType calculateType(CuContext context) {
 		if (val == null) { throw new NoSuchTypeException(Helper.getLineInfo());}
 		return CuType.string;
+	}
+	
+	public Pair<List<CuStat>, CuExpr> toHIR() {
+		List<CuStat> cuStat = new ArrayList<>();
+		CuExpr cuExpr = this;
+		
+		return new Pair<List<CuStat>, CuExpr>(cuStat, cuExpr);
 	}
 	
 	@Override
@@ -454,6 +564,8 @@ class CString extends CuExpr {
 		if (!localVars.contains(temp))
 			localVars.add(temp);
 		Helper.cVarType.put(temp, "String");
+		
+		def.add(temp);
 		
 		/*ArrayList<String> tempNameArr=new ArrayList<String>();	
 		ArrayList<String> tempDataArr=new ArrayList<String>();
@@ -514,6 +626,34 @@ class DivideExpr extends CuExpr{
 	 */
 	
 	@Override
+	public Pair<List<CuStat>, CuExpr> toHIR() {
+		List<CuStat> stats = new ArrayList<>();
+		Pair<List<CuStat>, CuExpr> leftToHir = new Pair<List<CuStat>, CuExpr>();
+		Pair<List<CuStat>, CuExpr> rightToHir = new Pair<List<CuStat>, CuExpr>();
+		String name1 = Helper.getVarName(), name2 = Helper.getVarName();
+		
+		leftToHir = left.toHIR();
+		rightToHir = right.toHIR();
+		stats.addAll(leftToHir.getFirst());
+		stats.addAll(rightToHir.getFirst());
+		
+		CuVvc temp1 = new Vv(name1);
+		CuVvc temp2 = new Vv(name2);
+		CuStat a = new AssignStat(temp1, leftToHir.getSecond());
+		CuStat b = new AssignStat(temp2, rightToHir.getSecond());
+		stats.add(a);
+		stats.add(b);
+		
+		CuExpr var1 = new VvExp(name1);
+		CuExpr var2 = new VvExp(name2);
+		CuExpr expr = new DivideExpr(var1, var2);		
+		
+		Pair<List<CuStat>, CuExpr> temp = new Pair<List<CuStat>, CuExpr>(stats, expr);
+		
+		return temp;
+	}
+	
+	@Override
 	public String toC(ArrayList<String> localVars) {
 		String temp = Helper.getVarName();
 		
@@ -547,10 +687,28 @@ class DivideExpr extends CuExpr{
 				+ temp + "->next = NULL;\n\t"
 				+ temp + "->concat = NULL;\n";
 		
+		super.name += Helper.incrRefCount(intName);		
 		super.name += "}\n";
 		super.cText = temp;
 		Helper.cVarType.put(temp, "Iterable");
 		Helper.cVarType.put(intName, "Integer");
+		
+		if (!left.getDef().isEmpty())
+			def.addAll(left.getDef());
+		if (!right.getDef().isEmpty())
+			def.addAll(right.getDef());
+		if (!left.getUse().isEmpty())
+			use.addAll(left.getUse());
+		if (!right.getUse().isEmpty())
+			use.addAll(right.getUse());
+
+		def.add(temp);
+		def.add(intName);
+		if (leftC.equals(""))
+			use.add(leftToC);
+		if (rightC.equals(""))
+			use.add(rightToC);
+		
 		
 		/*if (leftC.equals("") && rightC.equals("")){
 			//both are variables
@@ -581,9 +739,11 @@ class DivideExpr extends CuExpr{
 class EqualExpr extends CuExpr{
 	private CuExpr left, right;
 	private String method2= null;
+	Boolean bool;
 	public EqualExpr(CuExpr e1, CuExpr e2, Boolean eq) {
 		left = e1;
 		right = e2;
+		bool = eq;
 		super.methodId = "equals";
 		
 		if (eq) {
@@ -602,12 +762,34 @@ class EqualExpr extends CuExpr{
 		}
 		return t;
 	}
-	/*
-	@Override protected CuType calculateType(CuContext context) throws NoSuchTypeException {
-		if (!left.equals(right))
-			throw new NoSuchTypeException(Helper.getLineInfo());
-		return CuType.bool;
-	} */
+	
+	@Override
+	public Pair<List<CuStat>, CuExpr> toHIR() {
+		List<CuStat> stats = new ArrayList<>();
+		Pair<List<CuStat>, CuExpr> leftToHir = new Pair<List<CuStat>, CuExpr>();
+		Pair<List<CuStat>, CuExpr> rightToHir = new Pair<List<CuStat>, CuExpr>();
+		String name1 = Helper.getVarName(), name2 = Helper.getVarName();
+		
+		leftToHir = left.toHIR();
+		rightToHir = right.toHIR();
+		stats.addAll(leftToHir.getFirst());
+		stats.addAll(rightToHir.getFirst());
+		
+		CuVvc temp1 = new Vv(name1);
+		CuVvc temp2 = new Vv(name2);
+		CuStat a = new AssignStat(temp1, leftToHir.getSecond());
+		CuStat b = new AssignStat(temp2, rightToHir.getSecond());
+		stats.add(a);
+		stats.add(b);
+		
+		CuExpr var1 = new VvExp(name1);
+		CuExpr var2 = new VvExp(name2);
+		CuExpr expr = new EqualExpr(var1, var2, bool);		
+		
+		Pair<List<CuStat>, CuExpr> temp = new Pair<List<CuStat>, CuExpr>(stats, expr);
+		
+		return temp;
+	}
 	
 	@Override
 	public String toC(ArrayList<String> localVars) {
@@ -661,6 +843,19 @@ class EqualExpr extends CuExpr{
 		
 		}
 		
+		if (!left.getDef().isEmpty())
+			def.addAll(left.getDef());
+		if (!right.getDef().isEmpty())
+			def.addAll(right.getDef());
+		if (!left.getUse().isEmpty())
+			use.addAll(left.getUse());
+		if (!right.getUse().isEmpty())
+			use.addAll(right.getUse());
+
+		if (leftC.equals(""))
+			use.add(leftToC);
+		if (rightC.equals(""))
+			use.add(rightToC);
 		
 		/*if (leftC.equals("") && rightC.equals("")){
 			leftCastType = "(" + Helper.cVarType.get(left.toC()) + "*)";
@@ -775,6 +970,34 @@ class GreaterThanExpr extends CuExpr{
 	}
 	
 	@Override
+	public Pair<List<CuStat>, CuExpr> toHIR() {
+		List<CuStat> stats = new ArrayList<>();
+		Pair<List<CuStat>, CuExpr> leftToHir = new Pair<List<CuStat>, CuExpr>();
+		Pair<List<CuStat>, CuExpr> rightToHir = new Pair<List<CuStat>, CuExpr>();
+		String name1 = Helper.getVarName(), name2 = Helper.getVarName();
+		
+		leftToHir = left.toHIR();
+		rightToHir = right.toHIR();
+		stats.addAll(leftToHir.getFirst());
+		stats.addAll(rightToHir.getFirst());
+		
+		CuVvc temp1 = new Vv(name1);
+		CuVvc temp2 = new Vv(name2);
+		CuStat a = new AssignStat(temp1, leftToHir.getSecond());
+		CuStat b = new AssignStat(temp2, rightToHir.getSecond());
+		stats.add(a);
+		stats.add(b);
+		
+		CuExpr var1 = new VvExp(name1);
+		CuExpr var2 = new VvExp(name2);
+		CuExpr expr = new GreaterThanExpr(var1, var2, this.b);		
+		
+		Pair<List<CuStat>, CuExpr> temp = new Pair<List<CuStat>, CuExpr>(stats, expr);
+		
+		return temp;
+	}
+	
+	@Override
 	public String toC(ArrayList<String> localVars) {
 		castType = "Boolean";
 		String leftToC = left.toC(localVars);
@@ -797,6 +1020,20 @@ class GreaterThanExpr extends CuExpr{
 		else
 			super.cText = String.format("(%s %s)->value >= (%s %s)->value", leftCastType, leftToC, rightCastType, rightToC);
 
+		if (!left.getDef().isEmpty())
+			def.addAll(left.getDef());
+		if (!right.getDef().isEmpty())
+			def.addAll(right.getDef());
+		if (!left.getUse().isEmpty())
+			use.addAll(left.getUse());
+		if (!right.getUse().isEmpty())
+			use.addAll(right.getUse());
+
+		if (leftC.equals(""))
+			use.add(leftToC);
+		if (rightC.equals(""))
+			use.add(rightToC);
+		
 		/*if (leftC.equals("") && rightC.equals("")){
 			leftCastType = "(" + Helper.cVarType.get(left.toC()) + "*)";
 			rightCastType = "(" + Helper.cVarType.get(right.toC()) + "*)";
@@ -855,6 +1092,34 @@ class LessThanExpr extends CuExpr{
 	}
 	
 	@Override
+	public Pair<List<CuStat>, CuExpr> toHIR() {
+		List<CuStat> stats = new ArrayList<>();
+		Pair<List<CuStat>, CuExpr> leftToHir = new Pair<List<CuStat>, CuExpr>();
+		Pair<List<CuStat>, CuExpr> rightToHir = new Pair<List<CuStat>, CuExpr>();
+		String name1 = Helper.getVarName(), name2 = Helper.getVarName();
+		
+		leftToHir = left.toHIR();
+		rightToHir = right.toHIR();
+		stats.addAll(leftToHir.getFirst());
+		stats.addAll(rightToHir.getFirst());
+		
+		CuVvc temp1 = new Vv(name1);
+		CuVvc temp2 = new Vv(name2);
+		CuStat a = new AssignStat(temp1, leftToHir.getSecond());
+		CuStat b = new AssignStat(temp2, rightToHir.getSecond());
+		stats.add(a);
+		stats.add(b);
+		
+		CuExpr var1 = new VvExp(name1);
+		CuExpr var2 = new VvExp(name2);
+		CuExpr expr = new LessThanExpr(var1, var2, this.b);		
+		
+		Pair<List<CuStat>, CuExpr> temp = new Pair<List<CuStat>, CuExpr>(stats, expr);
+		
+		return temp;
+	}
+	
+	@Override
 	public String toC(ArrayList<String> localVars) {
 		castType = "Boolean";
 		String leftToC = left.toC(localVars);
@@ -876,6 +1141,20 @@ class LessThanExpr extends CuExpr{
 		else
 			super.cText = String.format("(%s %s)->value <= (%s %s)->value", leftCastType, leftToC, rightCastType, rightToC);
 
+		if (!left.getDef().isEmpty())
+			def.addAll(left.getDef());
+		if (!right.getDef().isEmpty())
+			def.addAll(right.getDef());
+		if (!left.getUse().isEmpty())
+			use.addAll(left.getUse());
+		if (!right.getUse().isEmpty())
+			use.addAll(right.getUse());
+
+		if (leftC.equals(""))
+			use.add(leftToC);
+		if (rightC.equals(""))
+			use.add(rightToC);
+		
 		/*if (leftC.equals("") && rightC.equals("")) {
 			leftCastType = "(" + Helper.cVarType.get(left.toC()) + "*)";
 			rightCastType = "(" + Helper.cVarType.get(right.toC()) + "*)";
@@ -933,6 +1212,34 @@ class MinusExpr extends CuExpr{
 	}*/
 	
 	@Override
+	public Pair<List<CuStat>, CuExpr> toHIR() {
+		List<CuStat> stats = new ArrayList<>();
+		Pair<List<CuStat>, CuExpr> leftToHir = new Pair<List<CuStat>, CuExpr>();
+		Pair<List<CuStat>, CuExpr> rightToHir = new Pair<List<CuStat>, CuExpr>();
+		String name1 = Helper.getVarName(), name2 = Helper.getVarName();
+		
+		leftToHir = left.toHIR();
+		rightToHir = right.toHIR();
+		stats.addAll(leftToHir.getFirst());
+		stats.addAll(rightToHir.getFirst());
+		
+		CuVvc temp1 = new Vv(name1);
+		CuVvc temp2 = new Vv(name2);
+		CuStat a = new AssignStat(temp1, leftToHir.getSecond());
+		CuStat b = new AssignStat(temp2, rightToHir.getSecond());
+		stats.add(a);
+		stats.add(b);
+		
+		CuExpr var1 = new VvExp(name1);
+		CuExpr var2 = new VvExp(name2);
+		CuExpr expr = new MinusExpr(var1, var2);		
+		
+		Pair<List<CuStat>, CuExpr> temp = new Pair<List<CuStat>, CuExpr>(stats, expr);
+		
+		return temp;
+	}
+	
+	@Override
 	public String toC(ArrayList<String> localVars) {
 		String temp = Helper.getVarName();
 		
@@ -956,6 +1263,22 @@ class MinusExpr extends CuExpr{
 		if (!localVars.contains(temp))
 			localVars.add(temp);
 		Helper.cVarType.put(temp, "Integer");
+		
+		if (!left.getDef().isEmpty())
+			def.addAll(left.getDef());
+		if (!right.getDef().isEmpty())
+			def.addAll(right.getDef());
+		if (!left.getUse().isEmpty())
+			use.addAll(left.getUse());
+		if (!right.getUse().isEmpty())
+			use.addAll(right.getUse());
+
+		def.add(temp);
+		if (leftC.equals(""))
+			use.add(leftToC);
+		if (rightC.equals(""))
+			use.add(rightToC);
+		
 		/*if (leftC.equals("") && rightC.equals("")){
 			//both are variables
 			super.name += String.format("Integer %s;\n%s.value=", temp, temp);
@@ -995,12 +1318,34 @@ class ModuloExpr extends CuExpr{
 	@Override protected CuType calculateType(CuContext context) throws NoSuchTypeException {
 		return binaryExprType(context, left.getType(context).id, super.methodId, right.getType(context));
 	}
-	/*
-	@Override protected CuType calculateType(CuContext context) throws NoSuchTypeException {
-		if (!left.getType(context).isInteger() || !right.getType(context).isInteger())
-			throw new NoSuchTypeException(Helper.getLineInfo());
-		return CuType.integer;
-	}*/
+	
+	@Override
+	public Pair<List<CuStat>, CuExpr> toHIR() {
+		List<CuStat> stats = new ArrayList<>();
+		Pair<List<CuStat>, CuExpr> leftToHir = new Pair<List<CuStat>, CuExpr>();
+		Pair<List<CuStat>, CuExpr> rightToHir = new Pair<List<CuStat>, CuExpr>();
+		String name1 = Helper.getVarName(), name2 = Helper.getVarName();
+		
+		leftToHir = left.toHIR();
+		rightToHir = right.toHIR();
+		stats.addAll(leftToHir.getFirst());
+		stats.addAll(rightToHir.getFirst());
+		
+		CuVvc temp1 = new Vv(name1);
+		CuVvc temp2 = new Vv(name2);
+		CuStat a = new AssignStat(temp1, leftToHir.getSecond());
+		CuStat b = new AssignStat(temp2, rightToHir.getSecond());
+		stats.add(a);
+		stats.add(b);
+		
+		CuExpr var1 = new VvExp(name1);
+		CuExpr var2 = new VvExp(name2);
+		CuExpr expr = new ModuloExpr(var1, var2);		
+		
+		Pair<List<CuStat>, CuExpr> temp = new Pair<List<CuStat>, CuExpr>(stats, expr);
+		
+		return temp;
+	}
 	
 	@Override
 	public String toC(ArrayList<String> localVars) {
@@ -1017,8 +1362,8 @@ class ModuloExpr extends CuExpr{
 		
 		name += "\n" + leftC + rightC;
 		
-		super.name += "Iterable* " + temp + ";\n"
-				+ "Integer* " + intName + ";\n";
+		super.name += "Iterable* " + temp + " = NULL;\n"
+				+ "Integer* " + intName + " = NULL;\n";
 		super.name += String.format("if(((%s*)%s)->value == 0) \n\t"
 				+ temp + " = NULL;\n"
 				,  "Integer", rightToC);
@@ -1036,10 +1381,28 @@ class ModuloExpr extends CuExpr{
 				+ temp + "->next = NULL;\n\t"
 				+ temp + "->concat = NULL;\n";
 		
+		super.name += Helper.incrRefCount(intName);		
 		super.name += "}\n";
 		super.cText = temp;
 		Helper.cVarType.put(temp, "Iterable");
 		Helper.cVarType.put(intName, "Integer");
+		
+		if (!left.getDef().isEmpty())
+			def.addAll(left.getDef());
+		if (!right.getDef().isEmpty())
+			def.addAll(right.getDef());
+		if (!left.getUse().isEmpty())
+			use.addAll(left.getUse());
+		if (!right.getUse().isEmpty())
+			use.addAll(right.getUse());
+
+		def.add(temp);
+		def.add(intName);
+		if (leftC.equals(""))
+			use.add(leftToC);
+		if (rightC.equals(""))
+			use.add(rightToC);
+		
 		/*if (leftC.equals("") && rightC.equals("")){
 			//both are variables
 			super.name += String.format("Integer %s;\n%s.value=", temp, temp);
@@ -1077,12 +1440,27 @@ class NegateExpr extends CuExpr{
 	@Override protected CuType calculateType(CuContext context) throws NoSuchTypeException {
 		return unaryExprType(context, val.getType(context).id, super.methodId);
 	}
-	/*
-	@Override protected CuType calculateType(CuContext context) throws NoSuchTypeException {
-		if (!val.getType(context).isBoolean())
-			throw new NoSuchTypeException(Helper.getLineInfo());
-		return CuType.bool;
-	}*/
+	
+	@Override
+	public Pair<List<CuStat>, CuExpr> toHIR() {
+		List<CuStat> stats = new ArrayList<>();
+		Pair<List<CuStat>, CuExpr> valToHir = new Pair<List<CuStat>, CuExpr>();
+		String name1 = Helper.getVarName();
+		
+		valToHir = val.toHIR();
+		stats.addAll(valToHir.getFirst());
+		
+		CuVvc temp1 = new Vv(name1);
+		CuStat a = new AssignStat(temp1, valToHir.getSecond());
+		stats.add(a);
+		
+		CuExpr var1 = new VvExp(name1);
+		CuExpr expr = new NegateExpr(var1);		
+		
+		Pair<List<CuStat>, CuExpr> temp = new Pair<List<CuStat>, CuExpr>(stats, expr);
+		
+		return temp;
+	}
 	
 	@Override
 	public String toC(ArrayList<String> localVars) {
@@ -1103,6 +1481,17 @@ class NegateExpr extends CuExpr{
 		if (!localVars.contains(temp))
 			localVars.add(temp);
 		Helper.cVarType.put(temp, "Boolean");
+		
+		if (!val.getDef().isEmpty())
+			def.addAll(val.getDef());
+		if (!val.getUse().isEmpty())
+			use.addAll(val.getUse());
+		
+		def.add(temp);
+		if (eC.equals(""))
+			use.add(valToC);
+		
+		
 /*		if(eC.equals(""))
 		{
 			name += String.format("Boolean %s;\n%s.value=", temp, temp);
@@ -1137,6 +1526,27 @@ class NegativeExpr extends CuExpr{
 	}*/
 	
 	@Override
+	public Pair<List<CuStat>, CuExpr> toHIR() {
+		List<CuStat> stats = new ArrayList<>();
+		Pair<List<CuStat>, CuExpr> valToHir = new Pair<List<CuStat>, CuExpr>();
+		String name1 = Helper.getVarName();
+		
+		valToHir = val.toHIR();
+		stats.addAll(valToHir.getFirst());
+		
+		CuVvc temp1 = new Vv(name1);
+		CuStat a = new AssignStat(temp1, valToHir.getSecond());
+		stats.add(a);
+		
+		CuExpr var1 = new VvExp(name1);
+		CuExpr expr = new NegativeExpr(var1);		
+		
+		Pair<List<CuStat>, CuExpr> temp = new Pair<List<CuStat>, CuExpr>(stats, expr);
+		
+		return temp;
+	}
+	
+	@Override
 	public String toC(ArrayList<String> localVars) {
 		String temp = Helper.getVarName();
 		
@@ -1155,6 +1565,16 @@ class NegativeExpr extends CuExpr{
 		if (!localVars.contains(temp))
 			localVars.add(temp);
 		Helper.cVarType.put(temp, "Integer");
+		
+		if (!val.getDef().isEmpty())
+			def.addAll(val.getDef());
+		if (!val.getUse().isEmpty())
+			use.addAll(val.getUse());
+
+		def.add(temp);
+		if (eC.equals(""))
+			use.add(valToC);
+		
 		/*if(eC.equals(""))
 		{
 			name += String.format("Integer* %s  = (Integer*) x3malloc(sizeof(Integer));\n"
@@ -1337,6 +1757,34 @@ class OrExpr extends CuExpr{
 	}
 	
 	@Override
+	public Pair<List<CuStat>, CuExpr> toHIR() {
+		List<CuStat> stats = new ArrayList<>();
+		Pair<List<CuStat>, CuExpr> leftToHir = new Pair<List<CuStat>, CuExpr>();
+		Pair<List<CuStat>, CuExpr> rightToHir = new Pair<List<CuStat>, CuExpr>();
+		String name1 = Helper.getVarName(), name2 = Helper.getVarName();
+		
+		leftToHir = left.toHIR();
+		rightToHir = right.toHIR();
+		stats.addAll(leftToHir.getFirst());
+		stats.addAll(rightToHir.getFirst());
+		
+		CuVvc temp1 = new Vv(name1);
+		CuVvc temp2 = new Vv(name2);
+		CuStat a = new AssignStat(temp1, leftToHir.getSecond());
+		CuStat b = new AssignStat(temp2, rightToHir.getSecond());
+		stats.add(a);
+		stats.add(b);
+		
+		CuExpr var1 = new VvExp(name1);
+		CuExpr var2 = new VvExp(name2);
+		CuExpr expr = new OrExpr(var1, var2);		
+		
+		Pair<List<CuStat>, CuExpr> temp = new Pair<List<CuStat>, CuExpr>(stats, expr);
+		
+		return temp;
+	}
+	
+	@Override
 	public String toC(ArrayList<String> localVars) {
 
 		String temp = Helper.getVarName();
@@ -1358,6 +1806,22 @@ class OrExpr extends CuExpr{
 		if (!localVars.contains(temp))
 			localVars.add(temp);
 		Helper.cVarType.put(temp, "Boolean");
+		
+		if (!left.getDef().isEmpty())
+			def.addAll(left.getDef());
+		if (!right.getDef().isEmpty())
+			def.addAll(right.getDef());
+		if (!left.getUse().isEmpty())
+			use.addAll(left.getUse());
+		if (!right.getUse().isEmpty())
+			use.addAll(right.getUse());
+
+		def.add(temp);
+		if (leftC.equals(""))
+			use.add(leftToC);
+		if (rightC.equals(""))
+			use.add(rightToC);
+		
 		/*if (leftC.equals("") && rightC.equals("")){
 			//both are variables
 			super.name += String.format("Boolean* %s  = (Boolean*) x3malloc(sizeof(Boolean));\n"
@@ -1406,6 +1870,34 @@ class PlusExpr extends CuExpr{
 	}
 	
 	@Override
+	public Pair<List<CuStat>, CuExpr> toHIR() {
+		List<CuStat> stats = new ArrayList<>();
+		Pair<List<CuStat>, CuExpr> leftToHir = new Pair<List<CuStat>, CuExpr>();
+		Pair<List<CuStat>, CuExpr> rightToHir = new Pair<List<CuStat>, CuExpr>();
+		String name1 = Helper.getVarName(), name2 = Helper.getVarName();
+		
+		leftToHir = left.toHIR();
+		rightToHir = right.toHIR();
+		stats.addAll(leftToHir.getFirst());
+		stats.addAll(rightToHir.getFirst());
+		
+		CuVvc temp1 = new Vv(name1);
+		CuVvc temp2 = new Vv(name2);
+		CuStat a = new AssignStat(temp1, leftToHir.getSecond());
+		CuStat b = new AssignStat(temp2, rightToHir.getSecond());
+		stats.add(a);
+		stats.add(b);
+		
+		CuExpr var1 = new VvExp(name1);
+		CuExpr var2 = new VvExp(name2);
+		CuExpr expr = new PlusExpr(var1, var2);		
+		
+		Pair<List<CuStat>, CuExpr> temp = new Pair<List<CuStat>, CuExpr>(stats, expr);
+		
+		return temp;
+	}
+	
+	@Override
 	public String toC(ArrayList<String> localVars) {
 		String temp = Helper.getVarName();
 		
@@ -1426,6 +1918,22 @@ class PlusExpr extends CuExpr{
 		if (!localVars.contains(temp))
 			localVars.add(temp);
 		Helper.cVarType.put(temp, "Integer");
+		
+		if (!left.getDef().isEmpty())
+			def.addAll(left.getDef());
+		if (!right.getDef().isEmpty())
+			def.addAll(right.getDef());
+		if (!left.getUse().isEmpty())
+			use.addAll(left.getUse());
+		if (!right.getUse().isEmpty())
+			use.addAll(right.getUse());
+
+		def.add(temp);
+		if (leftC.equals(""))
+			use.add(leftToC);
+		if (rightC.equals(""))
+			use.add(rightToC);
+		
 		/*
 		if (leftC.equals("") && rightC.equals("")){
 			//both are variables
@@ -1749,6 +2257,34 @@ class TimesExpr extends CuExpr{
 	}
 	
 	@Override
+	public Pair<List<CuStat>, CuExpr> toHIR() {
+		List<CuStat> stats = new ArrayList<>();
+		Pair<List<CuStat>, CuExpr> leftToHir = new Pair<List<CuStat>, CuExpr>();
+		Pair<List<CuStat>, CuExpr> rightToHir = new Pair<List<CuStat>, CuExpr>();
+		String name1 = Helper.getVarName(), name2 = Helper.getVarName();
+		
+		leftToHir = left.toHIR();
+		rightToHir = right.toHIR();
+		stats.addAll(leftToHir.getFirst());
+		stats.addAll(rightToHir.getFirst());
+		
+		CuVvc temp1 = new Vv(name1);
+		CuVvc temp2 = new Vv(name2);
+		CuStat a = new AssignStat(temp1, leftToHir.getSecond());
+		CuStat b = new AssignStat(temp2, rightToHir.getSecond());
+		stats.add(a);
+		stats.add(b);
+		
+		CuExpr var1 = new VvExp(name1);
+		CuExpr var2 = new VvExp(name2);
+		CuExpr expr = new TimesExpr(var1, var2);		
+		
+		Pair<List<CuStat>, CuExpr> temp = new Pair<List<CuStat>, CuExpr>(stats, expr);
+		
+		return temp;
+	}
+	
+	@Override
 	public String toC(ArrayList<String> localVars) {
 		String temp = Helper.getVarName();
 		
@@ -1769,6 +2305,22 @@ class TimesExpr extends CuExpr{
 		if (!localVars.contains(temp))
 			localVars.add(temp);
 		Helper.cVarType.put(temp, "Integer");
+		
+		if (!left.getDef().isEmpty())
+			def.addAll(left.getDef());
+		if (!right.getDef().isEmpty())
+			def.addAll(right.getDef());
+		if (!left.getUse().isEmpty())
+			use.addAll(left.getUse());
+		if (!right.getUse().isEmpty())
+			use.addAll(right.getUse());
+
+		def.add(temp);
+		if (leftC.equals(""))
+			use.add(leftToC);
+		if (rightC.equals(""))
+			use.add(rightToC);
+		
 		/*if (leftC.equals("") && rightC.equals("")){
 			//both are variables
 			super.name += String.format("Integer %s;\n%s.value=", temp, temp);
@@ -1886,12 +2438,21 @@ class VarExpr extends CuExpr{// e.vv<tao1...>(e1,...)
 			//fptrArg = "(" + classType + ", ";
 			for (CuExpr exp : es) {
 				expToC = exp.toC(localVars);
-				super.name += exp.construct();
+				String eC = exp.construct();
+				super.name += eC;
 				/*tempCastType = exp.getCastType();
 				if (tempCastType.equals(""))
 					tempCastType = Helper.cVarType.get(expToC);*/
 				temp += /*"(" + tempCastType + "*)" +*/ expToC + ", ";
 				//fptrArg += tempCastType + "*, ";
+				
+				if (!exp.getDef().isEmpty())
+					def.addAll(exp.getDef());
+				if (!exp.getUse().isEmpty())
+					use.addAll(exp.getUse());
+
+				if (eC.equals(""))
+					use.add(expToC);
 			}
 			int j = temp.lastIndexOf(", ");
 			if (j > 1)
@@ -1907,6 +2468,10 @@ class VarExpr extends CuExpr{// e.vv<tao1...>(e1,...)
 		String returnName = Helper.getVarName();
 		super.name += "void* " + returnName + ";\n";
 		super.name += String.format("%s = (((%s*)%s)->%s)->%s%s;\n", returnName, classType, valToC, classType+"_Tbl", method.toString(), temp);
+		
+		def.add(returnName);
+		use.add(valToC);
+		
 		
 		super.cText = returnName;
 		return super.toC(localVars);
@@ -1980,7 +2545,8 @@ Helper.P("VcExp= "+text);
 			for (CuExpr exp : es) {
 				expToC = exp.toC(localVars);
 				expConstruct = exp.construct();
-				super.name += expConstruct;
+				String eC = expConstruct;
+				super.name += eC;
 				tempCastType = exp.getCastType();
 				if (tempCastType.equals(""))
 					tempCastType = Helper.cVarType.get(expToC);
@@ -1988,7 +2554,15 @@ Helper.P("VcExp= "+text);
 				if (!expConstruct.equals("")) {
 					Helper.cVarType.put(expToC, tempCastType);
 				}
+			
+				if (!exp.getDef().isEmpty())
+					def.addAll(exp.getDef());
+				if (!exp.getUse().isEmpty())
+					use.addAll(exp.getUse());
 
+				if (eC.equals(""))
+					use.add(expToC);
+				
 			}
 			int j = temp.lastIndexOf(", ");
 			if (j > 1)
@@ -2004,6 +2578,9 @@ Helper.P("VcExp= "+text);
 		//j = 2;
 		
 		super.name += String.format("%s = new_%s %s;\n", objectName, val, temp);
+		
+		def.add(objectName);
+		use.add(val);
 		
 		/*for (CuExpr exp : es) {
 			expToC = exp.toC(localVars);
@@ -2092,6 +2669,28 @@ Helper.P(" 1mapping is " + mapping.toString());
 	}
 	
 	@Override
+	public Pair<List<CuStat>, CuExpr> toHIR() {
+		if(es == null) 
+		{
+			Pair<List<CuStat>, CuExpr> temp = new Pair<List<CuStat>, CuExpr>();
+			//String name1 = Helper.getVarName();
+			List<CuStat> stats = new ArrayList<>();
+			CuExpr exp = new VvExp(val);
+			
+			//CuVvc vvc = new Vv(name1);			
+			//CuStat a = new AssignStat(vvc, exp);
+			//stats.add(a);
+			
+			temp.setFirst(stats);
+			temp.setSecond(exp);
+
+			return temp;
+		}
+		
+		return super.toHIR();
+	}
+	
+	@Override
 	public String toC(ArrayList<String> localVars) {
 		if(es==null)
 		{
@@ -2104,6 +2703,8 @@ Helper.P(" 1mapping is " + mapping.toString());
 			if(super.iterType == null)
 				super.iterType = "";
 			
+			use.add(val);
+			
 			if(val.equals("input"))
 			{
 				iterType = "String";				
@@ -2114,8 +2715,8 @@ Helper.P(" 1mapping is " + mapping.toString());
 				if(!initialized) {
 				
 					name += "int " + len + ";\n"
-						+ "Iterable* " + iter + ";\n"
-						+ "String* " + temp + ";\n" 
+						+ "Iterable* " + iter + "= NULL;\n"
+						+ "String* " + temp + "= NULL;\n" 
 						+ len + " = next_line_len();\n"
 						+ "if(" + len + " == 0) {\n\t"
 						+ iter + " = NULL;\n}\n"
@@ -2128,6 +2729,8 @@ Helper.P(" 1mapping is " + mapping.toString());
 						+ temp + "->len = " + len + ";\n\t"
 						+ "read_line(" + temp + "->value);\n\t";
 		
+					name += Helper.incrRefCount(temp);
+					
 					name += iter + " = (Iterable*) x3malloc(sizeof(Iterable));\n\t"
 						+ iter + "->isIter = 1;\n\t"
 						+ iter + "->nrefs = 1;\n\t"
@@ -2142,9 +2745,11 @@ Helper.P(" 1mapping is " + mapping.toString());
 					Helper.cVarType.put(iter, "Iterable");
 					cText = iter;
 					initialized = true;
+					
+					def.add(temp);
 				}
 				else {
-					name = "Iterable* " + iterNew + ";\n"
+					name += "Iterable* " + iterNew + ";\n"
 							+ iterNew + " = (Iterable*) x3malloc(sizeof(Iterable));\n"
 							+ iterNew + "->isIter = 1;\n"
 							+ iterNew + "->nrefs = 1;\n"
@@ -2153,8 +2758,12 @@ Helper.P(" 1mapping is " + mapping.toString());
 							+ iterNew + "->next = NULL;\n"
 							+ iterNew + "->concat = NULL;\n";
 								
+					name += Helper.incrRefCount(temp);
 					cText = iterNew;
 				}
+				
+				use.add(val);
+				return super.toC(localVars);
 			}
 		}
 		else
@@ -2180,6 +2789,16 @@ Helper.P(" 1mapping is " + mapping.toString());
 						+ "unichar (((" + tempCastType + "*)" + expToC + ")->value);\n";
 				
 				super.cText = varName;
+				def.add(varName);
+				
+				if (!exp.getDef().isEmpty())
+					def.addAll(exp.getDef());
+				if (!exp.getUse().isEmpty())
+					use.addAll(exp.getUse());
+
+				if (tempName.equals(""))
+					use.add(expToC);
+				
 				return super.toC(localVars);
 			}
 			
@@ -2198,6 +2817,15 @@ Helper.P(" 1mapping is " + mapping.toString());
 					
 				super.cText = varName;
 				
+				if (!exp.getDef().isEmpty())
+					def.addAll(exp.getDef());
+				if (!exp.getUse().isEmpty())
+					use.addAll(exp.getUse());
+
+				def.add(varName);
+				if (tempName.equals(""))
+					use.add(expToC);
+				 
 				return super.toC(localVars);
 			}
 			
@@ -2218,14 +2846,26 @@ Helper.P(" 1mapping is " + mapping.toString());
 				super.name += tempName;
 				if (!tempName.equals("")) {
 					Helper.cVarType.put(expToC, tempCastType);
-				}					
+				}
+				
+				if (!exp.getDef().isEmpty())
+					def.addAll(exp.getDef());
+				if (!exp.getUse().isEmpty())
+					use.addAll(exp.getUse());
+
+				if (tempName.equals(""))
+					use.add(expToC);
+					
 			}
 			int j = temp.lastIndexOf(", ");
 			if (j > 1) temp = temp.substring(0, j);
 			temp += ")";
 			name += "void* " + varName + ";\n"
 					+ varName + " = " + val.toString() + temp + ";\n"; 
-			super.cText= varName;			
+			super.cText= varName;
+			
+			def.add(varName);
+			use.add(val);
 		}
 		return super.toC(localVars);
 	}
