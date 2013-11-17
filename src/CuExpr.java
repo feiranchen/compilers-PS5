@@ -2824,8 +2824,33 @@ Helper.P(" 1mapping is " + mapping.toString());
 
 			return temp;
 		}
-		
-		return super.toHIR();
+		else 
+		{
+			Pair<List<CuStat>, CuExpr> temp = new Pair<List<CuStat>, CuExpr>();
+			List<CuStat> stats = new ArrayList<CuStat>();
+			List<CuExpr> newEs = new ArrayList<CuExpr>();
+			
+			
+			for (CuExpr exp : es) {
+				Pair<List<CuStat>, CuExpr> expToHir = exp.toHIR();
+				stats.addAll(expToHir.getFirst());
+				String name1 = Helper.getVarName();
+				CuVvc vvc = new Vv(name1);			
+				CuStat a = new AssignStat(vvc, expToHir.getSecond());
+				stats.add(a);
+				
+				CuExpr e = new VvExp(name1);
+				newEs.add(e);
+			}
+			
+			CuExpr exp = new VvExp(val);
+			exp.add(types, newEs);
+			
+			temp.setFirst(stats);
+			temp.setSecond(exp);
+			
+			return temp;
+		}		
 	}
 	
 	@Override
@@ -2841,7 +2866,7 @@ Helper.P(" 1mapping is " + mapping.toString());
 			if(super.iterType == null)
 				super.iterType = "";
 			
-			use.add(val);
+			//use.add(val);
 			
 			if(val.equals("input"))
 			{
@@ -2900,7 +2925,7 @@ Helper.P(" 1mapping is " + mapping.toString());
 					cText = iterNew;
 				}
 				
-				use.add(val);
+				//use.add(val);
 				return super.toC(localVars);
 			}
 		}
@@ -3003,7 +3028,7 @@ Helper.P(" 1mapping is " + mapping.toString());
 			super.cText= varName;
 			
 			//def.add(varName);
-			use.add(val);
+			//use.add(val);
 		}
 		return super.toC(localVars);
 	}
