@@ -556,6 +556,88 @@ Helper.P("if end, e is " + e.toString());
 
 }
 
+class WhileStat extends CuStat{
+	private CuExpr e;
+	private CuStat s1;
+	public WhileStat (CuExpr ex, CuStat st){
+		e = ex;
+		s1 = st;
+		text = "while ( " + e.toString() + " ) " + s1.toString();
+	}
+	@Override public CuStat toHIR() {
+		Pair<List<CuStat>, CuExpr> pa =  e.toHIR();
+		List<CuStat> curHIR = pa.getFirst();
+		s1 = s1.toHIR();
+		curHIR.add(new WhileStat(pa.getSecond(), s1));
+		super.HIR = new Stats(curHIR);
+		return super.HIR;
+	}
+	//while is the same as for statement
+	@Override public void buildCFG() {
+		//the outer level has added the other branch to its successors
+		//this is the fall through branch
+		super.successors.add(s1.getFirst());
+		s1.getLast().successors.add(this);
+		//recursive build CFG
+		s1.buildCFG();
+	}
+	@Override public String toC(ArrayList<String> localVars) {
+		String exp_toC = e.toC(localVars);
+
+		super.ctext +="\n\n\n";
+		super.ctext += e.construct();
+    	if (e instanceof VvExp)
+    		super.ctext += "while (((Boolean *)" + exp_toC + ")->value) {\n";
+    	else
+    		super.ctext += "while (" + exp_toC + ") {\n";
+		
+		ArrayList<String> while_localVars = new ArrayList<String>(localVars);
+		super.ctext += s1.toC(while_localVars);
+		//some variables in localVarsIn are not newly created, so remove them before decrement ref count/deallocate
+		for(String cur_str : localVars) {
+			while (while_localVars.contains(cur_str)) {
+				while_localVars.remove(cur_str);
+			}
+		}
+		//now reference counting/x3free memory due to scoping
+		for (String cur_str : while_localVars) {
+			super.ctext += "\n\n\n";
+			super.ctext += "if (" + cur_str + "!= NULL) {\n";
+			//check whether it is the last pointer pointing to the object, if yes, x3free memory
+			super.ctext += "if ((*(int *)" + cur_str + ") == 1)\n";
+			super.ctext += "x3free(" + cur_str + ");\n";
+			super.ctext += "else\n";
+			//decrement the reference count
+			super.ctext += "(*(int *)" + cur_str + ")--;\n";
+			super.ctext += "}\n";
+		}
+		super.ctext += "}\n";
+		return super.ctext;
+	}
+    public HReturn calculateType(CuContext context) throws NoSuchTypeException {
+		//whenever we calculate expr type, we use a temporary context with merged mutable and
+		//immutable variables
+		CuContext tcontext = new CuContext (context);
+		tcontext.mergeVariable();		
+    	//check whether e is boolean
+		//System.out.println("in while, before checking expr");
+		//System.out.println(this.e.toString());
+    	CuType eType = e.calculateType(tcontext);
+    	//System.out.println("in while, after checking expr");
+    	if (!eType.isBoolean()) {
+    		//System.out.println("in while, expr is not boolean");
+    		//System.out.println("in while, expr type is " + eType.id);
+    		throw new NoSuchTypeException(Helper.getLineInfo()); 
+    	} 
+    	CuContext s_context = new CuContext(context);
+    	HReturn re = s1.calculateType(s_context);   	
+    	//type weakening to make it type check
+    	context.weakenMutType(s_context);
+    	re.b = false;
+    	return re;
+    }
+}
+
 class ReturnStat extends CuStat{
 	private CuExpr e;
 	public ReturnStat (CuExpr ee) {
@@ -614,6 +696,19 @@ Helper.P("e type is " + re.tau);
 		return re;
 	}
 }
+
+class EmptyBody extends CuStat {
+	public EmptyBody(){
+		text=" ;";
+	}
+	@Override public CuStat toHIR() {
+		return this;
+	}
+	public HReturn calculateType(CuContext context) throws NoSuchTypeException {
+		//default is false and bottom
+		return new HReturn();
+	}
+} 
 
 class Stats extends CuStat{
 	public ArrayList<CuStat> al = new ArrayList<CuStat>();
@@ -697,98 +792,3 @@ class Stats extends CuStat{
 		return re;
 	}
 }
-
-class WhileStat extends CuStat{
-	private CuExpr e;
-	private CuStat s1;
-	public WhileStat (CuExpr ex, CuStat st){
-		e = ex;
-		s1 = st;
-		text = "while ( " + e.toString() + " ) " + s1.toString();
-	}
-	@Override public CuStat toHIR() {
-		Pair<List<CuStat>, CuExpr> pa =  e.toHIR();
-		List<CuStat> curHIR = pa.getFirst();
-		s1 = s1.toHIR();
-		curHIR.add(new WhileStat(pa.getSecond(), s1));
-		super.HIR = new Stats(curHIR);
-		return super.HIR;
-	}
-	//while is the same as for statement
-	@Override public void buildCFG() {
-		//the outer level has added the other branch to its successors
-		//this is the fall through branch
-		super.successors.add(s1.getFirst());
-		s1.getLast().successors.add(this);
-		//recursive build CFG
-		s1.buildCFG();
-	}
-	@Override public String toC(ArrayList<String> localVars) {
-		String exp_toC = e.toC(localVars);
-
-		super.ctext +="\n\n\n";
-		super.ctext += e.construct();
-    	if (e instanceof VvExp)
-    		super.ctext += "while (((Boolean *)" + exp_toC + ")->value) {\n";
-    	else
-    		super.ctext += "while (" + exp_toC + ") {\n";
-		
-		ArrayList<String> while_localVars = new ArrayList<String>(localVars);
-		super.ctext += s1.toC(while_localVars);
-		//some variables in localVarsIn are not newly created, so remove them before decrement ref count/deallocate
-		for(String cur_str : localVars) {
-			while (while_localVars.contains(cur_str)) {
-				while_localVars.remove(cur_str);
-			}
-		}
-		//now reference counting/x3free memory due to scoping
-		for (String cur_str : while_localVars) {
-			super.ctext += "\n\n\n";
-			super.ctext += "if (" + cur_str + "!= NULL) {\n";
-			//check whether it is the last pointer pointing to the object, if yes, x3free memory
-			super.ctext += "if ((*(int *)" + cur_str + ") == 1)\n";
-			super.ctext += "x3free(" + cur_str + ");\n";
-			super.ctext += "else\n";
-			//decrement the reference count
-			super.ctext += "(*(int *)" + cur_str + ")--;\n";
-			super.ctext += "}\n";
-		}
-		super.ctext += "}\n";
-		return super.ctext;
-	}
-    public HReturn calculateType(CuContext context) throws NoSuchTypeException {
-		//whenever we calculate expr type, we use a temporary context with merged mutable and
-		//immutable variables
-		CuContext tcontext = new CuContext (context);
-		tcontext.mergeVariable();		
-    	//check whether e is boolean
-		//System.out.println("in while, before checking expr");
-		//System.out.println(this.e.toString());
-    	CuType eType = e.calculateType(tcontext);
-    	//System.out.println("in while, after checking expr");
-    	if (!eType.isBoolean()) {
-    		//System.out.println("in while, expr is not boolean");
-    		//System.out.println("in while, expr type is " + eType.id);
-    		throw new NoSuchTypeException(Helper.getLineInfo()); 
-    	} 
-    	CuContext s_context = new CuContext(context);
-    	HReturn re = s1.calculateType(s_context);   	
-    	//type weakening to make it type check
-    	context.weakenMutType(s_context);
-    	re.b = false;
-    	return re;
-    }
-}
-
-class EmptyBody extends CuStat {
-	public EmptyBody(){
-		text=" ;";
-	}
-	@Override public CuStat toHIR() {
-		return this;
-	}
-	public HReturn calculateType(CuContext context) throws NoSuchTypeException {
-		//default is false and bottom
-		return new HReturn();
-	}
-} 
