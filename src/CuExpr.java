@@ -187,35 +187,18 @@ class AndExpr extends CuExpr{
 			//localVars.add(temp);
 		Helper.cVarType.put(temp, "Boolean");
 		
-		if (leftC.equals(""))
+		
+		/*if (leftC.equals(""))
 			use.add(leftToC);
 		if (rightC.equals(""))
 			use.add(rightToC);
 		
-		def.add(temp);
+		def.add(temp);*/
 
-		/*if (leftC.equals("") && rightC.equals("")){
-		//both are variables
-		super.name += String.format("Boolean %s;\n%s.value=", temp, temp);
-		super.name += String.format("((%s*)%s)->value && ((%s*)%s)->value;\n", "Boolean", left.toC(), "Boolean", right.toC());			
-	}
-	else if (leftC.equals("") && !rightC.equals("")) { 
-		//right is Boolean
-		leftCastType = "(" + right.getCastType() + "*)";			
-		super.name += String.format("Boolean %s;\n%s.value=", temp, temp);
-		super.name += String.format("(%s %s)->value && %s.value;\n", leftCastType, left.toC(), right.toC());
-	}
-	else if (!leftC.equals("") && rightC.equals("")) {
-		//left is Boolean
-		rightCastType = "(" + left.getCastType() + "*)";
-		super.name += String.format("Boolean %s;\n%s.value=", temp, temp);
-		super.name += String.format("%s.value && (%s %s)->value;\n", left.toC(), rightCastType, right.toC());
-	}
-	else {
-		//both are Booleans
-		super.name += String.format("Boolean %s;\n%s.value=", temp, temp);
-		super.name += String.format("%s.value && %s.value;\n", left.toC(), right.toC());
-	}*/
+		if (!leftC.equals(""))
+			name += "x3free(" + leftToC + ");\n";
+		if (!rightC.equals(""))
+			name += "x3free(" + rightToC + ");\n";
 		
 		return super.toC(localVars);
 	}
@@ -245,11 +228,35 @@ class AppExpr extends CuExpr {
 Helper.P("t1 is " + t1.toString() + " t2 is " + t2.toString() + ", t1 type is " + t1.type.toString() + " t2 type is " + t2.type.toString());
 		CuType type = CuType.commonParent(t1.type, t2.type);
 Helper.P("common parent of types is " + type.toString());
-		return new Iter(type);
-		/*CuType type = CuType.commonParent(left.getType(context), right.getType(context));
-		if (type.isIterable()) return type;
-		if (type.isBottom()) return new Iter(CuType.bottom);
-		Helper.ToDo("Bottom <: Iterable<Bot>?"); */
+		return new Iter(type);		
+	}
+	
+	@Override
+	public Pair<List<CuStat>, CuExpr> toHIR() {
+		List<CuStat> stats = new ArrayList<>();
+		Pair<List<CuStat>, CuExpr> leftToHir = new Pair<List<CuStat>, CuExpr>();
+		Pair<List<CuStat>, CuExpr> rightToHir = new Pair<List<CuStat>, CuExpr>();
+		String name1 = Helper.getVarName(), name2 = Helper.getVarName();
+		
+		leftToHir = left.toHIR();
+		rightToHir = right.toHIR();
+		stats.addAll(leftToHir.getFirst());
+		stats.addAll(rightToHir.getFirst());
+		
+		CuVvc temp1 = new Vv(name1);
+		CuVvc temp2 = new Vv(name2);
+		CuStat a = new AssignStat(temp1, leftToHir.getSecond());
+		CuStat b = new AssignStat(temp2, rightToHir.getSecond());
+		stats.add(a);
+		stats.add(b);
+		
+		CuExpr var1 = new VvExp(name1);
+		CuExpr var2 = new VvExp(name2);
+		CuExpr expr = new AppExpr(var1, var2);		
+		
+		Pair<List<CuStat>, CuExpr> temp = new Pair<List<CuStat>, CuExpr>(stats, expr);
+		
+		return temp;
 	}
 	
 	@Override
@@ -338,7 +345,7 @@ Helper.P("common parent of types is " + type.toString());
 		
 		cText = iter;
 		
-		if (!left.getDef().isEmpty())
+		/*if (!left.getDef().isEmpty())
 			def.addAll(left.getDef());
 		if (!right.getDef().isEmpty())
 			def.addAll(right.getDef());
@@ -353,7 +360,12 @@ Helper.P("common parent of types is " + type.toString());
 		if (leftC.equals(""))
 			use.add(leftToC);
 		if (rightC.equals(""))
-			use.add(rightToC);
+			use.add(rightToC);*/
+		
+		if (!leftC.equals(""))
+			name += "x3free(" + leftToC + ");\n";
+		if (!rightC.equals(""))
+			name += "x3free(" + rightToC + ");\n";
 		
 		return super.toC(localVars);
 	}
@@ -416,11 +428,11 @@ class BrkExpr extends CuExpr {
 			eToC = e.toC(localVars);
 			name += e.construct();
 			
-			if (!e.getDef().isEmpty())
+			/*if (!e.getDef().isEmpty())
 				def.addAll(e.getDef());
 			if (!e.getUse().isEmpty())
 				use.addAll(e.getUse());
-			
+*/			
 			String eCastType = e.getCastType();
 			if (eCastType.equals(""))
 				eCastType = Helper.cVarType.get(e.toString());
@@ -455,11 +467,11 @@ class BrkExpr extends CuExpr {
 			
 			name += Helper.incrRefCount(tempDataArr.get(i+1));
 			
-			def.add(tempNameArr.get(i+1));
+			//def.add(tempNameArr.get(i+1));
 		}	
 			
 		name += Helper.incrRefCount(tempDataArr.get(0));
-		def.add(tempNameArr.get(0));
+		//def.add(tempNameArr.get(0));
 		
 		cText = tempNameArr.get(0);
 		
@@ -511,7 +523,7 @@ class CBoolean extends CuExpr{
 			//localVars.add(temp);
 		Helper.cVarType.put(temp, "Boolean");
 		
-		def.add(temp);
+		//def.add(temp);
 		
 		return super.toC(localVars);
 	}
@@ -549,7 +561,7 @@ class CInteger extends CuExpr {
 			//localVars.add(temp);
 		Helper.cVarType.put(temp, "Integer");
 		
-		def.add(temp);
+		//def.add(temp);
 		return super.toC(localVars);
 	}
 }
@@ -591,7 +603,7 @@ class CString extends CuExpr {
 			localVars.add(temp);
 		Helper.cVarType.put(temp, "String");
 		
-		def.add(temp);
+		//def.add(temp);
 		
 		/*ArrayList<String> tempNameArr=new ArrayList<String>();	
 		ArrayList<String> tempDataArr=new ArrayList<String>();
@@ -719,7 +731,7 @@ class DivideExpr extends CuExpr{
 		Helper.cVarType.put(temp, "Iterable");
 		Helper.cVarType.put(intName, "Integer");
 		
-		if (!left.getDef().isEmpty())
+		/*		if (!left.getDef().isEmpty())
 			def.addAll(left.getDef());
 		if (!right.getDef().isEmpty())
 			def.addAll(right.getDef());
@@ -734,7 +746,11 @@ class DivideExpr extends CuExpr{
 			use.add(leftToC);
 		if (rightC.equals(""))
 			use.add(rightToC);
-		
+		*/
+		if (!leftC.equals(""))
+			name += "x3free(" + leftToC + ");\n";
+		if (!rightC.equals(""))
+			name += "x3free(" + rightToC + ");\n";
 		
 		/*if (leftC.equals("") && rightC.equals("")){
 			//both are variables
@@ -869,7 +885,7 @@ class EqualExpr extends CuExpr{
 		
 		}
 		
-		if (!left.getDef().isEmpty())
+		/*if (!left.getDef().isEmpty())
 			def.addAll(left.getDef());
 		if (!right.getDef().isEmpty())
 			def.addAll(right.getDef());
@@ -881,7 +897,12 @@ class EqualExpr extends CuExpr{
 		if (leftC.equals(""))
 			use.add(leftToC);
 		if (rightC.equals(""))
-			use.add(rightToC);
+			use.add(rightToC);*/
+
+		if (!leftC.equals(""))
+			name += "x3free(" + leftToC + ");\n";
+		if (!rightC.equals(""))
+			name += "x3free(" + rightToC + ");\n";
 		
 		/*if (leftC.equals("") && rightC.equals("")){
 			leftCastType = "(" + Helper.cVarType.get(left.toC()) + "*)";
@@ -1046,7 +1067,12 @@ class GreaterThanExpr extends CuExpr{
 		else
 			super.cText = String.format("(%s %s)->value >= (%s %s)->value", leftCastType, leftToC, rightCastType, rightToC);
 
-		if (!left.getDef().isEmpty())
+		if (!leftC.equals(""))
+			name += "x3free(" + leftToC + ");\n";
+		if (!rightC.equals(""))
+			name += "x3free(" + rightToC + ");\n";
+		
+		/*if (!left.getDef().isEmpty())
 			def.addAll(left.getDef());
 		if (!right.getDef().isEmpty())
 			def.addAll(right.getDef());
@@ -1058,7 +1084,7 @@ class GreaterThanExpr extends CuExpr{
 		if (leftC.equals(""))
 			use.add(leftToC);
 		if (rightC.equals(""))
-			use.add(rightToC);
+			use.add(rightToC);*/
 		
 		/*if (leftC.equals("") && rightC.equals("")){
 			leftCastType = "(" + Helper.cVarType.get(left.toC()) + "*)";
@@ -1167,7 +1193,12 @@ class LessThanExpr extends CuExpr{
 		else
 			super.cText = String.format("(%s %s)->value <= (%s %s)->value", leftCastType, leftToC, rightCastType, rightToC);
 
-		if (!left.getDef().isEmpty())
+		if (!leftC.equals(""))
+			name += "x3free(" + leftToC + ");\n";
+		if (!rightC.equals(""))
+			name += "x3free(" + rightToC + ");\n";
+		
+		/*if (!left.getDef().isEmpty())
 			def.addAll(left.getDef());
 		if (!right.getDef().isEmpty())
 			def.addAll(right.getDef());
@@ -1175,11 +1206,11 @@ class LessThanExpr extends CuExpr{
 			use.addAll(left.getUse());
 		if (!right.getUse().isEmpty())
 			use.addAll(right.getUse());
-
+		
 		if (leftC.equals(""))
 			use.add(leftToC);
 		if (rightC.equals(""))
-			use.add(rightToC);
+			use.add(rightToC);*/
 		
 		/*if (leftC.equals("") && rightC.equals("")) {
 			leftCastType = "(" + Helper.cVarType.get(left.toC()) + "*)";
@@ -1290,7 +1321,12 @@ class MinusExpr extends CuExpr{
 			localVars.add(temp);
 		Helper.cVarType.put(temp, "Integer");
 		
-		if (!left.getDef().isEmpty())
+		if (!leftC.equals(""))
+			name += "x3free(" + leftToC + ");\n";
+		if (!rightC.equals(""))
+			name += "x3free(" + rightToC + ");\n";
+		
+		/*if (!left.getDef().isEmpty())
 			def.addAll(left.getDef());
 		if (!right.getDef().isEmpty())
 			def.addAll(right.getDef());
@@ -1304,7 +1340,7 @@ class MinusExpr extends CuExpr{
 			use.add(leftToC);
 		if (rightC.equals(""))
 			use.add(rightToC);
-		
+*/		
 		/*if (leftC.equals("") && rightC.equals("")){
 			//both are variables
 			super.name += String.format("Integer %s;\n%s.value=", temp, temp);
@@ -1413,7 +1449,12 @@ class ModuloExpr extends CuExpr{
 		Helper.cVarType.put(temp, "Iterable");
 		Helper.cVarType.put(intName, "Integer");
 		
-		if (!left.getDef().isEmpty())
+		if (!leftC.equals(""))
+			name += "x3free(" + leftToC + ");\n";
+		if (!rightC.equals(""))
+			name += "x3free(" + rightToC + ");\n";
+		
+		/*if (!left.getDef().isEmpty())
 			def.addAll(left.getDef());
 		if (!right.getDef().isEmpty())
 			def.addAll(right.getDef());
@@ -1427,7 +1468,7 @@ class ModuloExpr extends CuExpr{
 		if (leftC.equals(""))
 			use.add(leftToC);
 		if (rightC.equals(""))
-			use.add(rightToC);
+			use.add(rightToC);*/
 		
 		/*if (leftC.equals("") && rightC.equals("")){
 			//both are variables
@@ -1508,14 +1549,17 @@ class NegateExpr extends CuExpr{
 			localVars.add(temp);
 		Helper.cVarType.put(temp, "Boolean");
 		
-		if (!val.getDef().isEmpty())
+		if (!eC.equals(""))
+			name += "x3free(" + valToC + ");\n";
+		
+		/*if (!val.getDef().isEmpty())
 			def.addAll(val.getDef());
 		if (!val.getUse().isEmpty())
 			use.addAll(val.getUse());
-		
+
 		def.add(temp);
 		if (eC.equals(""))
-			use.add(valToC);
+			use.add(valToC);*/
 		
 		
 /*		if(eC.equals(""))
@@ -1591,15 +1635,18 @@ class NegativeExpr extends CuExpr{
 		if (!localVars.contains(temp))
 			localVars.add(temp);
 		Helper.cVarType.put(temp, "Integer");
+
+		if (!eC.equals(""))
+			name += "x3free(" + valToC + ");\n";
 		
-		if (!val.getDef().isEmpty())
+		/*if (!val.getDef().isEmpty())
 			def.addAll(val.getDef());
 		if (!val.getUse().isEmpty())
 			use.addAll(val.getUse());
 
 		def.add(temp);
 		if (eC.equals(""))
-			use.add(valToC);
+			use.add(valToC);*/
 		
 		/*if(eC.equals(""))
 		{
@@ -1853,8 +1900,13 @@ class OrExpr extends CuExpr{
 		if (!localVars.contains(temp))
 			localVars.add(temp);
 		Helper.cVarType.put(temp, "Boolean");
+
+		if (!leftC.equals(""))
+			name += "x3free(" + leftToC + ");\n";
+		if (!rightC.equals(""))
+			name += "x3free(" + rightToC + ");\n";
 		
-		if (!left.getDef().isEmpty())
+		/*if (!left.getDef().isEmpty())
 			def.addAll(left.getDef());
 		if (!right.getDef().isEmpty())
 			def.addAll(right.getDef());
@@ -1867,7 +1919,7 @@ class OrExpr extends CuExpr{
 		if (leftC.equals(""))
 			use.add(leftToC);
 		if (rightC.equals(""))
-			use.add(rightToC);
+			use.add(rightToC);*/
 		
 		/*if (leftC.equals("") && rightC.equals("")){
 			//both are variables
@@ -1962,11 +2014,16 @@ class PlusExpr extends CuExpr{
 				+ "%s->value=", temp, temp, temp, temp);
 		super.name += String.format("((%s*)%s)->value + ((%s*)%s)->value;\n", "Integer", leftToC, "Integer", rightToC);			
 		
-		if (!localVars.contains(temp))
-			localVars.add(temp);
+		/*if (!localVars.contains(temp))
+			localVars.add(temp);*/
 		Helper.cVarType.put(temp, "Integer");
+
+		if (!leftC.equals(""))
+			name += "x3free(" + leftToC + ");\n";
+		if (!rightC.equals(""))
+			name += "x3free(" + rightToC + ");\n";
 		
-		if (!left.getDef().isEmpty())
+		/*if (!left.getDef().isEmpty())
 			def.addAll(left.getDef());
 		if (!right.getDef().isEmpty())
 			def.addAll(right.getDef());
@@ -1980,7 +2037,7 @@ class PlusExpr extends CuExpr{
 			use.add(leftToC);
 		if (rightC.equals(""))
 			use.add(rightToC);
-		
+*/		
 		/*
 		if (leftC.equals("") && rightC.equals("")){
 			//both are variables
@@ -2378,11 +2435,16 @@ class TimesExpr extends CuExpr{
 				+ "%s->value=", temp, temp, temp, temp);
 		super.name += String.format("((%s*)%s)->value * ((%s*)%s)->value;\n", "Integer", leftToC, "Integer", rightToC);			
 
-		if (!localVars.contains(temp))
-			localVars.add(temp);
+		/*if (!localVars.contains(temp))
+			localVars.add(temp);*/
 		Helper.cVarType.put(temp, "Integer");
+
+		if (!leftC.equals(""))
+			name += "x3free(" + leftToC + ");\n";
+		if (!rightC.equals(""))
+			name += "x3free(" + rightToC + ");\n";
 		
-		if (!left.getDef().isEmpty())
+		/*if (!left.getDef().isEmpty())
 			def.addAll(left.getDef());
 		if (!right.getDef().isEmpty())
 			def.addAll(right.getDef());
@@ -2395,7 +2457,7 @@ class TimesExpr extends CuExpr{
 		if (leftC.equals(""))
 			use.add(leftToC);
 		if (rightC.equals(""))
-			use.add(rightToC);
+			use.add(rightToC);*/
 		
 		/*if (leftC.equals("") && rightC.equals("")){
 			//both are variables
@@ -2522,13 +2584,13 @@ class VarExpr extends CuExpr{// e.vv<tao1...>(e1,...)
 				temp += /*"(" + tempCastType + "*)" +*/ expToC + ", ";
 				//fptrArg += tempCastType + "*, ";
 				
-				if (!exp.getDef().isEmpty())
+				/*if (!exp.getDef().isEmpty())
 					def.addAll(exp.getDef());
 				if (!exp.getUse().isEmpty())
 					use.addAll(exp.getUse());
 
 				if (eC.equals(""))
-					use.add(expToC);
+					use.add(expToC);*/
 			}
 			int j = temp.lastIndexOf(", ");
 			if (j > 1)
@@ -2545,8 +2607,8 @@ class VarExpr extends CuExpr{// e.vv<tao1...>(e1,...)
 		super.name += "void* " + returnName + ";\n";
 		super.name += String.format("%s = (((%s*)%s)->%s)->%s%s;\n", returnName, classType, valToC, classType+"_Tbl", method.toString(), temp);
 		
-		def.add(returnName);
-		use.add(valToC);
+		/*def.add(returnName);
+		use.add(valToC);*/
 		
 		
 		super.cText = returnName;
@@ -2631,13 +2693,13 @@ Helper.P("VcExp= "+text);
 					Helper.cVarType.put(expToC, tempCastType);
 				}
 			
-				if (!exp.getDef().isEmpty())
+				/*if (!exp.getDef().isEmpty())
 					def.addAll(exp.getDef());
 				if (!exp.getUse().isEmpty())
 					use.addAll(exp.getUse());
 
 				if (eC.equals(""))
-					use.add(expToC);
+					use.add(expToC);*/
 				
 			}
 			int j = temp.lastIndexOf(", ");
@@ -2655,8 +2717,8 @@ Helper.P("VcExp= "+text);
 		
 		super.name += String.format("%s = new_%s %s;\n", objectName, val, temp);
 		
-		def.add(objectName);
-		use.add(val);
+		/*def.add(objectName);
+		use.add(val);*/
 		
 		/*for (CuExpr exp : es) {
 			expToC = exp.toC(localVars);
@@ -2822,7 +2884,7 @@ Helper.P(" 1mapping is " + mapping.toString());
 					cText = iter;
 					initialized = true;
 					
-					def.add(temp);
+					//def.add(temp);
 				}
 				else {
 					name += "Iterable* " + iterNew + ";\n"
@@ -2865,7 +2927,7 @@ Helper.P(" 1mapping is " + mapping.toString());
 						+ "unichar (((" + tempCastType + "*)" + expToC + ")->value);\n";
 				
 				super.cText = varName;
-				def.add(varName);
+				/*def.add(varName);
 				
 				if (!exp.getDef().isEmpty())
 					def.addAll(exp.getDef());
@@ -2873,7 +2935,7 @@ Helper.P(" 1mapping is " + mapping.toString());
 					use.addAll(exp.getUse());
 
 				if (tempName.equals(""))
-					use.add(expToC);
+					use.add(expToC);*/
 				
 				return super.toC(localVars);
 			}
@@ -2893,14 +2955,14 @@ Helper.P(" 1mapping is " + mapping.toString());
 					
 				super.cText = varName;
 				
-				if (!exp.getDef().isEmpty())
+				/*if (!exp.getDef().isEmpty())
 					def.addAll(exp.getDef());
 				if (!exp.getUse().isEmpty())
 					use.addAll(exp.getUse());
 
 				def.add(varName);
 				if (tempName.equals(""))
-					use.add(expToC);
+					use.add(expToC);*/
 				 
 				return super.toC(localVars);
 			}
@@ -2924,13 +2986,13 @@ Helper.P(" 1mapping is " + mapping.toString());
 					Helper.cVarType.put(expToC, tempCastType);
 				}
 				
-				if (!exp.getDef().isEmpty())
+				/*if (!exp.getDef().isEmpty())
 					def.addAll(exp.getDef());
 				if (!exp.getUse().isEmpty())
 					use.addAll(exp.getUse());
 
 				if (tempName.equals(""))
-					use.add(expToC);
+					use.add(expToC);*/
 					
 			}
 			int j = temp.lastIndexOf(", ");
@@ -2940,7 +3002,7 @@ Helper.P(" 1mapping is " + mapping.toString());
 					+ varName + " = " + val.toString() + temp + ";\n"; 
 			super.cText= varName;
 			
-			def.add(varName);
+			//def.add(varName);
 			use.add(val);
 		}
 		return super.toC(localVars);

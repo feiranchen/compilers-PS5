@@ -10,6 +10,7 @@ public class Pair<A, B> {
 
 	public Pair() {
 		// TODO Auto-generated constructor stub
+		super();
 	}
 
 	public int hashCode() {
