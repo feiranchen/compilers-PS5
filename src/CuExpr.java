@@ -381,6 +381,32 @@ class BrkExpr extends CuExpr {
 	}
 	
 	@Override
+	public Pair<List<CuStat>, CuExpr> toHIR() {
+		List<CuStat> stats = new ArrayList<>();
+		Pair<List<CuStat>, CuExpr> expToHir = new Pair<List<CuStat>, CuExpr>();
+		List<CuExpr> expressions = new ArrayList<>();
+		
+		for(CuExpr exp : val){
+			expToHir = exp.toHIR();
+			stats.addAll(expToHir.getFirst());
+			
+			String name1 = Helper.getVarName();
+			CuVvc temp1 = new Vv(name1);
+			CuStat a = new AssignStat(temp1, expToHir.getSecond());
+			stats.add(a);
+			
+			CuExpr var1 = new VvExp(name1);
+			expressions.add(var1);
+		}
+		
+		CuExpr expr = new BrkExpr(expressions);		
+		
+		Pair<List<CuStat>, CuExpr> temp = new Pair<List<CuStat>, CuExpr>(stats, expr);
+		
+		return temp;
+	}
+	
+	@Override
 	public String toC(ArrayList<String> localVars) {
 		String eToC = "", typeCast = "";
 		
@@ -459,6 +485,14 @@ class CBoolean extends CuExpr{
 	}
 	
 	@Override
+	public Pair<List<CuStat>, CuExpr> toHIR() {
+		List<CuStat> cuStat = new ArrayList<>();
+		CuExpr cuExpr = this;
+		
+		return new Pair<List<CuStat>, CuExpr>(cuStat, cuExpr);
+	}
+	
+	@Override
 	public String toC(ArrayList<String> localVars) {
 		super.castType = "Boolean";
 		String temp = Helper.getVarName();
@@ -480,14 +514,6 @@ class CBoolean extends CuExpr{
 		def.add(temp);
 		
 		return super.toC(localVars);
-	}
-	
-	@Override
-	public Pair<List<CuStat>, CuExpr> toHIR() {
-		List<CuStat> cuStat = new ArrayList<>();
-		CuExpr cuExpr = this;
-		
-		return new Pair<List<CuStat>, CuExpr>(cuStat, cuExpr);
 	}
 }
 
@@ -549,7 +575,7 @@ class CString extends CuExpr {
 	
 	@Override
 	public String toC(ArrayList<String> localVars) {
-		String temp = Helper.getVarName(), typeCast ="";
+		String temp = Helper.getVarName();
 		iterType = "Character";
 		super.name = String.format("String* %s;\n"
 				+ "%s = (String *) x3malloc(sizeof(String));\n"
@@ -1604,6 +1630,27 @@ class OnwardsExpr extends CuExpr{
 	}
 	
 	@Override
+	public Pair<List<CuStat>, CuExpr> toHIR() {
+		List<CuStat> stats = new ArrayList<>();
+		Pair<List<CuStat>, CuExpr> valToHir = new Pair<List<CuStat>, CuExpr>();
+		String name1 = Helper.getVarName();
+		
+		valToHir = val.toHIR();
+		stats.addAll(valToHir.getFirst());
+		
+		CuVvc temp1 = new Vv(name1);
+		CuStat a = new AssignStat(temp1, valToHir.getSecond());
+		stats.add(a);
+		
+		CuExpr var1 = new VvExp(name1);
+		CuExpr expr = new OnwardsExpr(var1, inclusive);		
+		
+		Pair<List<CuStat>, CuExpr> temp = new Pair<List<CuStat>, CuExpr>(stats, expr);
+		
+		return temp;
+	}
+	
+	@Override
 	public String toC(ArrayList<String> localVars) {
 		castType = "Iterable";		
 		String valToC = val.toC(localVars);
@@ -1983,6 +2030,35 @@ class ThroughExpr extends CuExpr{
 		else
 			return new Iter(CuType.bool);
 	}
+	
+	@Override
+	public Pair<List<CuStat>, CuExpr> toHIR() {
+		List<CuStat> stats = new ArrayList<>();
+		Pair<List<CuStat>, CuExpr> leftToHir = new Pair<List<CuStat>, CuExpr>();
+		Pair<List<CuStat>, CuExpr> rightToHir = new Pair<List<CuStat>, CuExpr>();
+		String name1 = Helper.getVarName(), name2 = Helper.getVarName();
+		
+		leftToHir = left.toHIR();
+		rightToHir = right.toHIR();
+		stats.addAll(leftToHir.getFirst());
+		stats.addAll(rightToHir.getFirst());
+		
+		CuVvc temp1 = new Vv(name1);
+		CuVvc temp2 = new Vv(name2);
+		CuStat a = new AssignStat(temp1, leftToHir.getSecond());
+		CuStat b = new AssignStat(temp2, rightToHir.getSecond());
+		stats.add(a);
+		stats.add(b);
+		
+		CuExpr var1 = new VvExp(name1);
+		CuExpr var2 = new VvExp(name2);
+		CuExpr expr = new ThroughExpr(var1, var2, bLow, bUp);			
+		
+		Pair<List<CuStat>, CuExpr> temp = new Pair<List<CuStat>, CuExpr>(stats, expr);
+		
+		return temp;		
+	}
+	
 	
 	@Override
 	public String toC(ArrayList<String> localVars) {
