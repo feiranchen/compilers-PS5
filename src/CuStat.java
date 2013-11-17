@@ -67,9 +67,9 @@ class AssignStat extends CuStat{
 		return super.HIR;
 	}
 	
-	public void buildCFG() {
+	@Override public void buildCFG() {
 		super.useV.addAll(ee.getUse());
-		super.defV.addAll(ee.getDef());
+		//super.defV.addAll(ee.getDef());
 		super.defV.add(var.toString());
 	}
 	@Override public String toC(ArrayList<String> localVars) {
@@ -140,6 +140,15 @@ class ForToWhileStat extends CuStat {
 		this.var = arg_var;
 		this.iter_name = arg_iter_name;
 		this.s1 = arg_s1;
+	}
+	
+	@Override public void buildCFG() {
+		super.successors.add(s1.getFirst());
+		s1.getLast().successors.add(this);
+		s1.buildCFG();
+		//build use def set along this traversal
+		super.useV.add(var);
+		super.defV.add(iter_name);
 	}
 	
 	@Override public CuStat toHIR() {
@@ -223,6 +232,24 @@ class ForStat extends CuStat{
 		super.text = "for ( " + var.toString() + " in " + e.toString() + " ) " + s1.toString();
 	}
 	
+	@Override public void buildCFG() {
+		/*//first, build use[n] and def[n]
+		
+		//the outer level has added the other branch to its successors
+		//this is the fall through branch
+		super.successors.add(s1.getFirst());
+		s1.getLast().successors.add(this);
+		//else, empty for statement won't have this loop there
+		//recursive build CFG
+		s1.buildCFG();*/
+		
+		
+		//after converting to HIR, this method should never be called
+		if (Helper.debug) {
+			System.out.println("in ForStat buildCFG, error");
+		}
+	}
+	
 	@Override public CuStat toHIR() {
 		Pair<List<CuStat>, CuExpr> pa =  e.toHIR();
 		//e.construct part
@@ -237,18 +264,6 @@ class ForStat extends CuStat{
 		curHIR.add(temp.toHIR());
 		super.HIR = new Stats(curHIR);
 		return super.HIR;
-	}
-	 
-	@Override public void buildCFG() {
-		//first, build use[n] and def[n]
-		
-		//the outer level has added the other branch to its successors
-		//this is the fall through branch
-		super.successors.add(s1.getFirst());
-		s1.getLast().successors.add(this);
-		//else, empty for statement won't have this loop there
-		//recursive build CFG
-		s1.buildCFG();
 	}
 	
 	//this needs to be modified because we now have a new ForToWhile java class now
@@ -375,6 +390,11 @@ class ConvertToIter extends CuStat {
 		return this;
 	}
 	
+	@Override public void buildCFG() {
+		super.useV.add(var);
+		//treat this as a whole node, manually do the ref count
+	}
+	
 	@Override public String toC(ArrayList<String> localVars)
 	{
 		super.ctext += "\t" + "if ("+ var.toString() +"!=NULL) {\n";
@@ -420,16 +440,22 @@ class IfStat extends CuStat{
     
 	@Override public void buildCFG() {
 		s1.getLast().successors = super.successors;
-		if (s2!=null) 
-			s2.getLast().successors = super.successors;
-		super.successors = new ArrayList<CuStat>();
-		super.successors.add(s1.getFirst());
-		if (s2!=null)
-			super.successors.add(s2.getFirst());
 		//recursively buildCFG
 		s1.buildCFG();
-		if (s2!=null)
-			s2.buildCFG();
+		if (s2!=null) {
+			s2.getLast().successors = super.successors;
+			super.successors = new ArrayList<CuStat>();
+			super.successors.add(s2.getFirst());
+			//s1 is always the second successor
+			super.successors.add(s1.getFirst());
+			s2.buildCFG();			
+		}
+		else {
+			//the first successor is always the next big block, for both if and loops
+			super.successors.add(s1.getFirst());
+		}	
+		//build use def sets, def set is empty
+		super.useV.addAll(e.getUse());
 	}
     
     //for if statement, ctext is build here
@@ -580,6 +606,9 @@ class WhileStat extends CuStat{
 		s1.getLast().successors.add(this);
 		//recursive build CFG
 		s1.buildCFG();
+		
+		//build use def sets, def set is empty, as in the if statement case
+		super.useV = e.getUse();
 	}
 	@Override public String toC(ArrayList<String> localVars) {
 		String exp_toC = e.toC(localVars);
@@ -654,6 +683,9 @@ class ReturnStat extends CuStat{
 	@Override public void buildCFG() {
 		//return stat doesn't have any successors
 		super.successors = new ArrayList<CuStat>();
+		
+		//build the use def set, def set is empty
+		super.useV = e.getUse();
 	}
 	@Override public String toC(ArrayList<String> localVars) {
 		//now reference counting/x3free memory due to scoping
@@ -728,11 +760,12 @@ class Stats extends CuStat{
 	@Override public void buildCFG() {
 		//build this connections first
 		for(int i=0; i<(this.al.size()-1); i++) {
-			al.get(i).successors.add(al.get(i+1));			
+			al.get(i).getLast().successors.add(al.get(i+1).getFirst());			
 		}
 		//recursively build connections for each elements
 		for(int i=0; i<this.al.size(); i++)
 			al.get(i).buildCFG();
+		//both use and def set is empty here
 	}
 	@Override public CuStat getFirst() {
 		//if empty, return itself
