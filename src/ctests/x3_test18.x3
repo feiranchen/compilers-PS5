@@ -1,8 +1,0 @@
-var := 5;
-continue1 := true;
-while(continue1)
-{
-	var := continue1;
-	continue1:=false&var;
-}
-return [""]; 
