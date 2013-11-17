@@ -192,7 +192,7 @@ public class Helper {
 			}
 		}
 	}
-	public String incrRefCount(String var) {
+	public static String incrRefCount(String var) {
 		String code = "if (" + var + "!= NULL) {\n";
 		//increase ref count
 		code +=    "\t" + "(*(int *)" + var + ")++;\n";
@@ -200,7 +200,7 @@ public class Helper {
 		return code;
 	}
 	
-	public String decRefCount(String var) {
+	public static String decRefCount(String var) {
 		String code = "if (" + var + "!= NULL) {\n";
 		//decrement ref count
 		code +=    "\t" + "(*(int *)" + var + ")--;\n";
