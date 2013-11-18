@@ -193,13 +193,14 @@ class ForToWhileStat extends CuStat {
 	@Override public String toC(ArrayList<String> localVars) {		
 		super.ctext += "\twhile (" + var.toString() + "!=NULL) {\n";
 		
-		String temp_name = Helper.getVarName();
-		super.ctext += Helper.refAcquire(temp_name, iter_name);
+		//String temp_name = Helper.getVarName();
+		//super.ctext += Helper.refAcquire(temp_name, iter_name);
+		super.ctext += "Iterable * " + iter_name +" = NULL;\n";
 		super.ctext += "\t\t" + iter_name + " = (Iterable *)" + var.toString() + ";\n";
 		super.ctext += "\t\t" + Helper.incrRefCount(iter_name);
-		super.ctext += "\t\t" + Helper.decRefCount(temp_name);
+		//super.ctext += "\t\t" + Helper.decRefCount(temp_name);
 		
-		temp_name = Helper.getVarName();
+		String temp_name = Helper.getVarName();
 		super.ctext += Helper.refAcquire(temp_name, var.toString());
 		super.ctext += "\t\t" + var.toString() + " = " + iter_name + "->value;\n";
 		super.ctext += "\t\t" + Helper.incrRefCount(var.toString());

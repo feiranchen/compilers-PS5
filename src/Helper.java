@@ -215,7 +215,7 @@ public class Helper {
 		if (debug) {
 			code +=    "\t" + "if ((*(int *)" + var + ") < 0)\n";
 			//need to include stdio for debugging
-			code +=    "\t\t" + "printf(\"" + var + " ref count is smaller than 0\n\");\n";
+			code +=    "\t\t" + "printf(\"" + var + " ref count is smaller than 0\\n\");\n";
 		}
 		code +=     "}\n";
 		return code;
