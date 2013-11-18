@@ -207,12 +207,44 @@ public class Helper {
 		//check whether it is the last pointer pointing to the object, if yes, x3free memory
 		code +=    "\t" + "if ((*(int *)" + var + ") == 0)\n";
 		code +=    "\t\t" + "x3free(" + var + ");\n";
+		
+		//newly added, we feel it should not cause memory bug
+		//make var pointing to null
+		code +=    "\t" + var + " = NULL;\n";
+				
 		if (debug) {
 			code +=    "\t" + "if ((*(int *)" + var + ") < 0)\n";
 			//need to include stdio for debugging
 			code +=    "\t\t" + "printf(\"" + var + " ref count is smaller than 0\n\");\n";
 		}
 		code +=     "}\n";
+		return code;
+	}
+	
+	public static String liveVarAnalysis(List<String> inV, List<String> defV, List<String> outV) {
+		String code = "";
+		ArrayList<String> inUnionDef = new ArrayList<String>();
+		for (String cur : inV) {
+			if (!inUnionDef.contains(cur)) {
+				inUnionDef.add(cur);
+			}
+		}
+		for (String cur : defV) {
+			if (!inUnionDef.contains(cur)) {
+				inUnionDef.add(cur);
+			}
+		}
+		for (String cur : inUnionDef) {
+			if (!outV.contains(cur)) {
+				code += Helper.decRefCount(cur);
+			}
+		}
+		return code;		
+	}
+	
+	public static String refAcquire(String temp_name, String var) {
+		String code = "void * " + temp_name +" = NULL;\n";
+		code += temp_name + " = " + var + ";\n";
 		return code;
 	}
 }

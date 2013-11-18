@@ -81,23 +81,31 @@ class AssignStat extends CuStat{
 		//the below sentence can be removed by higher level blocks
 		if (!Helper.funArgList.contains(var.toString()))
 			super.ctext += "void * " + var.toString() +" = NULL;\n";
-		super.ctext += "if (" + var.toString() + "!= NULL) {\n";
+		
+		/* super.ctext += "if (" + var.toString() + "!= NULL) {\n";
 		//check whether it is the last pointer pointing to the object, if yes, x3free memory
 		super.ctext += "\tif ((*(int *)" + var.toString() + ") == 1)\n";
 		super.ctext += "\t\tx3free(" + var.toString() + ");\n";
 		super.ctext += "\telse\n";
 		//decrement the reference count
 		super.ctext += "\t(*(int *)" + var.toString() + ")--;\n";
-		super.ctext += "}\n";
+		super.ctext += "}\n"; */
 		//((int*) &test)[0]
+		
+		//normal ref count
+		String temp_name = Helper.getVarName();
+		super.ctext += Helper.refAcquire(temp_name, var.toString());		
 		super.ctext += var.toString() + " = " + exp_toC + ";\n";
-		//increase the new reference count
+		//normal ref count
+		super.ctext += Helper.incrRefCount(var.toString());
+		super.ctext += Helper.decRefCount(temp_name);
+		/*//increase the new reference count
 		super.ctext += "if (" + var.toString() + "!=NULL)\n";
-		super.ctext += "\t(*(int *)" + var.toString() + ")++;\n";
-		/*if (ee.isFunCall())
-			super.ctext += var.toString() + " = " + ee.toC() + ";\n";
-		else
-			super.ctext += var.toString() + " = &" + ee.toC() + ";\n";  */
+		super.ctext += "\t(*(int *)" + var.toString() + ")++;\n";*/
+		
+		//live variable analysis
+		super.ctext += Helper.liveVarAnalysis(super.inV, super.defV, super.outV);
+
 		if (!Helper.funArgList.contains(var.toString()))
 			super.newVars.add(var.toString());
 		if (!localVars.contains(var.toString()) && !Helper.funArgList.contains(var.toString()))
@@ -183,9 +191,24 @@ class ForToWhileStat extends CuStat {
 	
 	@Override public String toC(ArrayList<String> localVars) {		
 		super.ctext += "\twhile (" + var.toString() + "!=NULL) {\n";
+		
+		String temp_name = Helper.getVarName();
+		super.ctext += Helper.refAcquire(temp_name, iter_name);
 		super.ctext += "\t\t" + iter_name + " = (Iterable *)" + var.toString() + ";\n";
+		super.ctext += "\t\t" + Helper.incrRefCount(iter_name);
+		super.ctext += "\t\t" + Helper.decRefCount(temp_name);
+		
+		temp_name = Helper.getVarName();
+		super.ctext += Helper.refAcquire(temp_name, var.toString());
 		super.ctext += "\t\t" + var.toString() + " = " + iter_name + "->value;\n";
-		super.ctext += "\t\t" + "(*((int *)" + var.toString() + "))++;\n";
+		super.ctext += "\t\t" + Helper.incrRefCount(var.toString());
+		super.ctext += "\t\t" + Helper.decRefCount(temp_name);
+		
+		//existing this node, we need to do live variable analysis
+		//this is the edge in the loop
+		super.ctext += Helper.liveVarAnalysis(super.inV, super.defV, super.successors.get(1).inV);
+		
+		//super.ctext += "\t\t" + "(*((int *)" + var.toString() + "))++;\n";
 		ArrayList<String> localVarsInFor = new ArrayList<String>(localVars);
 		String s1ToC = s1.toC(localVarsInFor);
 		String temp_str = s1ToC.replaceAll("void \\* " + var.toString() + " = NULL;\n", "");
@@ -199,7 +222,7 @@ class ForToWhileStat extends CuStat {
 		//newly added 
 		if (localVarsInFor.contains(var.toString()))
 			localVarsInFor.remove(var.toString());
-		//now reference counting/x3free memory due to scoping
+		/*//now reference counting/x3free memory due to scoping
 		for (String cur_str : localVarsInFor) {
 			super.ctext += "\t\t" + "\n\n\n";
 			super.ctext += "\t\t" + "if (" + cur_str + "!= NULL) {\n";
@@ -210,13 +233,16 @@ class ForToWhileStat extends CuStat {
 			//decrement the reference count
 			super.ctext += "\t\t\t\t" + "(*(int *)" + cur_str + ")--;\n";
 			super.ctext += "\t\t" + "}\n";
-		}
-		super.ctext += "\t\t" + "(*(int *)" + var.toString() + ")--;\n";
+		}*/
+		// ***********this part is commented out because this is already converted to a cubex node ***************
+		/*super.ctext += "\t\t" + "(*(int *)" + var.toString() + ")--;\n";
 		//note that is another node in C in the for/while loop, var is defined here again, but var will be used in the while
 		//node 
-		super.ctext += "\t\t" + var.toString() + " = iterGetNext(" + iter_name + ");\n";
-		super.ctext += "\t" + "}\n";	
+		super.ctext += "\t\t" + var.toString() + " = iterGetNext(" + iter_name + ");\n"; */
+		super.ctext += "\t" + "}\n";
 		
+		//exiting the while loop, live variable analysis on the other edge, def set is null here
+		super.ctext += Helper.liveVarAnalysis(super.inV, new ArrayList<String>(), super.successors.get(0).inV);
 		return super.ctext;
 	}
 }
@@ -269,18 +295,15 @@ class ForStat extends CuStat{
 	//this needs to be modified because we now have a new ForToWhile java class now
 	@Override public String toC(ArrayList<String> localVars)
 	{
+		//after converting to HIR, this method should never be called
+		if (Helper.debug) {
+			System.out.println("in ForStat buildCFG, error");
+		}
+		/*
 		String exp_toC = e.toC(localVars);
 		super.ctext +="\n\n\n";
 		super.ctext += e.construct();
 		String itype = e.getIterType();
-		/*if (e.getCastType().equals("String")) {
-			String iter_name = Helper.getVarName();
-			super.ctext += "Iterable *" + iter_name + ";\n";
-			super.ctext += iter_name + " = strToIter( ((String *)" + exp_toC + ")->value, ((String *)" + exp_toC + ")->len);\n";
-			exp_toC = iter_name;
-			Helper.cVarType.put(iter_name, "Iterable");
-			itype = "Character";
-		}*/
 		
 		//added for v scoping
 		super.ctext += "{\n";
@@ -339,7 +362,7 @@ class ForStat extends CuStat{
 		//iter_name is only dead here, so don't add it to use[n] and def[n]
 		//var is also only dead here
 		//should deallocate here, def[n] union in[n] then exclude out[n]
-		super.ctext += "}\n";
+		super.ctext += "}\n"; */
 		return super.ctext;
 	}
 	public HReturn calculateType(CuContext context) throws NoSuchTypeException {
@@ -402,9 +425,14 @@ class ConvertToIter extends CuStat {
 		//super.ctext += "(*(int *)" + iter_name1 + ")++;\n";
 		super.ctext += "\t\t" + "if (" + "(*((int *)(" + var +"+1))) == 0) {\n";
 		//super.ctext += "(*(int *)" + iter_name1 + ")--;\n";
-		//another def here, previous iter_name1 is dead, should decrease ref 
+		String temp_name = Helper.getVarName();
+		super.ctext += Helper.refAcquire(temp_name, var.toString());
 		super.ctext += "\t\t\t" + var.toString() + " = strToIter( ((String *)" + var + ")->value, ((String *)" + var + ")->len);\n";
+		super.ctext += Helper.incrRefCount(var.toString());
+		super.ctext += Helper.decRefCount(temp_name);
 		super.ctext += "\t\t}\n\t}\n";
+		
+		super.ctext += Helper.liveVarAnalysis(super.inV, super.defV, super.outV);
 		
 		return super.ctext;
 	}
@@ -502,7 +530,12 @@ class IfStat extends CuStat{
     		super.ctext += "if ( ((Boolean *)" + exp_toC + ")->value) {\n";
     	else
     		super.ctext += "if (" + exp_toC + ") {\n";
+    	
+    	//live variable analysis on the s1 edge
+    	super.ctext += Helper.liveVarAnalysis(super.inV, super.defV, super.successors.get(1).inV);
+    	
     	super.ctext += temp_s1;
+    	/*  ideally, we should not have this 
 		//now reference counting/x3free memory due to scoping
 		for (String cur_str : s1_localVars) {
 			super.ctext += "\n\n\n";
@@ -513,12 +546,14 @@ class IfStat extends CuStat{
 			super.ctext += "else\n";
 			//decrement the reference count
 			super.ctext += "(*(int *)" + cur_str + ")--;\n";
-			super.ctext += "}\n";
-		}
+			super.ctext += "}\n"; 
+		} */
     	super.ctext += "}\n";
     	if (s2 != null) {
     		super.ctext += "else {\n";
+    		super.ctext += Helper.liveVarAnalysis(super.inV, super.defV, super.successors.get(0).inV);
     		super.ctext += temp_s2;
+    		/*
     		//now reference counting/x3free memory due to scoping
     		for (String cur_str : s2_localVars) {
     			super.ctext += "\n\n\n";
@@ -530,9 +565,11 @@ class IfStat extends CuStat{
     			//decrement the reference count
     			super.ctext += "(*(int *)" + cur_str + ")--;\n";
     			super.ctext += "}\n";
-    		}   		
+    		}    */		
     		super.ctext += "}\n";
     	}
+    	else
+    		super.ctext += Helper.liveVarAnalysis(super.inV, super.defV, super.successors.get(0).inV);
     	return super.ctext;
     }
     
@@ -620,6 +657,8 @@ class WhileStat extends CuStat{
     	else
     		super.ctext += "while (" + exp_toC + ") {\n";
 		
+    	super.ctext += Helper.liveVarAnalysis(super.inV, super.defV, super.successors.get(1).inV);
+    	
 		ArrayList<String> while_localVars = new ArrayList<String>(localVars);
 		super.ctext += s1.toC(while_localVars);
 		//some variables in localVarsIn are not newly created, so remove them before decrement ref count/deallocate
@@ -628,6 +667,7 @@ class WhileStat extends CuStat{
 				while_localVars.remove(cur_str);
 			}
 		}
+		/*
 		//now reference counting/x3free memory due to scoping
 		for (String cur_str : while_localVars) {
 			super.ctext += "\n\n\n";
@@ -639,8 +679,11 @@ class WhileStat extends CuStat{
 			//decrement the reference count
 			super.ctext += "(*(int *)" + cur_str + ")--;\n";
 			super.ctext += "}\n";
-		}
+		} */
 		super.ctext += "}\n";
+		
+		super.ctext += Helper.liveVarAnalysis(super.inV, super.defV, super.successors.get(0).inV);
+		
 		return super.ctext;
 	}
     public HReturn calculateType(CuContext context) throws NoSuchTypeException {
@@ -692,6 +735,7 @@ class ReturnStat extends CuStat{
 		super.ctext +="\n\n\n";
 		String exp_toC = e.toC(localVars);
 		super.ctext += e.construct();
+		/*
 		for (String cur_str : localVars) {
 			super.ctext += "\n\n\n";
 			super.ctext += "if (" + cur_str + "!= NULL) {\n";
@@ -705,7 +749,13 @@ class ReturnStat extends CuStat{
 			//decrement the reference count
 			super.ctext += "(*(int *)" + cur_str + ")--;\n";
 			super.ctext += "}\n";
-		}
+		} */
+		
+		//special process for return statement
+		super.ctext += "if (" + exp_toC + "!= NULL) {\n";
+		super.ctext += "(*(int *)" + exp_toC + ")--;\n";
+		super.ctext += "}\n";
+			
 		super.ctext += "return " + exp_toC + ";\n";
 		/*if (e.isFunCall())
 			super.ctext += "return " + e.toC() + ";\n";
@@ -735,6 +785,10 @@ class EmptyBody extends CuStat {
 	}
 	@Override public CuStat toHIR() {
 		return this;
+	}
+	@Override public String toC(ArrayList<String> localVars) {
+		super.ctext += Helper.liveVarAnalysis(super.inV, super.defV, super.outV);
+		return super.ctext;
 	}
 	public HReturn calculateType(CuContext context) throws NoSuchTypeException {
 		//default is false and bottom

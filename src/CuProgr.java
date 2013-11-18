@@ -9,6 +9,9 @@ public abstract class CuProgr {
 	@Override public String toString() {
 		return text;
 	}
+	//added for project 5
+	public void toHIR() {}
+	public void buildCFG() {}
 	//added for project 4
 	protected List<String> newVars = new ArrayList<String>();
 	//new functions
@@ -28,6 +31,18 @@ class FullPrg extends CuProgr {
 	}
 	public void add_lastStat(CuStat s) {
 		this.s = s;
+	}
+	@Override public void toHIR() {
+		for (CuProgr pr : elements)
+			pr.toHIR();
+		s = s.toHIR();
+	}
+	@Override public void buildCFG()  {
+		for (CuProgr pr : elements) {
+			//should connect things together, todo
+			pr.buildCFG();
+		}
+		s.buildCFG();
 	}
 	@Override public String toC(ArrayList<String> localVars) {
 		String fnClass_str = "", temp_str = "";
@@ -198,6 +213,9 @@ class StatPrg extends CuProgr {
 		//System.out.println("in statement program constructor");
 		this.stat = s;
 		super.text = s.toString();
+	}
+	@Override public void toHIR() {
+		stat = stat.toHIR();
 	}
 	@Override public String toC(ArrayList<String> localVars) {
 		super.ctext = stat.toC(localVars);
