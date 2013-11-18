@@ -485,6 +485,7 @@ class BrkExpr extends CuExpr {
 					+ tempNameArr.get(i) + "->next = NULL;\n" 
 					+ tempNameArr.get(i)+ "->concat = NULL;\n";
 			
+			if (tempNameArr.get(i+1) != "NULL")
 			name += Helper.incrRefCount(tempDataArr.get(i+1));
 			
 			//def.add(tempNameArr.get(i+1));
