@@ -64,6 +64,7 @@ class AssignStat extends CuStat{
 		List<CuStat> curHIR = pa.getFirst();
 		curHIR.add(new AssignStat(var, pa.getSecond()));
 		super.HIR = new Stats(curHIR);
+		Helper.P(HIR.toString());
 		return super.HIR;
 	}
 	
@@ -289,6 +290,7 @@ class ForStat extends CuStat{
 		CuStat temp = new ForToWhileStat(var.toString(), iter_name, s1);
 		curHIR.add(temp.toHIR());
 		super.HIR = new Stats(curHIR);
+		Helper.P(HIR.toString());
 		return super.HIR;
 	}
 	
@@ -721,6 +723,7 @@ class ReturnStat extends CuStat{
 		List<CuStat> curHIR = pa.getFirst();
 		curHIR.add(new ReturnStat(pa.getSecond()));
 		super.HIR = new Stats(curHIR);
+		Helper.P(HIR.toString());
 		return super.HIR;
 	}
 	@Override public void buildCFG() {
