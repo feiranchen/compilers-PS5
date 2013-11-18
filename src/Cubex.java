@@ -39,6 +39,10 @@ public class Cubex {
 		}
 		//first, convert to HIR
         ourProgram.toHIR();
+        //next, build CFG, use and def sets are built here
+        ourProgram.buildCFG();
+        //next, build the in out sets
+        ourProgram.buildSets();
         
 		ArrayList<String> localVars = new ArrayList<String>();
 		PrintWriter writer = new PrintWriter("out.c", "UTF-8");
