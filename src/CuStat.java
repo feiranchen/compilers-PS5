@@ -50,8 +50,8 @@ public abstract class CuStat {
 }
 
 class AssignStat extends CuStat{
-	private CuVvc var;
-	private CuExpr ee;
+	public CuVvc var;
+	public CuExpr ee;
 	public AssignStat (CuVvc t, CuExpr e) {
 		var = t;
 		ee = e;
