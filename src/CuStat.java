@@ -19,6 +19,8 @@ public abstract class CuStat {
 	
 	protected List<CuStat> successors = new ArrayList<CuStat>();
 	
+	protected CuStat HIR = null;
+	
 	@Override public String toString() {
 		return text;
 	}
@@ -41,6 +43,10 @@ public abstract class CuStat {
 	public CuStat getLast() {
 		return this;
 	}
+	
+	public CuStat toHIR() {
+		return HIR;
+	}
 }
 
 class AssignStat extends CuStat{
@@ -51,9 +57,19 @@ class AssignStat extends CuStat{
 		ee = e;
 		super.text = var.toString() + " := " + ee.toString() + " ;";
 	}
-	public void buildCFG() {
+	
+	//transform to a Stats object
+	@Override public CuStat toHIR() {
+		Pair<List<CuStat>, CuExpr> pa =  ee.toHIR();
+		List<CuStat> curHIR = pa.getFirst();
+		curHIR.add(new AssignStat(var, pa.getSecond()));
+		super.HIR = new Stats(curHIR);
+		return super.HIR;
+	}
+	
+	@Override public void buildCFG() {
 		super.useV.addAll(ee.getUse());
-		super.defV.addAll(ee.getDef());
+		//super.defV.addAll(ee.getDef());
 		super.defV.add(var.toString());
 	}
 	@Override public String toC(ArrayList<String> localVars) {
@@ -65,23 +81,31 @@ class AssignStat extends CuStat{
 		//the below sentence can be removed by higher level blocks
 		if (!Helper.funArgList.contains(var.toString()))
 			super.ctext += "void * " + var.toString() +" = NULL;\n";
-		super.ctext += "if (" + var.toString() + "!= NULL) {\n";
+		
+		/* super.ctext += "if (" + var.toString() + "!= NULL) {\n";
 		//check whether it is the last pointer pointing to the object, if yes, x3free memory
 		super.ctext += "\tif ((*(int *)" + var.toString() + ") == 1)\n";
 		super.ctext += "\t\tx3free(" + var.toString() + ");\n";
 		super.ctext += "\telse\n";
 		//decrement the reference count
 		super.ctext += "\t(*(int *)" + var.toString() + ")--;\n";
-		super.ctext += "}\n";
+		super.ctext += "}\n"; */
 		//((int*) &test)[0]
+		
+		//normal ref count
+		String temp_name = Helper.getVarName();
+		super.ctext += Helper.refAcquire(temp_name, var.toString());		
 		super.ctext += var.toString() + " = " + exp_toC + ";\n";
-		//increase the new reference count
+		//normal ref count
+		super.ctext += Helper.incrRefCount(var.toString());
+		super.ctext += Helper.decRefCount(temp_name);
+		/*//increase the new reference count
 		super.ctext += "if (" + var.toString() + "!=NULL)\n";
-		super.ctext += "\t(*(int *)" + var.toString() + ")++;\n";
-		/*if (ee.isFunCall())
-			super.ctext += var.toString() + " = " + ee.toC() + ";\n";
-		else
-			super.ctext += var.toString() + " = &" + ee.toC() + ";\n";  */
+		super.ctext += "\t(*(int *)" + var.toString() + ")++;\n";*/
+		
+		//live variable analysis
+		super.ctext += Helper.liveVarAnalysis(super.inV, super.defV, super.outV);
+
 		if (!Helper.funArgList.contains(var.toString()))
 			super.newVars.add(var.toString());
 		if (!localVars.contains(var.toString()) && !Helper.funArgList.contains(var.toString()))
@@ -115,6 +139,114 @@ Helper.P("assign stat end " + ee.toString());
 	}
 }
 
+//added for PA5 to HIR
+class ForToWhileStat extends CuStat {
+	private String var, iter_name;
+	private CuStat s1;
+	
+	public ForToWhileStat(String arg_var, String arg_iter_name, CuStat arg_s1) {
+		this.var = arg_var;
+		this.iter_name = arg_iter_name;
+		this.s1 = arg_s1;
+	}
+	
+	@Override public void buildCFG() {
+		super.successors.add(s1.getFirst());
+		s1.getLast().successors.add(this);
+		s1.buildCFG();
+		//build use def set along this traversal
+		super.useV.add(var);
+		super.defV.add(iter_name);
+	}
+	
+	@Override public CuStat toHIR() {
+		//this node includes the 
+		/*
+		 super.ctext += "\t\t" + iter_name + " = (Iterable *)" + var.toString() + ";\n";
+		super.ctext += "\t\t" + var.toString() + " = " + iter_name + "->value;\n";
+		 */
+		//need to add the last "\t\t" + var.toString() + " = iterGetNext(" + iter_name + ");\n"; to s1
+		//make a new function call expression
+		CuExpr curExpr = new VvExp("iterGetNext");
+		ArrayList<CuExpr> args = new ArrayList<CuExpr>();
+		args.add(new VvExp(iter_name));
+		curExpr.add(null, args);
+		//make a new assign statement
+		CuStat newAssign = new AssignStat(new Vv(var),curExpr);
+		s1 = s1.toHIR();
+		if (s1 instanceof Stats) {
+			((Stats) s1).al.add(newAssign);
+		}
+		else {
+			ArrayList<CuStat> arg_stats = new ArrayList<CuStat>();
+			//we add the object pointed by s1 into the array list
+			//another way to say it is we make a copy of s1, and add the reference copy into the list
+			arg_stats.add(s1);
+			arg_stats.add(newAssign);
+			s1 = new Stats(arg_stats);
+		}
+		super.HIR = this;
+		return super.HIR;
+	}
+	
+	@Override public String toC(ArrayList<String> localVars) {		
+		super.ctext += "\twhile (" + var.toString() + "!=NULL) {\n";
+		
+		String temp_name = Helper.getVarName();
+		super.ctext += Helper.refAcquire(temp_name, iter_name);
+		super.ctext += "\t\t" + iter_name + " = (Iterable *)" + var.toString() + ";\n";
+		super.ctext += "\t\t" + Helper.incrRefCount(iter_name);
+		super.ctext += "\t\t" + Helper.decRefCount(temp_name);
+		
+		temp_name = Helper.getVarName();
+		super.ctext += Helper.refAcquire(temp_name, var.toString());
+		super.ctext += "\t\t" + var.toString() + " = " + iter_name + "->value;\n";
+		super.ctext += "\t\t" + Helper.incrRefCount(var.toString());
+		super.ctext += "\t\t" + Helper.decRefCount(temp_name);
+		
+		//existing this node, we need to do live variable analysis
+		//this is the edge in the loop
+		super.ctext += Helper.liveVarAnalysis(super.inV, super.defV, super.successors.get(1).inV);
+		
+		//super.ctext += "\t\t" + "(*((int *)" + var.toString() + "))++;\n";
+		ArrayList<String> localVarsInFor = new ArrayList<String>(localVars);
+		String s1ToC = s1.toC(localVarsInFor);
+		String temp_str = s1ToC.replaceAll("void \\* " + var.toString() + " = NULL;\n", "");
+		super.ctext += "\t\t" + temp_str;
+		//some variables in localVarsIn are not newly created, so remove them before decrement ref count/deallocate
+		for(String cur_str : localVars) {
+			while (localVarsInFor.contains(cur_str)) {
+				localVarsInFor.remove(cur_str);
+			}
+		}
+		//newly added 
+		if (localVarsInFor.contains(var.toString()))
+			localVarsInFor.remove(var.toString());
+		/*//now reference counting/x3free memory due to scoping
+		for (String cur_str : localVarsInFor) {
+			super.ctext += "\t\t" + "\n\n\n";
+			super.ctext += "\t\t" + "if (" + cur_str + "!= NULL) {\n";
+			//check whether it is the last pointer pointing to the object, if yes, x3free memory
+			super.ctext += "\t\t\t" + "if ((*(int *)" + cur_str + ") == 1)\n";
+			super.ctext += "\t\t\t\t" + "x3free(" + cur_str + ");\n";
+			super.ctext += "\t\t\t" + "else\n";
+			//decrement the reference count
+			super.ctext += "\t\t\t\t" + "(*(int *)" + cur_str + ")--;\n";
+			super.ctext += "\t\t" + "}\n";
+		}*/
+		// ***********this part is commented out because this is already converted to a cubex node ***************
+		/*super.ctext += "\t\t" + "(*(int *)" + var.toString() + ")--;\n";
+		//note that is another node in C in the for/while loop, var is defined here again, but var will be used in the while
+		//node 
+		super.ctext += "\t\t" + var.toString() + " = iterGetNext(" + iter_name + ");\n"; */
+		super.ctext += "\t" + "}\n";
+		
+		//exiting the while loop, live variable analysis on the other edge, def set is null here
+		super.ctext += Helper.liveVarAnalysis(super.inV, new ArrayList<String>(), super.successors.get(0).inV);
+		return super.ctext;
+	}
+}
+
 class ForStat extends CuStat{
 	private CuVvc var;
 	private CuExpr e;
@@ -125,8 +257,9 @@ class ForStat extends CuStat{
 		s1 = ss;
 		super.text = "for ( " + var.toString() + " in " + e.toString() + " ) " + s1.toString();
 	}
+	
 	@Override public void buildCFG() {
-		//first, build use[n] and def[n]
+		/*//first, build use[n] and def[n]
 		
 		//the outer level has added the other branch to its successors
 		//this is the fall through branch
@@ -134,44 +267,63 @@ class ForStat extends CuStat{
 		s1.getLast().successors.add(this);
 		//else, empty for statement won't have this loop there
 		//recursive build CFG
-		s1.buildCFG();
+		s1.buildCFG();*/
+		
+		
+		//after converting to HIR, this method should never be called
+		if (Helper.debug) {
+			System.out.println("in ForStat buildCFG, error");
+		}
 	}
+	
+	@Override public CuStat toHIR() {
+		Pair<List<CuStat>, CuExpr> pa =  e.toHIR();
+		//e.construct part
+		List<CuStat> curHIR = pa.getFirst();
+		//v = e part
+		curHIR.add(new AssignStat(var, pa.getSecond()));
+		//check if e is string, if so, conver to iter part
+		curHIR.add(new ConvertToIter(var.toString()));
+		//we need to call it here to get the name
+		String iter_name = Helper.getVarName();
+		CuStat temp = new ForToWhileStat(var.toString(), iter_name, s1);
+		curHIR.add(temp.toHIR());
+		super.HIR = new Stats(curHIR);
+		return super.HIR;
+	}
+	
+	//this needs to be modified because we now have a new ForToWhile java class now
 	@Override public String toC(ArrayList<String> localVars)
 	{
+		//after converting to HIR, this method should never be called
+		if (Helper.debug) {
+			System.out.println("in ForStat buildCFG, error");
+		}
+		/*
 		String exp_toC = e.toC(localVars);
 		super.ctext +="\n\n\n";
 		super.ctext += e.construct();
 		String itype = e.getIterType();
-		/*if (e.getCastType().equals("String")) {
-			String iter_name = Helper.getVarName();
-			super.ctext += "Iterable *" + iter_name + ";\n";
-			super.ctext += iter_name + " = strToIter( ((String *)" + exp_toC + ")->value, ((String *)" + exp_toC + ")->len);\n";
-			exp_toC = iter_name;
-			Helper.cVarType.put(iter_name, "Iterable");
-			itype = "Character";
-		}*/
-		
-		String iter_name1 = Helper.getVarName();
-		super.ctext += "void *" + iter_name1 + ";\n";
-		super.ctext += iter_name1 + " = " + exp_toC + ";\n";
-		super.ctext += "if ("+ iter_name1 +"!=NULL) {\n";
-		//no need for reference counting here
-		//super.ctext += "(*(int *)" + iter_name1 + ")++;\n";
-		super.ctext += "if (" + "(*((int *)(" + exp_toC +"+1))) == 0) {\n";
-		//super.ctext += "(*(int *)" + iter_name1 + ")--;\n";
-		super.ctext += iter_name1+ " = strToIter( ((String *)" + exp_toC + ")->value, ((String *)" + exp_toC + ")->len);\n";
-		super.ctext += "}\n}\n";
-		
-		//exp_toC = iter_name1;
-		Helper.cVarType.put(iter_name1, "Iterable");
-		//itype = "Character";
 		
 		//added for v scoping
 		super.ctext += "{\n";
-		super.ctext += "\tvoid * " + var.toString() + "=" + iter_name1 + ";\n";
+		
+		super.ctext += "\t" + "void *" + var.toString() + " = NULL;\n";
 		Helper.cVarType.put(var.toString(), itype);
 		String iter_name = Helper.getVarName();
-		super.ctext += "\tIterable * " + iter_name + ";\n";
+		super.ctext += "\tIterable * " + iter_name + " = NULL;\n";
+		//def here
+		super.ctext += "\t" + var.toString() + " = " + exp_toC + ";\n";
+		
+		super.ctext += "\t" + "if ("+ var.toString() +"!=NULL) {\n";
+		//no need for reference counting here
+		//super.ctext += "(*(int *)" + iter_name1 + ")++;\n";
+		super.ctext += "\t\t" + "if (" + "(*((int *)(" + exp_toC +"+1))) == 0) {\n";
+		//super.ctext += "(*(int *)" + iter_name1 + ")--;\n";
+		//another def here, previous iter_name1 is dead, should decrease ref 
+		super.ctext += "\t\t\t" + var.toString() + " = strToIter( ((String *)" + exp_toC + ")->value, ((String *)" + exp_toC + ")->len);\n";
+		super.ctext += "\t\t}\n\t}\n";
+		
 		super.ctext += "\twhile (" + var.toString() + "!=NULL) {\n";
 		super.ctext += "\t\t" + iter_name + " = (Iterable *)" + var.toString() + ";\n";
 		super.ctext += "\t\t" + var.toString() + " = " + iter_name + "->value;\n";
@@ -202,10 +354,15 @@ class ForStat extends CuStat{
 			super.ctext += "\t\t" + "}\n";
 		}
 		super.ctext += "\t\t" + "(*(int *)" + var.toString() + ")--;\n";
+		//note that is another node in C in the for/while loop, var is defined here again, but var will be used in the while
+		//node 
 		super.ctext += "\t\t" + var.toString() + " = iterGetNext(" + iter_name + ");\n";
 		super.ctext += "\t" + "}\n";	
 		//value is null now, so no need for deallocation
-		super.ctext += "}\n";
+		//iter_name is only dead here, so don't add it to use[n] and def[n]
+		//var is also only dead here
+		//should deallocate here, def[n] union in[n] then exclude out[n]
+		super.ctext += "}\n"; */
 		return super.ctext;
 	}
 	public HReturn calculateType(CuContext context) throws NoSuchTypeException {
@@ -244,6 +401,43 @@ Helper.P(String.format("FOR %s is %s<%s>", e, eType, eType.map));
 	}
 }
 
+//added in PA5 to convert for to while in AST->HIR conversion
+class ConvertToIter extends CuStat {
+	private String var;
+	
+	public ConvertToIter(String argVar) {
+		this.var = argVar;
+	}
+	
+	@Override public CuStat toHIR() {
+		return this;
+	}
+	
+	@Override public void buildCFG() {
+		super.useV.add(var);
+		//treat this as a whole node, manually do the ref count
+	}
+	
+	@Override public String toC(ArrayList<String> localVars)
+	{
+		super.ctext += "\t" + "if ("+ var.toString() +"!=NULL) {\n";
+		//no need for reference counting here
+		//super.ctext += "(*(int *)" + iter_name1 + ")++;\n";
+		super.ctext += "\t\t" + "if (" + "(*((int *)(" + var +"+1))) == 0) {\n";
+		//super.ctext += "(*(int *)" + iter_name1 + ")--;\n";
+		String temp_name = Helper.getVarName();
+		super.ctext += Helper.refAcquire(temp_name, var.toString());
+		super.ctext += "\t\t\t" + var.toString() + " = strToIter( ((String *)" + var + ")->value, ((String *)" + var + ")->len);\n";
+		super.ctext += Helper.incrRefCount(var.toString());
+		super.ctext += Helper.decRefCount(temp_name);
+		super.ctext += "\t\t}\n\t}\n";
+		
+		super.ctext += Helper.liveVarAnalysis(super.inV, super.defV, super.outV);
+		
+		return super.ctext;
+	}
+}
+
 class IfStat extends CuStat{
 	private CuExpr e;
 	private CuStat s1=null;
@@ -259,18 +453,37 @@ class IfStat extends CuStat{
     	super.text += " else " + s2.toString();
     }
     
+    @Override public CuStat toHIR() {
+		Pair<List<CuStat>, CuExpr> pa =  e.toHIR();
+		List<CuStat> curHIR = pa.getFirst();
+		s1 = s1.toHIR();
+		CuStat temp = new IfStat(pa.getSecond(), s1);
+		if (s2 != null) {
+			s2 = s2.toHIR();
+			temp.add(s2);
+		}
+		super.HIR = new Stats(curHIR);
+		return super.HIR;
+    }
+    
 	@Override public void buildCFG() {
 		s1.getLast().successors = super.successors;
-		if (s2!=null) 
-			s2.getLast().successors = super.successors;
-		super.successors = new ArrayList<CuStat>();
-		super.successors.add(s1.getFirst());
-		if (s2!=null)
-			super.successors.add(s2.getFirst());
 		//recursively buildCFG
 		s1.buildCFG();
-		if (s2!=null)
-			s2.buildCFG();
+		if (s2!=null) {
+			s2.getLast().successors = super.successors;
+			super.successors = new ArrayList<CuStat>();
+			super.successors.add(s2.getFirst());
+			//s1 is always the second successor
+			super.successors.add(s1.getFirst());
+			s2.buildCFG();			
+		}
+		else {
+			//the first successor is always the next big block, for both if and loops
+			super.successors.add(s1.getFirst());
+		}	
+		//build use def sets, def set is empty
+		super.useV.addAll(e.getUse());
 	}
     
     //for if statement, ctext is build here
@@ -317,7 +530,12 @@ class IfStat extends CuStat{
     		super.ctext += "if ( ((Boolean *)" + exp_toC + ")->value) {\n";
     	else
     		super.ctext += "if (" + exp_toC + ") {\n";
+    	
+    	//live variable analysis on the s1 edge
+    	super.ctext += Helper.liveVarAnalysis(super.inV, super.defV, super.successors.get(1).inV);
+    	
     	super.ctext += temp_s1;
+    	/*  ideally, we should not have this 
 		//now reference counting/x3free memory due to scoping
 		for (String cur_str : s1_localVars) {
 			super.ctext += "\n\n\n";
@@ -328,12 +546,14 @@ class IfStat extends CuStat{
 			super.ctext += "else\n";
 			//decrement the reference count
 			super.ctext += "(*(int *)" + cur_str + ")--;\n";
-			super.ctext += "}\n";
-		}
+			super.ctext += "}\n"; 
+		} */
     	super.ctext += "}\n";
     	if (s2 != null) {
     		super.ctext += "else {\n";
+    		super.ctext += Helper.liveVarAnalysis(super.inV, super.defV, super.successors.get(0).inV);
     		super.ctext += temp_s2;
+    		/*
     		//now reference counting/x3free memory due to scoping
     		for (String cur_str : s2_localVars) {
     			super.ctext += "\n\n\n";
@@ -345,9 +565,11 @@ class IfStat extends CuStat{
     			//decrement the reference count
     			super.ctext += "(*(int *)" + cur_str + ")--;\n";
     			super.ctext += "}\n";
-    		}   		
+    		}    */		
     		super.ctext += "}\n";
     	}
+    	else
+    		super.ctext += Helper.liveVarAnalysis(super.inV, super.defV, super.successors.get(0).inV);
     	return super.ctext;
     }
     
@@ -397,21 +619,123 @@ Helper.P("if end, e is " + e.toString());
 
 }
 
+class WhileStat extends CuStat{
+	private CuExpr e;
+	private CuStat s1;
+	public WhileStat (CuExpr ex, CuStat st){
+		e = ex;
+		s1 = st;
+		text = "while ( " + e.toString() + " ) " + s1.toString();
+	}
+	@Override public CuStat toHIR() {
+		Pair<List<CuStat>, CuExpr> pa =  e.toHIR();
+		List<CuStat> curHIR = pa.getFirst();
+		s1 = s1.toHIR();
+		curHIR.add(new WhileStat(pa.getSecond(), s1));
+		super.HIR = new Stats(curHIR);
+		return super.HIR;
+	}
+	//while is the same as for statement
+	@Override public void buildCFG() {
+		//the outer level has added the other branch to its successors
+		//this is the fall through branch
+		super.successors.add(s1.getFirst());
+		s1.getLast().successors.add(this);
+		//recursive build CFG
+		s1.buildCFG();
+		
+		//build use def sets, def set is empty, as in the if statement case
+		super.useV = e.getUse();
+	}
+	@Override public String toC(ArrayList<String> localVars) {
+		String exp_toC = e.toC(localVars);
+
+		super.ctext +="\n\n\n";
+		super.ctext += e.construct();
+    	if (e instanceof VvExp)
+    		super.ctext += "while (((Boolean *)" + exp_toC + ")->value) {\n";
+    	else
+    		super.ctext += "while (" + exp_toC + ") {\n";
+		
+    	super.ctext += Helper.liveVarAnalysis(super.inV, super.defV, super.successors.get(1).inV);
+    	
+		ArrayList<String> while_localVars = new ArrayList<String>(localVars);
+		super.ctext += s1.toC(while_localVars);
+		//some variables in localVarsIn are not newly created, so remove them before decrement ref count/deallocate
+		for(String cur_str : localVars) {
+			while (while_localVars.contains(cur_str)) {
+				while_localVars.remove(cur_str);
+			}
+		}
+		/*
+		//now reference counting/x3free memory due to scoping
+		for (String cur_str : while_localVars) {
+			super.ctext += "\n\n\n";
+			super.ctext += "if (" + cur_str + "!= NULL) {\n";
+			//check whether it is the last pointer pointing to the object, if yes, x3free memory
+			super.ctext += "if ((*(int *)" + cur_str + ") == 1)\n";
+			super.ctext += "x3free(" + cur_str + ");\n";
+			super.ctext += "else\n";
+			//decrement the reference count
+			super.ctext += "(*(int *)" + cur_str + ")--;\n";
+			super.ctext += "}\n";
+		} */
+		super.ctext += "}\n";
+		
+		super.ctext += Helper.liveVarAnalysis(super.inV, super.defV, super.successors.get(0).inV);
+		
+		return super.ctext;
+	}
+    public HReturn calculateType(CuContext context) throws NoSuchTypeException {
+		//whenever we calculate expr type, we use a temporary context with merged mutable and
+		//immutable variables
+		CuContext tcontext = new CuContext (context);
+		tcontext.mergeVariable();		
+    	//check whether e is boolean
+		//System.out.println("in while, before checking expr");
+		//System.out.println(this.e.toString());
+    	CuType eType = e.calculateType(tcontext);
+    	//System.out.println("in while, after checking expr");
+    	if (!eType.isBoolean()) {
+    		//System.out.println("in while, expr is not boolean");
+    		//System.out.println("in while, expr type is " + eType.id);
+    		throw new NoSuchTypeException(Helper.getLineInfo()); 
+    	} 
+    	CuContext s_context = new CuContext(context);
+    	HReturn re = s1.calculateType(s_context);   	
+    	//type weakening to make it type check
+    	context.weakenMutType(s_context);
+    	re.b = false;
+    	return re;
+    }
+}
+
 class ReturnStat extends CuStat{
 	private CuExpr e;
 	public ReturnStat (CuExpr ee) {
 		e = ee;
 		super.text = "return " + e.toString() + " ;";
 	}
+	@Override public CuStat toHIR() {
+		Pair<List<CuStat>, CuExpr> pa =  e.toHIR();
+		List<CuStat> curHIR = pa.getFirst();
+		curHIR.add(new ReturnStat(pa.getSecond()));
+		super.HIR = new Stats(curHIR);
+		return super.HIR;
+	}
 	@Override public void buildCFG() {
 		//return stat doesn't have any successors
 		super.successors = new ArrayList<CuStat>();
+		
+		//build the use def set, def set is empty
+		super.useV = e.getUse();
 	}
 	@Override public String toC(ArrayList<String> localVars) {
 		//now reference counting/x3free memory due to scoping
 		super.ctext +="\n\n\n";
 		String exp_toC = e.toC(localVars);
 		super.ctext += e.construct();
+		/*
 		for (String cur_str : localVars) {
 			super.ctext += "\n\n\n";
 			super.ctext += "if (" + cur_str + "!= NULL) {\n";
@@ -425,7 +749,13 @@ class ReturnStat extends CuStat{
 			//decrement the reference count
 			super.ctext += "(*(int *)" + cur_str + ")--;\n";
 			super.ctext += "}\n";
-		}
+		} */
+		
+		//special process for return statement
+		super.ctext += "if (" + exp_toC + "!= NULL) {\n";
+		super.ctext += "(*(int *)" + exp_toC + ")--;\n";
+		super.ctext += "}\n";
+			
 		super.ctext += "return " + exp_toC + ";\n";
 		/*if (e.isFunCall())
 			super.ctext += "return " + e.toC() + ";\n";
@@ -449,20 +779,47 @@ Helper.P("e type is " + re.tau);
 	}
 }
 
+class EmptyBody extends CuStat {
+	public EmptyBody(){
+		text=" ;";
+	}
+	@Override public CuStat toHIR() {
+		return this;
+	}
+	@Override public String toC(ArrayList<String> localVars) {
+		super.ctext += Helper.liveVarAnalysis(super.inV, super.defV, super.outV);
+		return super.ctext;
+	}
+	public HReturn calculateType(CuContext context) throws NoSuchTypeException {
+		//default is false and bottom
+		return new HReturn();
+	}
+} 
+
 class Stats extends CuStat{
 	public ArrayList<CuStat> al = new ArrayList<CuStat>();
 	public Stats (List<CuStat> cu) {
 		al = (ArrayList<CuStat>) cu;
 		text = "{ " + Helper.listFlatten(al) + " }";
 	}
+	@Override public CuStat toHIR() {
+		ArrayList<CuStat> newAl = new ArrayList<CuStat>();
+		for (CuStat cs : al) {
+			//note this will form each element into Stats because of the flattening
+			newAl.add(cs.toHIR());
+		}
+		super.HIR = new Stats(newAl);
+		return super.HIR;
+	}
 	@Override public void buildCFG() {
 		//build this connections first
 		for(int i=0; i<(this.al.size()-1); i++) {
-			al.get(i).successors.add(al.get(i+1));			
+			al.get(i).getLast().successors.add(al.get(i+1).getFirst());			
 		}
 		//recursively build connections for each elements
 		for(int i=0; i<this.al.size(); i++)
 			al.get(i).buildCFG();
+		//both use and def set is empty here
 	}
 	@Override public CuStat getFirst() {
 		//if empty, return itself
@@ -522,87 +879,3 @@ class Stats extends CuStat{
 		return re;
 	}
 }
-
-class WhileStat extends CuStat{
-	private CuExpr e;
-	private CuStat s1;
-	public WhileStat (CuExpr ex, CuStat st){
-		e = ex;
-		s1 = st;
-		text = "while ( " + e.toString() + " ) " + s1.toString();
-	}
-	//while is the same as for statement
-	@Override public void buildCFG() {
-		//the outer level has added the other branch to its successors
-		//this is the fall through branch
-		super.successors.add(s1.getFirst());
-		s1.getLast().successors.add(this);
-		//recursive build CFG
-		s1.buildCFG();
-	}
-	@Override public String toC(ArrayList<String> localVars) {
-		String exp_toC = e.toC(localVars);
-
-		super.ctext +="\n\n\n";
-		super.ctext += e.construct();
-    	if (e instanceof VvExp)
-    		super.ctext += "while (((Boolean *)" + exp_toC + ")->value) {\n";
-    	else
-    		super.ctext += "while (" + exp_toC + ") {\n";
-		
-		ArrayList<String> while_localVars = new ArrayList<String>(localVars);
-		super.ctext += s1.toC(while_localVars);
-		//some variables in localVarsIn are not newly created, so remove them before decrement ref count/deallocate
-		for(String cur_str : localVars) {
-			while (while_localVars.contains(cur_str)) {
-				while_localVars.remove(cur_str);
-			}
-		}
-		//now reference counting/x3free memory due to scoping
-		for (String cur_str : while_localVars) {
-			super.ctext += "\n\n\n";
-			super.ctext += "if (" + cur_str + "!= NULL) {\n";
-			//check whether it is the last pointer pointing to the object, if yes, x3free memory
-			super.ctext += "if ((*(int *)" + cur_str + ") == 1)\n";
-			super.ctext += "x3free(" + cur_str + ");\n";
-			super.ctext += "else\n";
-			//decrement the reference count
-			super.ctext += "(*(int *)" + cur_str + ")--;\n";
-			super.ctext += "}\n";
-		}
-		super.ctext += "}\n";
-		return super.ctext;
-	}
-    public HReturn calculateType(CuContext context) throws NoSuchTypeException {
-		//whenever we calculate expr type, we use a temporary context with merged mutable and
-		//immutable variables
-		CuContext tcontext = new CuContext (context);
-		tcontext.mergeVariable();		
-    	//check whether e is boolean
-		//System.out.println("in while, before checking expr");
-		//System.out.println(this.e.toString());
-    	CuType eType = e.calculateType(tcontext);
-    	//System.out.println("in while, after checking expr");
-    	if (!eType.isBoolean()) {
-    		//System.out.println("in while, expr is not boolean");
-    		//System.out.println("in while, expr type is " + eType.id);
-    		throw new NoSuchTypeException(Helper.getLineInfo()); 
-    	} 
-    	CuContext s_context = new CuContext(context);
-    	HReturn re = s1.calculateType(s_context);   	
-    	//type weakening to make it type check
-    	context.weakenMutType(s_context);
-    	re.b = false;
-    	return re;
-    }
-}
-
-class EmptyBody extends CuStat {
-	public EmptyBody(){
-		text=" ;";
-	}
-	public HReturn calculateType(CuContext context) throws NoSuchTypeException {
-		//default is false and bottom
-		return new HReturn();
-	}
-} 

@@ -37,7 +37,9 @@ public class Cubex {
 			//even if rejected, we still generate a 
 			//System.exit(-2);
 		}
-
+		//first, convert to HIR
+        ourProgram.toHIR();
+        
 		ArrayList<String> localVars = new ArrayList<String>();
 		PrintWriter writer = new PrintWriter("out.c", "UTF-8");
 		String cProgram = ourProgram.toC(localVars);
