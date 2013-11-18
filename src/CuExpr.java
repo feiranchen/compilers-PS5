@@ -1,7 +1,9 @@
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 //*************** TO DO check related operators against figures 9************************
 
@@ -12,10 +14,11 @@ public abstract class CuExpr {
 	protected String cText = "";
 	protected String name = "";
 	protected String castType = "", iterType = "";
-	protected ArrayList<String> def = new ArrayList<>();
-	protected ArrayList<String> use = new ArrayList<>();
+	protected ArrayList<String> def = new ArrayList<String>();
+	protected ArrayList<String> use = new ArrayList<String>();
 	protected Pair<List<CuStat>, CuExpr> hir;
 	private CuType type = null;
+	protected  Set<CuVvc> containsVar= new HashSet<CuVvc>();
 	public void add(List<CuType> pt, List<CuExpr> es) {}
 	public final CuType getType(CuContext context) throws NoSuchTypeException {
 		if(type == null) { type = calculateType(context); }
@@ -122,16 +125,15 @@ public abstract class CuExpr {
 }
 
 class AndExpr extends CuExpr{
-	private CuExpr left, right;
+	public CuExpr left, right;
 	public AndExpr(CuExpr e1, CuExpr e2) {
 		left = e1;
 		right = e2;
+		containsVar.addAll(left.containsVar);
+		containsVar.addAll(right.containsVar);
 //		super.desiredType = CuType.bool;
 		super.methodId = "and";
 		super.text = String.format("%s . %s < > ( %s )", left.toString(), super.methodId, right.toString());
-		
-		
-		
 	}
 	@Override protected CuType calculateType(CuContext context) throws NoSuchTypeException {
 		//right should pass in a type
@@ -140,7 +142,7 @@ class AndExpr extends CuExpr{
 	
 	@Override
 	public Pair<List<CuStat>, CuExpr> toHIR() {
-		List<CuStat> stats = new ArrayList<>();
+		List<CuStat> stats = new ArrayList<CuStat>();
 		Pair<List<CuStat>, CuExpr> leftToHir = new Pair<List<CuStat>, CuExpr>();
 		Pair<List<CuStat>, CuExpr> rightToHir = new Pair<List<CuStat>, CuExpr>();
 		String name1 = Helper.getVarName(), name2 = Helper.getVarName();
@@ -210,6 +212,8 @@ class AppExpr extends CuExpr {
 	public AppExpr(CuExpr e1, CuExpr e2) {
 		this.left = e1;
 		this.right = e2;
+		containsVar.addAll(left.containsVar);
+		containsVar.addAll(right.containsVar);
 		super.text = e1.toString() + " ++ " + e2.toString();
 	}
 	@Override protected CuType calculateType(CuContext context) throws NoSuchTypeException {
@@ -372,9 +376,12 @@ Helper.P("common parent of types is " + type.toString());
 }
 
 class BrkExpr extends CuExpr {
-	private List<CuExpr> val;
+	public List<CuExpr> val;
 	public BrkExpr(List<CuExpr> es){
 		this.val = es;
+		for (CuExpr e : es){
+			containsVar.addAll(e.containsVar);
+		}
 		super.text=Helper.printList("[", val, "]", ",");
 		
 	}
@@ -390,32 +397,6 @@ class BrkExpr extends CuExpr {
 		//System.out.println("in bracket expression end");
 		
 		return new Iter(t);
-	}
-	
-	@Override
-	public Pair<List<CuStat>, CuExpr> toHIR() {
-		List<CuStat> stats = new ArrayList<>();
-		Pair<List<CuStat>, CuExpr> expToHir = new Pair<List<CuStat>, CuExpr>();
-		List<CuExpr> expressions = new ArrayList<>();
-		
-		for(CuExpr exp : val){
-			expToHir = exp.toHIR();
-			stats.addAll(expToHir.getFirst());
-			
-			String name1 = Helper.getVarName();
-			CuVvc temp1 = new Vv(name1);
-			CuStat a = new AssignStat(temp1, expToHir.getSecond());
-			stats.add(a);
-			
-			CuExpr var1 = new VvExp(name1);
-			expressions.add(var1);
-		}
-		
-		CuExpr expr = new BrkExpr(expressions);		
-		
-		Pair<List<CuStat>, CuExpr> temp = new Pair<List<CuStat>, CuExpr>(stats, expr);
-		
-		return temp;
 	}
 	
 	@Override
@@ -497,14 +478,6 @@ class CBoolean extends CuExpr{
 	}
 	
 	@Override
-	public Pair<List<CuStat>, CuExpr> toHIR() {
-		List<CuStat> cuStat = new ArrayList<>();
-		CuExpr cuExpr = this;
-		
-		return new Pair<List<CuStat>, CuExpr>(cuStat, cuExpr);
-	}
-	
-	@Override
 	public String toC(ArrayList<String> localVars) {
 		super.castType = "Boolean";
 		String temp = Helper.getVarName();
@@ -527,6 +500,14 @@ class CBoolean extends CuExpr{
 		
 		return super.toC(localVars);
 	}
+	
+	@Override
+	public Pair<List<CuStat>, CuExpr> toHIR() {
+		List<CuStat> cuStat = new ArrayList<CuStat>();
+		CuExpr cuExpr = this;
+		
+		return new Pair<List<CuStat>, CuExpr>(cuStat, cuExpr);
+	}
 }
 
 class CInteger extends CuExpr {
@@ -543,7 +524,7 @@ class CInteger extends CuExpr {
 	
 	@Override
 	public Pair<List<CuStat>, CuExpr> toHIR() {
-		List<CuStat> cuStat = new ArrayList<>();
+		List<CuStat> cuStat = new ArrayList<CuStat>();
 		CuExpr cuExpr = this;
 		
 		return new Pair<List<CuStat>, CuExpr>(cuStat, cuExpr);
@@ -579,7 +560,7 @@ class CString extends CuExpr {
 	}
 	
 	public Pair<List<CuStat>, CuExpr> toHIR() {
-		List<CuStat> cuStat = new ArrayList<>();
+		List<CuStat> cuStat = new ArrayList<CuStat>();
 		CuExpr cuExpr = this;
 		
 		return new Pair<List<CuStat>, CuExpr>(cuStat, cuExpr);
@@ -587,7 +568,7 @@ class CString extends CuExpr {
 	
 	@Override
 	public String toC(ArrayList<String> localVars) {
-		String temp = Helper.getVarName();
+		String temp = Helper.getVarName(), typeCast ="";
 		iterType = "Character";
 		super.name = String.format("String* %s;\n"
 				+ "%s = (String *) x3malloc(sizeof(String));\n"
@@ -645,10 +626,12 @@ class CString extends CuExpr {
 }
 
 class DivideExpr extends CuExpr{
-	private CuExpr left, right;
+	public CuExpr left, right;
 	public DivideExpr(CuExpr e1, CuExpr e2) {
 		left = e1;
 		right = e2;
+		containsVar.addAll(left.containsVar);
+		containsVar.addAll(right.containsVar);
 		super.methodId = "divide";
 		super.text = String.format("%s . %s < > ( %s )", left.toString(), super.methodId, right.toString());
 	}
@@ -665,7 +648,7 @@ class DivideExpr extends CuExpr{
 	
 	@Override
 	public Pair<List<CuStat>, CuExpr> toHIR() {
-		List<CuStat> stats = new ArrayList<>();
+		List<CuStat> stats = new ArrayList<CuStat>();
 		Pair<List<CuStat>, CuExpr> leftToHir = new Pair<List<CuStat>, CuExpr>();
 		Pair<List<CuStat>, CuExpr> rightToHir = new Pair<List<CuStat>, CuExpr>();
 		String name1 = Helper.getVarName(), name2 = Helper.getVarName();
@@ -779,13 +762,15 @@ class DivideExpr extends CuExpr{
 }
 
 class EqualExpr extends CuExpr{
-	private CuExpr left, right;
+	public CuExpr left, right;
 	private String method2= null;
 	Boolean bool;
 	public EqualExpr(CuExpr e1, CuExpr e2, Boolean eq) {
 		left = e1;
 		right = e2;
 		bool = eq;
+		containsVar.addAll(left.containsVar);
+		containsVar.addAll(right.containsVar);
 		super.methodId = "equals";
 		
 		if (eq) {
@@ -807,7 +792,7 @@ class EqualExpr extends CuExpr{
 	
 	@Override
 	public Pair<List<CuStat>, CuExpr> toHIR() {
-		List<CuStat> stats = new ArrayList<>();
+		List<CuStat> stats = new ArrayList<CuStat>();
 		Pair<List<CuStat>, CuExpr> leftToHir = new Pair<List<CuStat>, CuExpr>();
 		Pair<List<CuStat>, CuExpr> rightToHir = new Pair<List<CuStat>, CuExpr>();
 		String name1 = Helper.getVarName(), name2 = Helper.getVarName();
@@ -997,11 +982,13 @@ class EqualExpr extends CuExpr{
 }
 
 class GreaterThanExpr extends CuExpr{
-	private CuExpr left, right;
+	public CuExpr left, right;
 	boolean b;
 	public GreaterThanExpr(CuExpr e1, CuExpr e2, Boolean strict) {
 		left = e1;
 		right = e2;
+		containsVar.addAll(left.containsVar);
+		containsVar.addAll(right.containsVar);
 		b = strict;
 		super.methodId = "greaterThan";
 		Helper.ToDo("strict boolean??");
@@ -1018,7 +1005,7 @@ class GreaterThanExpr extends CuExpr{
 	
 	@Override
 	public Pair<List<CuStat>, CuExpr> toHIR() {
-		List<CuStat> stats = new ArrayList<>();
+		List<CuStat> stats = new ArrayList<CuStat>();
 		Pair<List<CuStat>, CuExpr> leftToHir = new Pair<List<CuStat>, CuExpr>();
 		Pair<List<CuStat>, CuExpr> rightToHir = new Pair<List<CuStat>, CuExpr>();
 		String name1 = Helper.getVarName(), name2 = Helper.getVarName();
@@ -1124,11 +1111,13 @@ class GreaterThanExpr extends CuExpr{
 }
 
 class LessThanExpr extends CuExpr{
-	private CuExpr left, right;
+	public CuExpr left, right;
 	boolean b;
 	public LessThanExpr(CuExpr e1, CuExpr e2, Boolean strict) {
 		left = e1;
 		right = e2;
+		containsVar.addAll(left.containsVar);
+		containsVar.addAll(right.containsVar);
 		b = strict;
 		super.methodId = "lessThan";
 		super.text = String.format("%s . %s < > ( %s, %s )", left.toString(), super.methodId, right.toString(), strict);
@@ -1145,7 +1134,7 @@ class LessThanExpr extends CuExpr{
 	
 	@Override
 	public Pair<List<CuStat>, CuExpr> toHIR() {
-		List<CuStat> stats = new ArrayList<>();
+		List<CuStat> stats = new ArrayList<CuStat>();
 		Pair<List<CuStat>, CuExpr> leftToHir = new Pair<List<CuStat>, CuExpr>();
 		Pair<List<CuStat>, CuExpr> rightToHir = new Pair<List<CuStat>, CuExpr>();
 		String name1 = Helper.getVarName(), name2 = Helper.getVarName();
@@ -1250,10 +1239,12 @@ class LessThanExpr extends CuExpr{
 }
 
 class MinusExpr extends CuExpr{
-	private CuExpr left, right;
+	public CuExpr left, right;
 	public MinusExpr(CuExpr e1, CuExpr e2) {
 		left = e1;
 		right = e2;
+		containsVar.addAll(left.containsVar);
+		containsVar.addAll(right.containsVar);
 		super.methodId = "minus";
 		super.text = String.format("%s . %s < > ( %s )", left.toString(), super.methodId, right.toString());
 		
@@ -1270,7 +1261,7 @@ class MinusExpr extends CuExpr{
 	
 	@Override
 	public Pair<List<CuStat>, CuExpr> toHIR() {
-		List<CuStat> stats = new ArrayList<>();
+		List<CuStat> stats = new ArrayList<CuStat>();
 		Pair<List<CuStat>, CuExpr> leftToHir = new Pair<List<CuStat>, CuExpr>();
 		Pair<List<CuStat>, CuExpr> rightToHir = new Pair<List<CuStat>, CuExpr>();
 		String name1 = Helper.getVarName(), name2 = Helper.getVarName();
@@ -1368,10 +1359,12 @@ class MinusExpr extends CuExpr{
 }
 
 class ModuloExpr extends CuExpr{
-	private CuExpr left, right;
+	public CuExpr left, right;
 	public ModuloExpr(CuExpr e1, CuExpr e2) {
 		left = e1;
 		right = e2;
+		containsVar.addAll(left.containsVar);
+		containsVar.addAll(right.containsVar);
 		super.methodId = "modulo";
 		super.text = String.format("%s . %s < > ( %s )", left.toString(), super.methodId, right.toString());
 		
@@ -1383,7 +1376,7 @@ class ModuloExpr extends CuExpr{
 	
 	@Override
 	public Pair<List<CuStat>, CuExpr> toHIR() {
-		List<CuStat> stats = new ArrayList<>();
+		List<CuStat> stats = new ArrayList<CuStat>();
 		Pair<List<CuStat>, CuExpr> leftToHir = new Pair<List<CuStat>, CuExpr>();
 		Pair<List<CuStat>, CuExpr> rightToHir = new Pair<List<CuStat>, CuExpr>();
 		String name1 = Helper.getVarName(), name2 = Helper.getVarName();
@@ -1497,9 +1490,10 @@ class ModuloExpr extends CuExpr{
 }
 
 class NegateExpr extends CuExpr{
-	private CuExpr val;
+	public CuExpr val;
 	public NegateExpr(CuExpr e) {
 		val = e;
+		containsVar.addAll(val.containsVar);
 		super.methodId = "negate";
 		super.text = String.format("%s . %s < > ( )", val.toString(), super.methodId);
 
@@ -1510,7 +1504,7 @@ class NegateExpr extends CuExpr{
 	
 	@Override
 	public Pair<List<CuStat>, CuExpr> toHIR() {
-		List<CuStat> stats = new ArrayList<>();
+		List<CuStat> stats = new ArrayList<CuStat>();
 		Pair<List<CuStat>, CuExpr> valToHir = new Pair<List<CuStat>, CuExpr>();
 		String name1 = Helper.getVarName();
 		
@@ -1578,9 +1572,10 @@ class NegateExpr extends CuExpr{
 }
 
 class NegativeExpr extends CuExpr{
-	private CuExpr val;
+	public CuExpr val;
 	public NegativeExpr(CuExpr e) {
 		val = e;
+		containsVar.addAll(val.containsVar);
 		super.methodId = "negative";
 		super.text = String.format("%s . %s < > ( )", val.toString(), super.methodId);
 
@@ -1597,7 +1592,7 @@ class NegativeExpr extends CuExpr{
 	
 	@Override
 	public Pair<List<CuStat>, CuExpr> toHIR() {
-		List<CuStat> stats = new ArrayList<>();
+		List<CuStat> stats = new ArrayList<CuStat>();
 		Pair<List<CuStat>, CuExpr> valToHir = new Pair<List<CuStat>, CuExpr>();
 		String name1 = Helper.getVarName();
 		
@@ -1664,37 +1659,17 @@ class NegativeExpr extends CuExpr{
 }
 
 class OnwardsExpr extends CuExpr{
-	private CuExpr val;
+	public CuExpr val;
 	boolean inclusive;
 	public OnwardsExpr(CuExpr e, Boolean inclusiveness) {
 		val = e;
+		containsVar.addAll(e.containsVar);
 		inclusive = inclusiveness;
 		super.methodId = "onwards";
 		super.text = String.format("%s . %s < > ( %s )", val.toString(), super.methodId, inclusiveness);
 	}
 	@Override protected CuType calculateType(CuContext context) throws NoSuchTypeException {
 		return binaryExprType(context, val.getType(context).id, super.methodId, CuType.bool);
-	}
-	
-	@Override
-	public Pair<List<CuStat>, CuExpr> toHIR() {
-		List<CuStat> stats = new ArrayList<>();
-		Pair<List<CuStat>, CuExpr> valToHir = new Pair<List<CuStat>, CuExpr>();
-		String name1 = Helper.getVarName();
-		
-		valToHir = val.toHIR();
-		stats.addAll(valToHir.getFirst());
-		
-		CuVvc temp1 = new Vv(name1);
-		CuStat a = new AssignStat(temp1, valToHir.getSecond());
-		stats.add(a);
-		
-		CuExpr var1 = new VvExp(name1);
-		CuExpr expr = new OnwardsExpr(var1, inclusive);		
-		
-		Pair<List<CuStat>, CuExpr> temp = new Pair<List<CuStat>, CuExpr>(stats, expr);
-		
-		return temp;
 	}
 	
 	@Override
@@ -1838,10 +1813,12 @@ class OnwardsExpr extends CuExpr{
 }
 
 class OrExpr extends CuExpr{
-	private CuExpr left, right;
+	public CuExpr left, right;
 	public OrExpr(CuExpr e1, CuExpr e2) {
 		left = e1;
 		right = e2;
+		containsVar.addAll(left.containsVar);
+		containsVar.addAll(right.containsVar);
 		super.methodId = "or";
 		super.text = String.format("%s . %s < > ( %s )", left.toString(), super.methodId, right.toString());
 
@@ -1852,7 +1829,7 @@ class OrExpr extends CuExpr{
 	
 	@Override
 	public Pair<List<CuStat>, CuExpr> toHIR() {
-		List<CuStat> stats = new ArrayList<>();
+		List<CuStat> stats = new ArrayList<CuStat>();
 		Pair<List<CuStat>, CuExpr> leftToHir = new Pair<List<CuStat>, CuExpr>();
 		Pair<List<CuStat>, CuExpr> rightToHir = new Pair<List<CuStat>, CuExpr>();
 		String name1 = Helper.getVarName(), name2 = Helper.getVarName();
@@ -1950,10 +1927,12 @@ class OrExpr extends CuExpr{
 }
 
 class PlusExpr extends CuExpr{
-	private CuExpr left, right;
+	public CuExpr left, right;
 	public PlusExpr(CuExpr e1, CuExpr e2) {
 		left = e1;
 		right = e2;
+		containsVar.addAll(left.containsVar);
+		containsVar.addAll(right.containsVar);
 		super.methodId = "plus";
 		super.text = String.format("%s . %s < > ( %s )", left.toString(), super.methodId, right.toString());
 	}
@@ -1970,7 +1949,7 @@ class PlusExpr extends CuExpr{
 	
 	@Override
 	public Pair<List<CuStat>, CuExpr> toHIR() {
-		List<CuStat> stats = new ArrayList<>();
+		List<CuStat> stats = new ArrayList<CuStat>();
 		Pair<List<CuStat>, CuExpr> leftToHir = new Pair<List<CuStat>, CuExpr>();
 		Pair<List<CuStat>, CuExpr> rightToHir = new Pair<List<CuStat>, CuExpr>();
 		String name1 = Helper.getVarName(), name2 = Helper.getVarName();
@@ -2066,13 +2045,15 @@ class PlusExpr extends CuExpr{
 }
 
 class ThroughExpr extends CuExpr{
-	private CuExpr left, right;
+	public CuExpr left, right;
 	boolean bLow, bUp;
 	public ThroughExpr(CuExpr e1, CuExpr e2, Boolean low, Boolean up) {
 		left = e1;
 		right = e2;
 		bLow = low;
 		bUp = up;
+		containsVar.addAll(left.containsVar);
+		containsVar.addAll(right.containsVar);
 		super.methodId = "through";
 		super.text = String.format("%s . %s < > ( %s , %s , %s )", left.toString(), methodId, right.toString(), low, up);
 	}
@@ -2087,35 +2068,6 @@ class ThroughExpr extends CuExpr{
 		else
 			return new Iter(CuType.bool);
 	}
-	
-	@Override
-	public Pair<List<CuStat>, CuExpr> toHIR() {
-		List<CuStat> stats = new ArrayList<>();
-		Pair<List<CuStat>, CuExpr> leftToHir = new Pair<List<CuStat>, CuExpr>();
-		Pair<List<CuStat>, CuExpr> rightToHir = new Pair<List<CuStat>, CuExpr>();
-		String name1 = Helper.getVarName(), name2 = Helper.getVarName();
-		
-		leftToHir = left.toHIR();
-		rightToHir = right.toHIR();
-		stats.addAll(leftToHir.getFirst());
-		stats.addAll(rightToHir.getFirst());
-		
-		CuVvc temp1 = new Vv(name1);
-		CuVvc temp2 = new Vv(name2);
-		CuStat a = new AssignStat(temp1, leftToHir.getSecond());
-		CuStat b = new AssignStat(temp2, rightToHir.getSecond());
-		stats.add(a);
-		stats.add(b);
-		
-		CuExpr var1 = new VvExp(name1);
-		CuExpr var2 = new VvExp(name2);
-		CuExpr expr = new ThroughExpr(var1, var2, bLow, bUp);			
-		
-		Pair<List<CuStat>, CuExpr> temp = new Pair<List<CuStat>, CuExpr>(stats, expr);
-		
-		return temp;		
-	}
-	
 	
 	@Override
 	public String toC(ArrayList<String> localVars) {
@@ -2377,10 +2329,12 @@ class ThroughExpr extends CuExpr{
 }
 
 class TimesExpr extends CuExpr{
-	private CuExpr left, right;
+	public CuExpr left, right;
 	public TimesExpr(CuExpr e1, CuExpr e2) {
 		this.left = e1;
 		this.right = e2;
+		containsVar.addAll(left.containsVar);
+		containsVar.addAll(right.containsVar);
 		super.methodId = "times";
 		super.text = String.format("%s . %s < > ( %s )", left.toString(), super.methodId, right.toString());
 
@@ -2391,7 +2345,7 @@ class TimesExpr extends CuExpr{
 	
 	@Override
 	public Pair<List<CuStat>, CuExpr> toHIR() {
-		List<CuStat> stats = new ArrayList<>();
+		List<CuStat> stats = new ArrayList<CuStat>();
 		Pair<List<CuStat>, CuExpr> leftToHir = new Pair<List<CuStat>, CuExpr>();
 		Pair<List<CuStat>, CuExpr> rightToHir = new Pair<List<CuStat>, CuExpr>();
 		String name1 = Helper.getVarName(), name2 = Helper.getVarName();
@@ -2486,7 +2440,7 @@ class TimesExpr extends CuExpr{
 }
 
 class VarExpr extends CuExpr{// e.vv<tao1...>(e1,...)
-	private CuExpr val;
+	public CuExpr val;
 	private String method;
 	private List<CuType> types;
 	List<CuExpr> es;
@@ -2495,6 +2449,10 @@ class VarExpr extends CuExpr{// e.vv<tao1...>(e1,...)
 		this.method = var;
 		this.types = pt;
 		this.es = es;
+		containsVar.addAll(e.containsVar);
+		for (CuExpr elem : es){
+			containsVar.addAll(elem.containsVar);
+		}
 		super.text = String.format("%s . %s %s %s", this.val.toString(), this.method, 
 				Helper.printList("<", this.types, ">", ","), Helper.printList("(", this.es, ")", ","));
 	}
@@ -2616,16 +2574,19 @@ class VarExpr extends CuExpr{// e.vv<tao1...>(e1,...)
 		}
 
 }
-class VcExp extends CuExpr {
+class VcExp extends CuExpr {// vc<tao1...>(e1,...)
 	private String val; 
 	private List<CuType> types;
-	private List<CuExpr> es;
+	public List<CuExpr> es;
 	public VcExp(String v, List<CuType> pt, List<CuExpr> e){
 		//System.out.println("in VcExp constructor, begin");
 		this.val=v;
 		this.types=pt;
 		this.es=e;
-		
+
+		for (CuExpr elem : es){
+			containsVar.addAll(elem.containsVar);
+		}
 		super.text=val.toString()+Helper.printList("<", types, ">", ",")+Helper.printList("(", es, ")", ",");
 Helper.P("VcExp= "+text);
 		//System.out.println("in VcExp constructor, end");
@@ -2733,16 +2694,17 @@ Helper.P("VcExp= "+text);
 	}
 }
 
-class VvExp extends CuExpr{
-	private String val;
+class VvExp extends CuExpr{//varname or function call
+	public String val;
 	private List<CuType> types = new ArrayList<CuType>();
-	private List<CuExpr> es = null;
+	public List<CuExpr> es = null;
 	static private boolean initialized = false;
 	static String  iter = Helper.getVarName(), temp = Helper.getVarName();
 	
 	public VvExp(String str){
 		val = str;
 		super.text=str;
+		containsVar.add(new Vv(str));
 	}
 	
 	@Override public void add(List<CuType> pt, List<CuExpr> e){
@@ -2812,7 +2774,7 @@ Helper.P(" 1mapping is " + mapping.toString());
 		{
 			Pair<List<CuStat>, CuExpr> temp = new Pair<List<CuStat>, CuExpr>();
 			//String name1 = Helper.getVarName();
-			List<CuStat> stats = new ArrayList<>();
+			List<CuStat> stats = new ArrayList<CuStat>();
 			CuExpr exp = new VvExp(val);
 			
 			//CuVvc vvc = new Vv(name1);			
