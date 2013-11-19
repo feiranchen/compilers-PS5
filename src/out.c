@@ -575,14 +575,6 @@ if (aaaaby!= NULL) {
 	if ((*(int *)aaaaby) < 0)
 		printf("aaaaby ref count is smaller than 0\n");
 }
-if (v!= NULL) {
-	(*(int *)v)--;
-	if ((*(int *)v) == 0)
-		x3free(v);
-	v = NULL;
-	if ((*(int *)v) < 0)
-		printf("v ref count is smaller than 0\n");
-}
 	}
 if (v!= NULL) {
 	(*(int *)v)--;

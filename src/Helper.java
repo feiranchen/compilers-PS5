@@ -205,6 +205,25 @@ public class Helper {
 				cs.inV = newInV;
 			}
 		}
+		
+		//print out the in out use def sets
+		if (debug) {
+			int i = 0;
+			System.out.println("printing the CFG with in out use def sets");
+			for (CuStat cs : nodes) {
+				System.out.println(String.valueOf(i) + " : " + cs.toString());
+				System.out.println("in set is:");
+				System.out.println(cs.inV.toString());
+				System.out.println("out set is:");
+				System.out.println(cs.outV.toString());
+				System.out.println("use set is:");
+				System.out.println(cs.useV.toString());
+				System.out.println("def set is:");
+				System.out.println(cs.defV.toString());			
+				System.out.println("\n");
+				i = i+1;
+			}
+		}
 	}
 	public static String incrRefCount(String var) {
 		String code = "if (" + var + "!= NULL) {\n";
