@@ -41,6 +41,9 @@ class FullPrg extends CuProgr {
 		for (CuProgr pr : elements) 
 			pr.toHIR();
 		s = s.toHIR();
+		if (Helper.debug) {
+			System.out.println(s.toString());
+		}
 	}
 	@Override public void buildCFG()  {		
 		for (CuProgr pr : elements) {
@@ -54,9 +57,6 @@ class FullPrg extends CuProgr {
 				statements.add(((StatPrg)pr).stat);
 			}
 		}
-		//we are supposing statements elements are a list of primitive statement, no more list
-		//the same assumption is made in Stats Class
-		//still need to check whether this is true
 		super.entry = statements.get(0).getFirst();
 		statements.add(s);
 		//the same way as dealing with stats
@@ -185,6 +185,9 @@ class FunPrg extends CuProgr {
 	
 	@Override public void toHIR() {
 		this.statement = this.statement.toHIR();
+		if (Helper.debug) {
+			System.out.println(this.statement.toString());
+		}
 	}
 	
 	@Override public void buildCFG() {
@@ -257,6 +260,9 @@ class StatPrg extends CuProgr {
 	}
 	@Override public void toHIR() {
 		stat = stat.toHIR();
+		if (Helper.debug) {
+			System.out.println(stat.toString());
+		}
 	}
 	@Override public String toC(ArrayList<String> localVars) {
 		super.ctext = stat.toC(localVars);

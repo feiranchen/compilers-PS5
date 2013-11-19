@@ -89,10 +89,10 @@ public class Helper {
 	}
 	
 	protected static void P(Object s) {
-		System.out.println(s.toString());
+		//System.out.println(s.toString());
 	}
 	protected static void P(String s, Object...args) {
-		System.out.println(String.format(s, args));
+		//System.out.println(String.format(s, args));
 	}
 	/* thoughts coming, to implement later on */
 	protected static void ToDo(String comment){
@@ -144,6 +144,20 @@ public class Helper {
 				}
 			}
 			nodes.add(cur);
+		}
+		
+		if (debug) {
+			int i = 0;
+			System.out.println("printing the CFG");
+			for (CuStat cs : nodes) {
+				System.out.println(String.valueOf(i) + " : " + cs.toString());
+				System.out.println("successors are:");
+				for (CuStat css : cs.successors) {
+					System.out.println(css.toString());
+				}
+				System.out.println("\n");
+				i = i+1;
+			}
 		}
 		
 		//after the breath first search, nodes contains references all of the nodes in the CFG

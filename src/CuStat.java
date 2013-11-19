@@ -85,7 +85,6 @@ class AssignStat extends CuStat{
 		List<CuStat> curHIR = pa.getFirst();
 		curHIR.add(new AssignStat(var, pa.getSecond()));
 		super.HIR = new Stats(curHIR);
-		Helper.P(HIR.toString());
 		return super.HIR;
 	}
 	
@@ -321,7 +320,6 @@ class ForStat extends CuStat{
 		CuStat temp = new ForToWhileStat(var.toString(), iter_name, s1);
 		curHIR.add(temp.toHIR());
 		super.HIR = new Stats(curHIR);
-		Helper.P(HIR.toString());
 		return super.HIR;
 	}
 	
@@ -775,7 +773,6 @@ class ReturnStat extends CuStat{
 		List<CuStat> curHIR = pa.getFirst();
 		curHIR.add(new ReturnStat(pa.getSecond()));
 		super.HIR = new Stats(curHIR);
-		Helper.P(HIR.toString());
 		return super.HIR;
 	}
 	@Override public void buildCFG() {
@@ -880,13 +877,19 @@ class Stats extends CuStat{
 		//if empty, return itself
 		if (al.size()==0)
 			return this;
-		return al.get(0);
+		CuStat first = al.get(0);
+		while (first.getFirst()!=first)
+			first = first.getFirst();
+		return first;
 	}
 	@Override public CuStat getLast() {
 		//if empty, return itself
 		if (al.size()==0)
 			return this;
-		return al.get(al.size()-1);
+		CuStat last = al.get(al.size()-1);
+		while (last.getLast()!=last)
+			last = last.getLast();
+		return last;
 	}
 	@Override public String toC(ArrayList<String> localVars) {
 		String temp_str = "";
