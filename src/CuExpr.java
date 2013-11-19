@@ -163,9 +163,9 @@ class AndExpr extends CuExpr{
 		CuExpr var2 = new VvExp(name2);
 		CuExpr expr = new AndExpr(var1, var2);		
 		
-		if (leftToHir.getFirst().isEmpty())
+		//if (leftToHir.getFirst().isEmpty())
 			expr.use.add(var1.toString());
-		if (rightToHir.getFirst().isEmpty())
+		//if (rightToHir.getFirst().isEmpty())
 			expr.use.add(var2.toString());
 		
 		Pair<List<CuStat>, CuExpr> temp = new Pair<List<CuStat>, CuExpr>(stats, expr);
@@ -263,9 +263,9 @@ Helper.P("common parent of types is " + type.toString());
 		CuExpr var2 = new VvExp(name2);
 		CuExpr expr = new AppExpr(var1, var2);		
 		
-		if (leftToHir.getFirst().isEmpty())
+		//if (leftToHir.getFirst().isEmpty())
 			expr.use.add(var1.toString());
-		if (rightToHir.getFirst().isEmpty())
+		//if (rightToHir.getFirst().isEmpty())
 			expr.use.add(var2.toString());
 		
 		Pair<List<CuStat>, CuExpr> temp = new Pair<List<CuStat>, CuExpr>(stats, expr);
@@ -427,8 +427,8 @@ class BrkExpr extends CuExpr {
 			CuExpr var1 = new VvExp(name1);
 			expressions.add(var1);
 			
-			if (expToHir.getFirst().isEmpty())
-				use.add(var1.toString());			
+			use.add(var1.toString());	
+			
 		}
 		
 		CuExpr expr = new BrkExpr(expressions);
@@ -710,9 +710,9 @@ class DivideExpr extends CuExpr{
 		CuExpr var2 = new VvExp(name2);
 		CuExpr expr = new DivideExpr(var1, var2);		
 		
-		if (leftToHir.getFirst().isEmpty())
+		//if (leftToHir.getFirst().isEmpty())
 			expr.use.add(var1.toString());
-		if (rightToHir.getFirst().isEmpty())
+		//if (rightToHir.getFirst().isEmpty())
 			expr.use.add(var2.toString());
 		
 		Pair<List<CuStat>, CuExpr> temp = new Pair<List<CuStat>, CuExpr>(stats, expr);
@@ -859,9 +859,9 @@ class EqualExpr extends CuExpr{
 		CuExpr var2 = new VvExp(name2);
 		CuExpr expr = new EqualExpr(var1, var2, bool);		
 		
-		if (leftToHir.getFirst().isEmpty())
+		//if (leftToHir.getFirst().isEmpty())
 			expr.use.add(var1.toString());
-		if (rightToHir.getFirst().isEmpty())
+		//if (rightToHir.getFirst().isEmpty())
 			expr.use.add(var2.toString());
 		
 		Pair<List<CuStat>, CuExpr> temp = new Pair<List<CuStat>, CuExpr>(stats, expr);
@@ -1077,9 +1077,9 @@ class GreaterThanExpr extends CuExpr{
 		CuExpr var2 = new VvExp(name2);
 		CuExpr expr = new GreaterThanExpr(var1, var2, this.b);		
 		
-		if (leftToHir.getFirst().isEmpty())
+		//if (leftToHir.getFirst().isEmpty())
 			expr.use.add(var1.toString());
-		if (rightToHir.getFirst().isEmpty())
+		//if (rightToHir.getFirst().isEmpty())
 			expr.use.add(var2.toString());
 		
 		Pair<List<CuStat>, CuExpr> temp = new Pair<List<CuStat>, CuExpr>(stats, expr);
@@ -1211,9 +1211,9 @@ class LessThanExpr extends CuExpr{
 		CuExpr var2 = new VvExp(name2);
 		CuExpr expr = new LessThanExpr(var1, var2, this.b);		
 		
-		if (leftToHir.getFirst().isEmpty())
+		//if (leftToHir.getFirst().isEmpty())
 			expr.use.add(var1.toString());
-		if (rightToHir.getFirst().isEmpty())
+		//if (rightToHir.getFirst().isEmpty())
 			expr.use.add(var2.toString());
 				
 		Pair<List<CuStat>, CuExpr> temp = new Pair<List<CuStat>, CuExpr>(stats, expr);
@@ -1343,9 +1343,9 @@ class MinusExpr extends CuExpr{
 		CuExpr var2 = new VvExp(name2);
 		CuExpr expr = new MinusExpr(var1, var2);		
 		
-		if (leftToHir.getFirst().isEmpty())
+		//if (leftToHir.getFirst().isEmpty())
 			expr.use.add(var1.toString());
-		if (rightToHir.getFirst().isEmpty())
+		//if (rightToHir.getFirst().isEmpty())
 			expr.use.add(var2.toString());
 		
 		Pair<List<CuStat>, CuExpr> temp = new Pair<List<CuStat>, CuExpr>(stats, expr);
@@ -1463,9 +1463,9 @@ class ModuloExpr extends CuExpr{
 		CuExpr var2 = new VvExp(name2);
 		CuExpr expr = new ModuloExpr(var1, var2);		
 		
-		if (leftToHir.getFirst().isEmpty())
+		//if (leftToHir.getFirst().isEmpty())
 			expr.use.add(var1.toString());
-		if (rightToHir.getFirst().isEmpty())
+		//if (rightToHir.getFirst().isEmpty())
 			expr.use.add(var2.toString());
 		
 		Pair<List<CuStat>, CuExpr> temp = new Pair<List<CuStat>, CuExpr>(stats, expr);
@@ -1589,7 +1589,7 @@ class NegateExpr extends CuExpr{
 		CuExpr var1 = new VvExp(name1);
 		CuExpr expr = new NegateExpr(var1);		
 		
-		if (valToHir.getFirst().isEmpty())
+		//if (valToHir.getFirst().isEmpty())
 			expr.use.add(var1.toString());
 		
 		Pair<List<CuStat>, CuExpr> temp = new Pair<List<CuStat>, CuExpr>(stats, expr);
@@ -1680,7 +1680,7 @@ class NegativeExpr extends CuExpr{
 		CuExpr var1 = new VvExp(name1);
 		CuExpr expr = new NegativeExpr(var1);		
 		
-		if (valToHir.getFirst().isEmpty())
+		//if (valToHir.getFirst().isEmpty())
 			expr.use.add(var1.toString());
 		
 		Pair<List<CuStat>, CuExpr> temp = new Pair<List<CuStat>, CuExpr>(stats, expr);
@@ -1765,7 +1765,7 @@ class OnwardsExpr extends CuExpr{
 		CuExpr var1 = new VvExp(name1);
 		CuExpr expr = new OnwardsExpr(var1, inclusive);		
 		
-		if (valToHir.getFirst().isEmpty())
+		//if (valToHir.getFirst().isEmpty())
 			expr.use.add(var1.toString());
 		
 		Pair<List<CuStat>, CuExpr> temp = new Pair<List<CuStat>, CuExpr>(stats, expr);
@@ -1951,9 +1951,9 @@ class OrExpr extends CuExpr{
 		CuExpr var2 = new VvExp(name2);
 		CuExpr expr = new OrExpr(var1, var2);		
 		
-		if (leftToHir.getFirst().isEmpty())
+		//if (leftToHir.getFirst().isEmpty())
 			expr.use.add(var1.toString());
-		if (rightToHir.getFirst().isEmpty())
+		//if (rightToHir.getFirst().isEmpty())
 			expr.use.add(var2.toString());
 		
 		Pair<List<CuStat>, CuExpr> temp = new Pair<List<CuStat>, CuExpr>(stats, expr);
@@ -2076,9 +2076,9 @@ class PlusExpr extends CuExpr{
 		CuExpr var2 = new VvExp(name2);
 		CuExpr expr = new PlusExpr(var1, var2);		
 		
-		if (leftToHir.getFirst().isEmpty())
+		//if (leftToHir.getFirst().isEmpty())
 			expr.use.add(var1.toString());
-		if (rightToHir.getFirst().isEmpty())
+		//if (rightToHir.getFirst().isEmpty())
 			expr.use.add(var2.toString());
 		
 		Pair<List<CuStat>, CuExpr> temp = new Pair<List<CuStat>, CuExpr>(stats, expr);
@@ -2203,9 +2203,9 @@ class ThroughExpr extends CuExpr{
 		CuExpr var2 = new VvExp(name2);
 		CuExpr expr = new ThroughExpr(var1, var2, bLow, bUp);			
 		
-		if (leftToHir.getFirst().isEmpty())
+		//if (leftToHir.getFirst().isEmpty())
 			expr.use.add(var1.toString());
-		if (rightToHir.getFirst().isEmpty())
+		//if (rightToHir.getFirst().isEmpty())
 			expr.use.add(var2.toString());
 		
 		Pair<List<CuStat>, CuExpr> temp = new Pair<List<CuStat>, CuExpr>(stats, expr);
@@ -2511,9 +2511,9 @@ class TimesExpr extends CuExpr{
 		CuExpr var2 = new VvExp(name2);
 		CuExpr expr = new TimesExpr(var1, var2);		
 		
-		if (leftToHir.getFirst().isEmpty())
+		//if (leftToHir.getFirst().isEmpty())
 			expr.use.add(var1.toString());
-		if (rightToHir.getFirst().isEmpty())
+		//if (rightToHir.getFirst().isEmpty())
 			expr.use.add(var2.toString());
 		
 		Pair<List<CuStat>, CuExpr> temp = new Pair<List<CuStat>, CuExpr>(stats, expr);
@@ -2671,7 +2671,7 @@ class VarExpr extends CuExpr{// e.vv<tao1...>(e1,...)
 				
 				CuExpr e = new VvExp(name1);
 				newEs.add(e);
-				if (expToHir.getFirst().isEmpty())
+				//if (expToHir.getFirst().isEmpty())
 					use.add(e.toString());
 			}
 			
@@ -2829,7 +2829,7 @@ Helper.P("VcExp= "+text);
 
 			CuExpr e = new VvExp(name1);
 			newEs.add(e);
-			if (expToHir.getFirst().isEmpty())
+			//if (expToHir.getFirst().isEmpty())
 				use.add(e.toString());
 		}
 
@@ -3014,7 +3014,7 @@ Helper.P(" 1mapping is " + mapping.toString());
 				
 				CuExpr e = new VvExp(name1);
 				newEs.add(e);
-				if (expToHir.getFirst().isEmpty())
+				//if (expToHir.getFirst().isEmpty())
 					use.add(e.toString());
 			}
 			
