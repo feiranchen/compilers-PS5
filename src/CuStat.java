@@ -192,6 +192,8 @@ class ForToWhileStat extends CuStat {
 		ArrayList<CuExpr> args = new ArrayList<CuExpr>();
 		args.add(new VvExp(iter_name));
 		curExpr.add(null, args);
+		//this is a hack
+		curExpr.toHIR();
 		//make a new assign statement
 		CuStat newAssign = new AssignStat(new Vv(var),curExpr);
 		s1 = s1.toHIR();
