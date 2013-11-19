@@ -269,6 +269,14 @@ class ForToWhileStat extends CuStat {
 		return super.ctext;
 	}
 	
+	@Override public String toString() {
+		String temp = "ForToWhile(" + var + "!=NULL) {\n";
+		temp += iter_name + " = (Iterable *)" + var.toString() + ";\n";
+		temp += var.toString() + " = " + iter_name + "->value;\n";
+		temp += s1.toString();
+		temp += "}\n";
+		return temp;
+	}
 }
 
 class ForStat extends CuStat{
@@ -460,6 +468,14 @@ class ConvertToIter extends CuStat {
 		super.ctext += Helper.liveVarAnalysis(super.inV, super.defV, super.outV);
 		
 		return super.ctext;
+	}
+	
+	@Override public String toString() {
+		String temp = "if ("+ var.toString() +"!=NULL) {\n";
+		temp += "if (" + var + ".isNotIter)\n";
+		temp += var + " = strToIter(" + var + ");\n";
+		temp += "}\n";
+		return temp;
 	}
 }
 
