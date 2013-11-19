@@ -47,6 +47,27 @@ public abstract class CuStat {
 	public CuStat toHIR() {
 		return HIR;
 	}
+	
+	public CuStat getNext() {
+		return successors.get(0);
+	}
+	
+	public CuStat ifBranch() {
+		return successors.get(1);
+	}
+	
+	public CuStat elseBranch() {
+		return successors.get(0);
+	}
+	
+	public CuStat noBranch() {
+		return successors.get(0);
+	}
+	
+	public CuStat whileBranch() {
+		return successors.get(1);
+	}
+	
 }
 
 class AssignStat extends CuStat{
@@ -247,6 +268,7 @@ class ForToWhileStat extends CuStat {
 		super.ctext += Helper.liveVarAnalysis(super.inV, new ArrayList<String>(), super.successors.get(0).inV);
 		return super.ctext;
 	}
+	
 }
 
 class ForStat extends CuStat{
@@ -575,6 +597,19 @@ class IfStat extends CuStat{
     		super.ctext += Helper.liveVarAnalysis(super.inV, super.defV, super.successors.get(0).inV);
     	return super.ctext;
     }
+    
+	@Override public CuStat elseBranch() {
+		if (s2==null)
+			return null;
+		return successors.get(0);
+	}
+	
+	public CuStat noBranch() {
+		//if we have an else block, there is no noBranch
+		if (s2!=null)
+			return null;
+		return successors.get(0);
+	}
     
 	public HReturn calculateType(CuContext context) throws NoSuchTypeException {
 Helper.P("if begin, e is " + e.toString());
