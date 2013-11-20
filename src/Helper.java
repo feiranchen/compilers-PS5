@@ -240,16 +240,16 @@ public class Helper {
 		//check whether it is the last pointer pointing to the object, if yes, x3free memory
 		code +=    "\t" + "if ((*(int *)" + var + ") == 0)\n";
 		code +=    "\t\t" + "x3free(" + var + ");\n";
-		
-		//newly added, we feel it should not cause memory bug
-		//make var pointing to null
-		code +=    "\t" + var + " = NULL;\n";
 				
 		if (debug) {
 			code +=    "\t" + "if ((*(int *)" + var + ") < 0)\n";
 			//need to include stdio for debugging
 			code +=    "\t\t" + "printf(\"" + var + " ref count is smaller than 0\\n\");\n";
 		}
+		//newly added, we feel it should not cause memory bug
+		//make var pointing to null
+		code +=    "\t" + var + " = NULL;\n";
+		
 		code +=     "}\n";
 		return code;
 	}

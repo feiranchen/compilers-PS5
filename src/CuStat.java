@@ -857,8 +857,12 @@ class Stats extends CuStat{
 	public ArrayList<CuStat> al = new ArrayList<CuStat>();
 	public Stats (List<CuStat> cu) {
 		al = (ArrayList<CuStat>) cu;
-		text = "{ " + Helper.listFlatten(al) + " }";
 	}
+	@Override public String toString() {
+		text = "{ " + Helper.listFlatten(al) + " }";
+		return text;
+	}
+	
 	@Override public CuStat toHIR() {
 		ArrayList<CuStat> newAl = new ArrayList<CuStat>();
 		for (CuStat cs : al) {
