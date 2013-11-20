@@ -192,20 +192,23 @@ class ForToWhileStat extends CuStat {
 		ArrayList<CuExpr> args = new ArrayList<CuExpr>();
 		args.add(new VvExp(iter_name));
 		curExpr.add(null, args);
-		//this is a hack
-		curExpr.toHIR();
+		
+		Pair<List<CuStat>, CuExpr> pa =  curExpr.toHIR();
+		List<CuStat> curHIR = pa.getFirst();		
 		//make a new assign statement
-		CuStat newAssign = new AssignStat(new Vv(var),curExpr);
+		CuStat newAssign = new AssignStat(new Vv(var),pa.getSecond());
+		curHIR.add(newAssign);
+		
 		s1 = s1.toHIR();
 		if (s1 instanceof Stats) {
-			((Stats) s1).al.add(newAssign);
+			((Stats) s1).al.addAll(curHIR);
 		}
 		else {
 			ArrayList<CuStat> arg_stats = new ArrayList<CuStat>();
 			//we add the object pointed by s1 into the array list
 			//another way to say it is we make a copy of s1, and add the reference copy into the list
 			arg_stats.add(s1);
-			arg_stats.add(newAssign);
+			arg_stats.addAll(curHIR);
 			s1 = new Stats(arg_stats);
 		}
 		super.HIR = this;
