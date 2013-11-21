@@ -146,6 +146,20 @@ public class Helper {
 			nodes.add(cur);
 		}
 		
+		if (debug) {
+			int i = 0;
+			System.out.println("printing the CFG");
+			for (CuStat cs : nodes) {
+				System.out.println(String.valueOf(i) + " : " + cs.toString());
+				System.out.println("successors are:");
+				for (CuStat css : cs.successors) {
+					System.out.println(css.toString());
+				}
+				System.out.println("\n");
+				i = i+1;
+			}
+		}
+		
 		//after the breath first search, nodes contains references all of the nodes in the CFG
 		//now iteratively build the in out sets
 		boolean nochange = false;
@@ -191,6 +205,25 @@ public class Helper {
 				cs.inV = newInV;
 			}
 		}
+		
+		//print out the in out use def sets
+		if (debug) {
+			int i = 0;
+			System.out.println("printing the CFG with in out use def sets");
+			for (CuStat cs : nodes) {
+				System.out.println(String.valueOf(i) + " : " + cs.toString());
+				System.out.println("in set is:");
+				System.out.println(cs.inV.toString());
+				System.out.println("out set is:");
+				System.out.println(cs.outV.toString());
+				System.out.println("use set is:");
+				System.out.println(cs.useV.toString());
+				System.out.println("def set is:");
+				System.out.println(cs.defV.toString());			
+				System.out.println("\n");
+				i = i+1;
+			}
+		}
 	}
 	public static String incrRefCount(String var) {
 		String code = "if (" + var + "!= NULL) {\n";
@@ -207,16 +240,16 @@ public class Helper {
 		//check whether it is the last pointer pointing to the object, if yes, x3free memory
 		code +=    "\t" + "if ((*(int *)" + var + ") == 0)\n";
 		code +=    "\t\t" + "x3free(" + var + ");\n";
-		
-		//newly added, we feel it should not cause memory bug
-		//make var pointing to null
-		code +=    "\t" + var + " = NULL;\n";
 				
 		if (debug) {
 			code +=    "\t" + "if ((*(int *)" + var + ") < 0)\n";
 			//need to include stdio for debugging
-			code +=    "\t\t" + "printf(\"" + var + " ref count is smaller than 0\n\");\n";
+			code +=    "\t\t" + "printf(\"" + var + " ref count is smaller than 0\\n\");\n";
 		}
+		//newly added, we feel it should not cause memory bug
+		//make var pointing to null
+		code +=    "\t" + var + " = NULL;\n";
+		
 		code +=     "}\n";
 		return code;
 	}

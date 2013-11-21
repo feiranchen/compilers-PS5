@@ -1,6 +1,6 @@
 # typechecker test program 9 (stage 1)
 
-lst := [1,2,3,4];
+lst := [1+2,2,3,4];
 lst2 := 1..4;
 sum := 0;
 for(v in lst)

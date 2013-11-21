@@ -6,6 +6,8 @@ import java.util.Map.Entry;
 public abstract class CuProgr {
 	protected String text = "";
 	protected String ctext = "";
+	//the first node of CFG
+	protected CuStat entry = null;
 	@Override public String toString() {
 		return text;
 	}
@@ -21,11 +23,14 @@ public abstract class CuProgr {
 	public void calculateType(CuContext context) throws NoSuchTypeException {}
 	
 	public abstract String toC(ArrayList<String> localVars);
+	
+	public void buildSets() {}
 }
 
 class FullPrg extends CuProgr {
 	List<CuProgr> elements = new ArrayList<CuProgr>();
 	CuStat s;
+	List<CuStat> statements = new ArrayList<CuStat>();
 	public void add_prg(CuProgr p){
 		elements.add(p);
 	}
@@ -33,17 +38,44 @@ class FullPrg extends CuProgr {
 		this.s = s;
 	}
 	@Override public void toHIR() {
-		for (CuProgr pr : elements)
+		for (CuProgr pr : elements) 
 			pr.toHIR();
 		s = s.toHIR();
-	}
-	@Override public void buildCFG()  {
-		for (CuProgr pr : elements) {
-			//should connect things together, todo
-			pr.buildCFG();
+		if (Helper.debug) {
+			System.out.println(s.toString());
 		}
-		s.buildCFG();
 	}
+	@Override public void buildCFG()  {		
+		for (CuProgr pr : elements) {
+			if (pr instanceof ClassPrg) {
+				//TO Do, probably never do
+			}
+			else if (pr instanceof FunPrg) {
+				pr.buildCFG();
+			}
+			else {
+				statements.add(((StatPrg)pr).stat);
+			}
+		}
+		super.entry = statements.get(0).getFirst();
+		statements.add(s);
+		//the same way as dealing with stats
+		CuStat temp = new Stats(statements);
+		temp.buildCFG();
+	}
+	
+	@Override public void buildSets() {
+		Helper.buildSet(entry);
+		for (CuProgr pr : elements) {
+			if (pr instanceof ClassPrg) {
+				//TO Do, probably never do
+			}
+			else if (pr instanceof FunPrg) {
+				Helper.buildSet(pr.entry);
+			}
+		}
+	}
+	
 	@Override public String toC(ArrayList<String> localVars) {
 		String fnClass_str = "", temp_str = "";
 		for (CuProgr cp : elements) {
@@ -151,6 +183,18 @@ class FunPrg extends CuProgr {
 		//System.out.println("in fun program constructor, end");
 	}
 	
+	@Override public void toHIR() {
+		this.statement = this.statement.toHIR();
+		if (Helper.debug) {
+			System.out.println(this.statement.toString());
+		}
+	}
+	
+	@Override public void buildCFG() {
+		super.entry = this.statement.getFirst();
+		this.statement.buildCFG();
+	}
+	
 	@Override public String toString() {
 		return Helper.printList("", fun, "", "");
 	}
@@ -208,7 +252,7 @@ Helper.P("in func program " + name);
 }
 
 class StatPrg extends CuProgr {
-	CuStat stat;
+	public CuStat stat;
 	public StatPrg(CuStat s) {
 		//System.out.println("in statement program constructor");
 		this.stat = s;
@@ -216,6 +260,9 @@ class StatPrg extends CuProgr {
 	}
 	@Override public void toHIR() {
 		stat = stat.toHIR();
+		if (Helper.debug) {
+			System.out.println(stat.toString());
+		}
 	}
 	@Override public String toC(ArrayList<String> localVars) {
 		super.ctext = stat.toC(localVars);

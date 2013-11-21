@@ -47,6 +47,27 @@ public abstract class CuStat {
 	public CuStat toHIR() {
 		return HIR;
 	}
+	
+	public CuStat getNext() {
+		return successors.get(0);
+	}
+	
+	public CuStat ifBranch() {
+		return successors.get(1);
+	}
+	
+	public CuStat elseBranch() {
+		return successors.get(0);
+	}
+	
+	public CuStat noBranch() {
+		return successors.get(0);
+	}
+	
+	public CuStat whileBranch() {
+		return successors.get(1);
+	}
+	
 }
 
 class AssignStat extends CuStat{
@@ -171,18 +192,23 @@ class ForToWhileStat extends CuStat {
 		ArrayList<CuExpr> args = new ArrayList<CuExpr>();
 		args.add(new VvExp(iter_name));
 		curExpr.add(null, args);
+		
+		Pair<List<CuStat>, CuExpr> pa =  curExpr.toHIR();
+		List<CuStat> curHIR = pa.getFirst();		
 		//make a new assign statement
-		CuStat newAssign = new AssignStat(new Vv(var),curExpr);
+		CuStat newAssign = new AssignStat(new Vv(var),pa.getSecond());
+		curHIR.add(newAssign);
+		
 		s1 = s1.toHIR();
 		if (s1 instanceof Stats) {
-			((Stats) s1).al.add(newAssign);
+			((Stats) s1).al.addAll(curHIR);
 		}
 		else {
 			ArrayList<CuStat> arg_stats = new ArrayList<CuStat>();
 			//we add the object pointed by s1 into the array list
 			//another way to say it is we make a copy of s1, and add the reference copy into the list
 			arg_stats.add(s1);
-			arg_stats.add(newAssign);
+			arg_stats.addAll(curHIR);
 			s1 = new Stats(arg_stats);
 		}
 		super.HIR = this;
@@ -192,13 +218,14 @@ class ForToWhileStat extends CuStat {
 	@Override public String toC(ArrayList<String> localVars) {		
 		super.ctext += "\twhile (" + var.toString() + "!=NULL) {\n";
 		
-		String temp_name = Helper.getVarName();
-		super.ctext += Helper.refAcquire(temp_name, iter_name);
+		//String temp_name = Helper.getVarName();
+		//super.ctext += Helper.refAcquire(temp_name, iter_name);
+		super.ctext += "Iterable * " + iter_name +" = NULL;\n";
 		super.ctext += "\t\t" + iter_name + " = (Iterable *)" + var.toString() + ";\n";
 		super.ctext += "\t\t" + Helper.incrRefCount(iter_name);
-		super.ctext += "\t\t" + Helper.decRefCount(temp_name);
+		//super.ctext += "\t\t" + Helper.decRefCount(temp_name);
 		
-		temp_name = Helper.getVarName();
+		String temp_name = Helper.getVarName();
 		super.ctext += Helper.refAcquire(temp_name, var.toString());
 		super.ctext += "\t\t" + var.toString() + " = " + iter_name + "->value;\n";
 		super.ctext += "\t\t" + Helper.incrRefCount(var.toString());
@@ -244,6 +271,15 @@ class ForToWhileStat extends CuStat {
 		//exiting the while loop, live variable analysis on the other edge, def set is null here
 		super.ctext += Helper.liveVarAnalysis(super.inV, new ArrayList<String>(), super.successors.get(0).inV);
 		return super.ctext;
+	}
+	
+	@Override public String toString() {
+		String temp = "ForToWhile(" + var + "!=NULL) {\n";
+		temp += iter_name + " = (Iterable *)" + var.toString() + ";\n";
+		temp += var.toString() + " = " + iter_name + "->value;\n";
+		temp += s1.toString();
+		temp += "}\n";
+		return temp;
 	}
 }
 
@@ -436,6 +472,14 @@ class ConvertToIter extends CuStat {
 		
 		return super.ctext;
 	}
+	
+	@Override public String toString() {
+		String temp = "if ("+ var.toString() +"!=NULL) {\n";
+		temp += "if (" + var + ".isNotIter)\n";
+		temp += var + " = strToIter(" + var + ");\n";
+		temp += "}\n";
+		return temp;
+	}
 }
 
 class IfStat extends CuStat{
@@ -572,6 +616,19 @@ class IfStat extends CuStat{
     		super.ctext += Helper.liveVarAnalysis(super.inV, super.defV, super.successors.get(0).inV);
     	return super.ctext;
     }
+    
+	@Override public CuStat elseBranch() {
+		if (s2==null)
+			return null;
+		return successors.get(0);
+	}
+	
+	public CuStat noBranch() {
+		//if we have an else block, there is no noBranch
+		if (s2!=null)
+			return null;
+		return successors.get(0);
+	}
     
 	public HReturn calculateType(CuContext context) throws NoSuchTypeException {
 Helper.P("if begin, e is " + e.toString());
@@ -800,8 +857,12 @@ class Stats extends CuStat{
 	public ArrayList<CuStat> al = new ArrayList<CuStat>();
 	public Stats (List<CuStat> cu) {
 		al = (ArrayList<CuStat>) cu;
-		text = "{ " + Helper.listFlatten(al) + " }";
 	}
+	@Override public String toString() {
+		text = "{ " + Helper.listFlatten(al) + " }";
+		return text;
+	}
+	
 	@Override public CuStat toHIR() {
 		ArrayList<CuStat> newAl = new ArrayList<CuStat>();
 		for (CuStat cs : al) {
@@ -825,13 +886,19 @@ class Stats extends CuStat{
 		//if empty, return itself
 		if (al.size()==0)
 			return this;
-		return al.get(0);
+		CuStat first = al.get(0);
+		while (first.getFirst()!=first)
+			first = first.getFirst();
+		return first;
 	}
 	@Override public CuStat getLast() {
 		//if empty, return itself
 		if (al.size()==0)
 			return this;
-		return al.get(al.size()-1);
+		CuStat last = al.get(al.size()-1);
+		while (last.getLast()!=last)
+			last = last.getLast();
+		return last;
 	}
 	@Override public String toC(ArrayList<String> localVars) {
 		String temp_str = "";

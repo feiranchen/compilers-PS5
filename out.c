@@ -1,453 +1,874 @@
+#include<stdio.h>
 #include "cubex_main.h"
 #include "cubex_external_functions.h"
 #include "cubex_lib.h"
 
-void* rest(void *l) {
 
 
-
-void * ret = NULL;
-void * passed = NULL;
-
-
-
-if (ret!= NULL) {
-	if ((*(int *)ret) == 1)
-		x3free(ret);
-	else
-	(*(int *)ret)--;
-}
-ret = NULL;
-if (ret!=NULL)
-	(*(int *)ret)++;
-
-
-
-Boolean* aaaaah;
-aaaaah = (Boolean *) x3malloc(sizeof(Boolean));
-(aaaaah->nrefs) = 1;
-aaaaah->value = 0;
-if (passed!= NULL) {
-	if ((*(int *)passed) == 1)
-		x3free(passed);
-	else
-	(*(int *)passed)--;
-}
-passed = aaaaah;
-if (passed!=NULL)
-	(*(int *)passed)++;
-
-
-
-Iterable *aaaaai;
-aaaaai = (Iterable *)l;
-(*(int *)aaaaai)++;
-if ((*(int *)(l+1)) == 0) {
-(*(int *)aaaaai)--;
-aaaaai = strToIter( ((String *)l)->value, ((String *)l)->len);
-}
+void* our_main()
 {
-	void * e=aaaaai;
-	Iterable * aaaaaj;
-	while (e!=NULL) {
-		aaaaaj = (Iterable *)e;
-		e = aaaaaj->value;
-		(*(int *)e)++;
-		
+void * aaaaac = NULL;
+void * aaaaad = NULL;
+void * aaaaae = NULL;
+void * aaaaaf = NULL;
+void * aaaaag = NULL;
+void * aaaaah = NULL;
+void * lst = NULL;
+void * aaaaai = NULL;
+void * aaaaaj = NULL;
+void * lst2 = NULL;
+void * sum = NULL;
+void * v = NULL;
+void * aaaaas = NULL;
 
 
 
-
-
-if ( ((Boolean *)passed)->value) {
-
-
-
-
-
-
-Iterable* aaaaak;
-aaaaak = (Iterable*) x3malloc(sizeof(Iterable));
-aaaaak->isIter = 1;
-aaaaak->nrefs = 1;
-aaaaak->value = e;
-aaaaak->additional = NULL;
-aaaaak->next = NULL;
-aaaaak->concat = NULL;
-Iterable* aaaaan;
-aaaaan = concatenate((Iterable*)ret, (Iterable*) aaaaak);
-if (ret!= NULL) {
-	if ((*(int *)ret) == 1)
-		x3free(ret);
-	else
-	(*(int *)ret)--;
-}
-ret = aaaaan;
-if (ret!=NULL)
-	(*(int *)ret)++;
-}
-
-
-
-Boolean* aaaaao;
-aaaaao = (Boolean *) x3malloc(sizeof(Boolean));
-(aaaaao->nrefs) = 1;
-aaaaao->value = 1;
-if (passed!= NULL) {
-	if ((*(int *)passed) == 1)
-		x3free(passed);
-	else
-	(*(int *)passed)--;
-}
-passed = aaaaao;
-if (passed!=NULL)
-	(*(int *)passed)++;
-		
-
-
-		if (aaaaao!= NULL) {
-			if ((*(int *)aaaaao) == 1)
-				x3free(aaaaao);
-			else
-				(*(int *)aaaaao)--;
-		}
-		(*(int *)e)--;
-		e = iterGetNext(aaaaaj);
-	}
-}
-
-
-
-
-
-
-if (ret!= NULL) {
-(*(int *)ret)--;
-}
-
-
-
-if (aaaaah!= NULL) {
-if ((*(int *)aaaaah) == 1)
-x3free(aaaaah);
-else
-(*(int *)aaaaah)--;
-}
-
-
-
-if (passed!= NULL) {
-if ((*(int *)passed) == 1)
-x3free(passed);
-else
-(*(int *)passed)--;
-}
-return ret;
-}
-void* last(void *l , void *default1) {
-
-
-
-
-
-
-Iterable *aaaaap;
-aaaaap = (Iterable *)l;
-(*(int *)aaaaap)++;
-if ((*(int *)(l+1)) == 0) {
-(*(int *)aaaaap)--;
-aaaaap = strToIter( ((String *)l)->value, ((String *)l)->len);
-}
-{
-	void * e=aaaaap;
-	Iterable * aaaaaq;
-	while (e!=NULL) {
-		aaaaaq = (Iterable *)e;
-		e = aaaaaq->value;
-		(*(int *)e)++;
-		
-
-
-
-
-
-
-
-void* aaaaas;
-aaaaas = rest((void*) l);
-void* aaaaar;
-aaaaar = last((void*) aaaaas, (void*) e);
-return aaaaar;
-		(*(int *)e)--;
-		e = iterGetNext(aaaaaq);
-	}
-}
-
-
-
-return default1;
-}
-void* length(void *l) {
-
-
-
-void * ret = NULL;
 
 
 
 Integer* aaaaat;
 aaaaat = (Integer*) x3malloc(sizeof(Integer));
 (aaaaat->nrefs) = 1;
-aaaaat->value = 0;
-if (ret!= NULL) {
-	if ((*(int *)ret) == 1)
-		x3free(ret);
-	else
-	(*(int *)ret)--;
+aaaaat->value = 1;
+void * aaaaau = NULL;
+aaaaau = aaaaac;
+aaaaac = aaaaat;
+if (aaaaac!= NULL) {
+	(*(int *)aaaaac)++;
 }
-ret = aaaaat;
-if (ret!=NULL)
-	(*(int *)ret)++;
-
-
-
-Iterable *aaaaau;
-aaaaau = (Iterable *)l;
-(*(int *)aaaaau)++;
-if ((*(int *)(l+1)) == 0) {
-(*(int *)aaaaau)--;
-aaaaau = strToIter( ((String *)l)->value, ((String *)l)->len);
+if (aaaaau!= NULL) {
+	(*(int *)aaaaau)--;
+	if ((*(int *)aaaaau) == 0)
+		x3free(aaaaau);
+	aaaaau = NULL;
+	if ((*(int *)aaaaau) < 0)
+		printf("aaaaau ref count is smaller than 0\n");
 }
-{
-	void * e=aaaaau;
-	Iterable * aaaaav;
-	while (e!=NULL) {
-		aaaaav = (Iterable *)e;
-		e = aaaaav->value;
-		(*(int *)e)++;
-		
 
 
+
+Integer* aaaaav;
+aaaaav = (Integer*) x3malloc(sizeof(Integer));
+(aaaaav->nrefs) = 1;
+aaaaav->value = 2;
+void * aaaaaw = NULL;
+aaaaaw = aaaaad;
+aaaaad = aaaaav;
+if (aaaaad!= NULL) {
+	(*(int *)aaaaad)++;
+}
+if (aaaaaw!= NULL) {
+	(*(int *)aaaaaw)--;
+	if ((*(int *)aaaaaw) == 0)
+		x3free(aaaaaw);
+	aaaaaw = NULL;
+	if ((*(int *)aaaaaw) < 0)
+		printf("aaaaaw ref count is smaller than 0\n");
+}
 
 
 
 
 Integer* aaaaax;
-aaaaax = (Integer*) x3malloc(sizeof(Integer));
-(aaaaax->nrefs) = 1;
-aaaaax->value = 1;
-Integer* aaaaaw;
-aaaaaw  = (Integer*) x3malloc(sizeof(Integer));
-aaaaaw->nrefs = 1;
-aaaaaw->value=((Integer*)ret)->value + ((Integer*)aaaaax)->value;
-if (ret!= NULL) {
-	if ((*(int *)ret) == 1)
-		x3free(ret);
-	else
-	(*(int *)ret)--;
+aaaaax  = (Integer*) x3malloc(sizeof(Integer));
+aaaaax->nrefs = 1;
+aaaaax->value=((Integer*)aaaaac)->value + ((Integer*)aaaaad)->value;
+void * aaaaay = NULL;
+aaaaay = aaaaae;
+aaaaae = aaaaax;
+if (aaaaae!= NULL) {
+	(*(int *)aaaaae)++;
 }
-ret = aaaaaw;
-if (ret!=NULL)
-	(*(int *)ret)++;
-		
-
-
-		if (aaaaax!= NULL) {
-			if ((*(int *)aaaaax) == 1)
-				x3free(aaaaax);
-			else
-				(*(int *)aaaaax)--;
-		}
-		
-
-
-		if (aaaaaw!= NULL) {
-			if ((*(int *)aaaaaw) == 1)
-				x3free(aaaaaw);
-			else
-				(*(int *)aaaaaw)--;
-		}
-		(*(int *)e)--;
-		e = iterGetNext(aaaaav);
-	}
+if (aaaaay!= NULL) {
+	(*(int *)aaaaay)--;
+	if ((*(int *)aaaaay) == 0)
+		x3free(aaaaay);
+	aaaaay = NULL;
+	if ((*(int *)aaaaay) < 0)
+		printf("aaaaay ref count is smaller than 0\n");
+}
+if (aaaaac!= NULL) {
+	(*(int *)aaaaac)--;
+	if ((*(int *)aaaaac) == 0)
+		x3free(aaaaac);
+	aaaaac = NULL;
+	if ((*(int *)aaaaac) < 0)
+		printf("aaaaac ref count is smaller than 0\n");
+}
+if (aaaaad!= NULL) {
+	(*(int *)aaaaad)--;
+	if ((*(int *)aaaaad) == 0)
+		x3free(aaaaad);
+	aaaaad = NULL;
+	if ((*(int *)aaaaad) < 0)
+		printf("aaaaad ref count is smaller than 0\n");
 }
 
 
 
-
-
-
-if (aaaaat!= NULL) {
-if ((*(int *)aaaaat) == 1)
-x3free(aaaaat);
-else
-(*(int *)aaaaat)--;
+Integer* aaaaaz;
+aaaaaz = (Integer*) x3malloc(sizeof(Integer));
+(aaaaaz->nrefs) = 1;
+aaaaaz->value = 2;
+void * aaaaba = NULL;
+aaaaba = aaaaaf;
+aaaaaf = aaaaaz;
+if (aaaaaf!= NULL) {
+	(*(int *)aaaaaf)++;
+}
+if (aaaaba!= NULL) {
+	(*(int *)aaaaba)--;
+	if ((*(int *)aaaaba) == 0)
+		x3free(aaaaba);
+	aaaaba = NULL;
+	if ((*(int *)aaaaba) < 0)
+		printf("aaaaba ref count is smaller than 0\n");
 }
 
 
 
-if (ret!= NULL) {
-(*(int *)ret)--;
-}
-return ret;
-}
-
-
-void* our_main()
-{
-
-
-
-
-int aaaaaz;
-Iterable* aaaaaf;
-String* aaaaag;
-aaaaaz = next_line_len();
-if(aaaaaz == 0) {
-	aaaaaf = NULL;
-}
-else {
-	aaaaag = (String*) x3malloc(sizeof(String));
-	aaaaag->isIter = 0;
-	aaaaag->nrefs = 1;
-	aaaaag->value = (char*) x3malloc(aaaaaz * sizeof(char));
-	aaaaag->len = aaaaaz;
-	read_line(aaaaag->value);
-	aaaaaf = (Iterable*) x3malloc(sizeof(Iterable));
-	aaaaaf->isIter = 1;
-aaaaaf->nrefs = 1;
-	aaaaaf->value = aaaaag;
-	aaaaaf->additional = NULL;
-	aaaaaf->next = &input_onwards;
-	aaaaaf->concat = NULL;
-}
-String* aaaabb;
-aaaabb = (String *) x3malloc(sizeof(String));
-(aaaabb->isIter) = 0;
-aaaabb->value = (char*) x3malloc(sizeof(""));
+Integer* aaaabb;
+aaaabb = (Integer*) x3malloc(sizeof(Integer));
 (aaaabb->nrefs) = 1;
-aaaabb->len = sizeof("") - 1;
-mystrcpy(aaaabb->value, "");
-void* aaaaay;
-aaaaay = last((void*) aaaaaf, (void*) aaaabb);
-Iterable* aaaabc;
-aaaabc = (Iterable*) x3malloc(sizeof(Iterable));
-aaaabc->isIter = 1;
-aaaabc->nrefs = 1;
-aaaabc->value = aaaaay;
-aaaabc->additional = NULL;
-aaaabc->next = NULL;
-aaaabc->concat = NULL;
+aaaabb->value = 3;
+void * aaaabc = NULL;
+aaaabc = aaaaag;
+aaaaag = aaaabb;
+if (aaaaag!= NULL) {
+	(*(int *)aaaaag)++;
+}
+if (aaaabc!= NULL) {
+	(*(int *)aaaabc)--;
+	if ((*(int *)aaaabc) == 0)
+		x3free(aaaabc);
+	aaaabc = NULL;
+	if ((*(int *)aaaabc) < 0)
+		printf("aaaabc ref count is smaller than 0\n");
+}
+
+
+
+Integer* aaaabd;
+aaaabd = (Integer*) x3malloc(sizeof(Integer));
+(aaaabd->nrefs) = 1;
+aaaabd->value = 4;
+void * aaaabe = NULL;
+aaaabe = aaaaah;
+aaaaah = aaaabd;
+if (aaaaah!= NULL) {
+	(*(int *)aaaaah)++;
+}
+if (aaaabe!= NULL) {
+	(*(int *)aaaabe)--;
+	if ((*(int *)aaaabe) == 0)
+		x3free(aaaabe);
+	aaaabe = NULL;
+	if ((*(int *)aaaabe) < 0)
+		printf("aaaabe ref count is smaller than 0\n");
+}
+
+
+
+Iterable* aaaabi;
+aaaabi = (Iterable*) x3malloc(sizeof(Iterable));
+aaaabi->isIter = 1;
+aaaabi->nrefs = 1;
+aaaabi->value = aaaaah;
+aaaabi->additional = NULL;
+aaaabi->next = NULL;
+aaaabi->concat = NULL;
+Iterable* aaaabh;
+aaaabh = (Iterable*) x3malloc(sizeof(Iterable));
+aaaabh->isIter = 1;
+aaaabh->nrefs = 1;
+aaaabh->value = aaaaag;
+aaaabh->additional = aaaabi;
+aaaabh->next = NULL;
+aaaabh->concat = NULL;
+if (aaaaah!= NULL) {
+	(*(int *)aaaaah)++;
+}
+Iterable* aaaabg;
+aaaabg = (Iterable*) x3malloc(sizeof(Iterable));
+aaaabg->isIter = 1;
+aaaabg->nrefs = 1;
+aaaabg->value = aaaaaf;
+aaaabg->additional = aaaabh;
+aaaabg->next = NULL;
+aaaabg->concat = NULL;
+if (aaaaag!= NULL) {
+	(*(int *)aaaaag)++;
+}
+Iterable* aaaabf;
+aaaabf = (Iterable*) x3malloc(sizeof(Iterable));
+aaaabf->isIter = 1;
+aaaabf->nrefs = 1;
+aaaabf->value = aaaaae;
+aaaabf->additional = aaaabg;
+aaaabf->next = NULL;
+aaaabf->concat = NULL;
+if (aaaaaf!= NULL) {
+	(*(int *)aaaaaf)++;
+}
+if (aaaaae!= NULL) {
+	(*(int *)aaaaae)++;
+}
+void * aaaabj = NULL;
+aaaabj = lst;
+lst = aaaabf;
+if (lst!= NULL) {
+	(*(int *)lst)++;
+}
+if (aaaabj!= NULL) {
+	(*(int *)aaaabj)--;
+	if ((*(int *)aaaabj) == 0)
+		x3free(aaaabj);
+	aaaabj = NULL;
+	if ((*(int *)aaaabj) < 0)
+		printf("aaaabj ref count is smaller than 0\n");
+}
+if (aaaaae!= NULL) {
+	(*(int *)aaaaae)--;
+	if ((*(int *)aaaaae) == 0)
+		x3free(aaaaae);
+	aaaaae = NULL;
+	if ((*(int *)aaaaae) < 0)
+		printf("aaaaae ref count is smaller than 0\n");
+}
+if (aaaaaf!= NULL) {
+	(*(int *)aaaaaf)--;
+	if ((*(int *)aaaaaf) == 0)
+		x3free(aaaaaf);
+	aaaaaf = NULL;
+	if ((*(int *)aaaaaf) < 0)
+		printf("aaaaaf ref count is smaller than 0\n");
+}
+if (aaaaag!= NULL) {
+	(*(int *)aaaaag)--;
+	if ((*(int *)aaaaag) == 0)
+		x3free(aaaaag);
+	aaaaag = NULL;
+	if ((*(int *)aaaaag) < 0)
+		printf("aaaaag ref count is smaller than 0\n");
+}
+if (aaaaah!= NULL) {
+	(*(int *)aaaaah)--;
+	if ((*(int *)aaaaah) == 0)
+		x3free(aaaaah);
+	aaaaah = NULL;
+	if ((*(int *)aaaaah) < 0)
+		printf("aaaaah ref count is smaller than 0\n");
+}
 
 
 
 
-Integer* aaaabh;
-aaaabh = (Integer*) x3malloc(sizeof(Integer));
-(aaaabh->nrefs) = 1;
-aaaabh->value = 5;
 
-Iterable* aaaabk;
-aaaabk = (Iterable*) x3malloc(sizeof(Iterable));
-aaaabk->isIter = 1;
-aaaabk->nrefs = 1;
-aaaabk->value = aaaaag;
-aaaabk->additional = ((Iterable*)aaaaaf)->additional;
-aaaabk->next = NULL;
-aaaabk->concat = NULL;
-void* aaaabi;
-aaaabi = length((void*) aaaabk);
-Iterable* aaaabl;
-aaaabl = (Iterable*) x3malloc(sizeof(Iterable));
-aaaabl->isIter = 1;
-aaaabl->nrefs = 1;
-aaaabl->value = aaaabh;
-aaaabl->additional = aaaabi;
-aaaabl->next = &Integer_through;
-aaaabl->concat = NULL;
+
+Integer* aaaabk;
+aaaabk = (Integer*) x3malloc(sizeof(Integer));
+(aaaabk->nrefs) = 1;
+aaaabk->value = 1;
+void * aaaabl = NULL;
+aaaabl = aaaaai;
+aaaaai = aaaabk;
+if (aaaaai!= NULL) {
+	(*(int *)aaaaai)++;
+}
+if (aaaabl!= NULL) {
+	(*(int *)aaaabl)--;
+	if ((*(int *)aaaabl) == 0)
+		x3free(aaaabl);
+	aaaabl = NULL;
+	if ((*(int *)aaaabl) < 0)
+		printf("aaaabl ref count is smaller than 0\n");
+}
+
+
+
 Integer* aaaabm;
 aaaabm = (Integer*) x3malloc(sizeof(Integer));
 (aaaabm->nrefs) = 1;
-aaaabm->value = 3;
-void* aaaabg;
-aaaabg = last((void*) checkIter(aaaabl), (void*) aaaabm);
-Integer* aaaabn;
-aaaabn = (Integer*) x3malloc(sizeof(Integer));
-(aaaabn->nrefs) = 1;
-aaaabn->value = 30;
-Integer* aaaabf;
-aaaabf  = (Integer*) x3malloc(sizeof(Integer));
-aaaabf->nrefs = 1;
-aaaabf->value=((Integer*)aaaabg)->value + ((Integer*)aaaabn)->value;
-Character* aaaabe;
-aaaabe = (Character*) x3malloc(sizeof(Character));
-aaaabe->value = unichar (((Integer*)aaaabf)->value);
+aaaabm->value = 4;
+void * aaaabn = NULL;
+aaaabn = aaaaaj;
+aaaaaj = aaaabm;
+if (aaaaaj!= NULL) {
+	(*(int *)aaaaaj)++;
+}
+if (aaaabn!= NULL) {
+	(*(int *)aaaabn)--;
+	if ((*(int *)aaaabn) == 0)
+		x3free(aaaabn);
+	aaaabn = NULL;
+	if ((*(int *)aaaabn) < 0)
+		printf("aaaabn ref count is smaller than 0\n");
+}
+
+
+
 Iterable* aaaabo;
 aaaabo = (Iterable*) x3malloc(sizeof(Iterable));
 aaaabo->isIter = 1;
 aaaabo->nrefs = 1;
-aaaabo->value = aaaabe;
-aaaabo->additional = NULL;
-aaaabo->next = NULL;
+aaaabo->value = aaaaai;
+aaaabo->additional = aaaaaj;
+aaaabo->next = &Integer_through;
 aaaabo->concat = NULL;
-void* aaaabd;
-aaaabd = concatChars((Iterable*)aaaabo);
-Iterable* aaaabp;
-aaaabp = (Iterable*) x3malloc(sizeof(Iterable));
-aaaabp->isIter = 1;
-aaaabp->nrefs = 1;
-aaaabp->value = aaaabd;
-aaaabp->additional = NULL;
-aaaabp->next = NULL;
-aaaabp->concat = NULL;
-Iterable* aaaabs;
-aaaabs = concatenate((Iterable*)aaaabc, (Iterable*) aaaabp);
-
-
-
-if (aaaabb!= NULL) {
-if ((*(int *)aaaabb) == 1)
-x3free(aaaabb);
-else
-(*(int *)aaaabb)--;
+void * aaaabp = NULL;
+aaaabp = lst2;
+lst2 = checkIter(aaaabo);
+if (lst2!= NULL) {
+	(*(int *)lst2)++;
+}
+if (aaaabp!= NULL) {
+	(*(int *)aaaabp)--;
+	if ((*(int *)aaaabp) == 0)
+		x3free(aaaabp);
+	aaaabp = NULL;
+	if ((*(int *)aaaabp) < 0)
+		printf("aaaabp ref count is smaller than 0\n");
+}
+if (aaaaai!= NULL) {
+	(*(int *)aaaaai)--;
+	if ((*(int *)aaaaai) == 0)
+		x3free(aaaaai);
+	aaaaai = NULL;
+	if ((*(int *)aaaaai) < 0)
+		printf("aaaaai ref count is smaller than 0\n");
+}
+if (aaaaaj!= NULL) {
+	(*(int *)aaaaaj)--;
+	if ((*(int *)aaaaaj) == 0)
+		x3free(aaaaaj);
+	aaaaaj = NULL;
+	if ((*(int *)aaaaaj) < 0)
+		printf("aaaaaj ref count is smaller than 0\n");
+}
+if (lst2!= NULL) {
+	(*(int *)lst2)--;
+	if ((*(int *)lst2) == 0)
+		x3free(lst2);
+	lst2 = NULL;
+	if ((*(int *)lst2) < 0)
+		printf("lst2 ref count is smaller than 0\n");
 }
 
 
 
-if (aaaabh!= NULL) {
-if ((*(int *)aaaabh) == 1)
-x3free(aaaabh);
-else
-(*(int *)aaaabh)--;
+
+
+
+Integer* aaaabq;
+aaaabq = (Integer*) x3malloc(sizeof(Integer));
+(aaaabq->nrefs) = 1;
+aaaabq->value = 0;
+void * aaaabr = NULL;
+aaaabr = sum;
+sum = aaaabq;
+if (sum!= NULL) {
+	(*(int *)sum)++;
+}
+if (aaaabr!= NULL) {
+	(*(int *)aaaabr)--;
+	if ((*(int *)aaaabr) == 0)
+		x3free(aaaabr);
+	aaaabr = NULL;
+	if ((*(int *)aaaabr) < 0)
+		printf("aaaabr ref count is smaller than 0\n");
 }
 
 
 
-if (aaaabm!= NULL) {
-if ((*(int *)aaaabm) == 1)
-x3free(aaaabm);
-else
-(*(int *)aaaabm)--;
+
+
+
+void * aaaabs = NULL;
+aaaabs = v;
+v = lst;
+if (v!= NULL) {
+	(*(int *)v)++;
+}
+if (aaaabs!= NULL) {
+	(*(int *)aaaabs)--;
+	if ((*(int *)aaaabs) == 0)
+		x3free(aaaabs);
+	aaaabs = NULL;
+	if ((*(int *)aaaabs) < 0)
+		printf("aaaabs ref count is smaller than 0\n");
+}
+	if (v!=NULL) {
+		if ((*((int *)(v+1))) == 0) {
+void * aaaabt = NULL;
+aaaabt = v;
+			v = strToIter( ((String *)v)->value, ((String *)v)->len);
+if (v!= NULL) {
+	(*(int *)v)++;
+}
+if (aaaabt!= NULL) {
+	(*(int *)aaaabt)--;
+	if ((*(int *)aaaabt) == 0)
+		x3free(aaaabt);
+	aaaabt = NULL;
+	if ((*(int *)aaaabt) < 0)
+		printf("aaaabt ref count is smaller than 0\n");
+}
+		}
+	}
+	while (v!=NULL) {
+Iterable * aaaaak = NULL;
+		aaaaak = (Iterable *)v;
+		if (aaaaak!= NULL) {
+	(*(int *)aaaaak)++;
+}
+void * aaaabu = NULL;
+aaaabu = v;
+		v = aaaaak->value;
+		if (v!= NULL) {
+	(*(int *)v)++;
+}
+		if (aaaabu!= NULL) {
+	(*(int *)aaaabu)--;
+	if ((*(int *)aaaabu) == 0)
+		x3free(aaaabu);
+	aaaabu = NULL;
+	if ((*(int *)aaaabu) < 0)
+		printf("aaaabu ref count is smaller than 0\n");
+}
+		
+
+
+void * aaaaam = NULL;
+void * aaaaan = NULL;
+void * aaaaal = NULL;
+
+
+
+
+
+
+void * aaaabv = NULL;
+aaaabv = aaaaam;
+aaaaam = sum;
+if (aaaaam!= NULL) {
+	(*(int *)aaaaam)++;
+}
+if (aaaabv!= NULL) {
+	(*(int *)aaaabv)--;
+	if ((*(int *)aaaabv) == 0)
+		x3free(aaaabv);
+	aaaabv = NULL;
+	if ((*(int *)aaaabv) < 0)
+		printf("aaaabv ref count is smaller than 0\n");
+}
+if (sum!= NULL) {
+	(*(int *)sum)--;
+	if ((*(int *)sum) == 0)
+		x3free(sum);
+	sum = NULL;
+	if ((*(int *)sum) < 0)
+		printf("sum ref count is smaller than 0\n");
 }
 
 
 
-if (aaaabn!= NULL) {
-if ((*(int *)aaaabn) == 1)
-x3free(aaaabn);
-else
-(*(int *)aaaabn)--;
+void * aaaabw = NULL;
+aaaabw = aaaaan;
+aaaaan = v;
+if (aaaaan!= NULL) {
+	(*(int *)aaaaan)++;
+}
+if (aaaabw!= NULL) {
+	(*(int *)aaaabw)--;
+	if ((*(int *)aaaabw) == 0)
+		x3free(aaaabw);
+	aaaabw = NULL;
+	if ((*(int *)aaaabw) < 0)
+		printf("aaaabw ref count is smaller than 0\n");
+}
+if (v!= NULL) {
+	(*(int *)v)--;
+	if ((*(int *)v) == 0)
+		x3free(v);
+	v = NULL;
+	if ((*(int *)v) < 0)
+		printf("v ref count is smaller than 0\n");
 }
 
 
 
-if (aaaabf!= NULL) {
-if ((*(int *)aaaabf) == 1)
-x3free(aaaabf);
-else
-(*(int *)aaaabf)--;
+
+Integer* aaaabx;
+aaaabx  = (Integer*) x3malloc(sizeof(Integer));
+aaaabx->nrefs = 1;
+aaaabx->value=((Integer*)aaaaam)->value + ((Integer*)aaaaan)->value;
+void * aaaaby = NULL;
+aaaaby = sum;
+sum = aaaabx;
+if (sum!= NULL) {
+	(*(int *)sum)++;
 }
-return aaaabs;
+if (aaaaby!= NULL) {
+	(*(int *)aaaaby)--;
+	if ((*(int *)aaaaby) == 0)
+		x3free(aaaaby);
+	aaaaby = NULL;
+	if ((*(int *)aaaaby) < 0)
+		printf("aaaaby ref count is smaller than 0\n");
+}
+if (aaaaam!= NULL) {
+	(*(int *)aaaaam)--;
+	if ((*(int *)aaaaam) == 0)
+		x3free(aaaaam);
+	aaaaam = NULL;
+	if ((*(int *)aaaaam) < 0)
+		printf("aaaaam ref count is smaller than 0\n");
+}
+if (aaaaan!= NULL) {
+	(*(int *)aaaaan)--;
+	if ((*(int *)aaaaan) == 0)
+		x3free(aaaaan);
+	aaaaan = NULL;
+	if ((*(int *)aaaaan) < 0)
+		printf("aaaaan ref count is smaller than 0\n");
+}
+
+
+
+void * aaaabz = NULL;
+aaaabz = aaaaal;
+aaaaal = aaaaak;
+if (aaaaal!= NULL) {
+	(*(int *)aaaaal)++;
+}
+if (aaaabz!= NULL) {
+	(*(int *)aaaabz)--;
+	if ((*(int *)aaaabz) == 0)
+		x3free(aaaabz);
+	aaaabz = NULL;
+	if ((*(int *)aaaabz) < 0)
+		printf("aaaabz ref count is smaller than 0\n");
+}
+if (aaaaak!= NULL) {
+	(*(int *)aaaaak)--;
+	if ((*(int *)aaaaak) == 0)
+		x3free(aaaaak);
+	aaaaak = NULL;
+	if ((*(int *)aaaaak) < 0)
+		printf("aaaaak ref count is smaller than 0\n");
+}
+
+
+
+
+void* aaaaca;
+aaaaca = iterGetNext((void*) aaaaal);
+void * aaaacb = NULL;
+aaaacb = v;
+v = aaaaca;
+if (v!= NULL) {
+	(*(int *)v)++;
+}
+if (aaaacb!= NULL) {
+	(*(int *)aaaacb)--;
+	if ((*(int *)aaaacb) == 0)
+		x3free(aaaacb);
+	aaaacb = NULL;
+	if ((*(int *)aaaacb) < 0)
+		printf("aaaacb ref count is smaller than 0\n");
+}
+if (aaaaal!= NULL) {
+	(*(int *)aaaaal)--;
+	if ((*(int *)aaaaal) == 0)
+		x3free(aaaaal);
+	aaaaal = NULL;
+	if ((*(int *)aaaaal) < 0)
+		printf("aaaaal ref count is smaller than 0\n");
+}
+	}
+if (v!= NULL) {
+	(*(int *)v)--;
+	if ((*(int *)v) == 0)
+		x3free(v);
+	v = NULL;
+	if ((*(int *)v) < 0)
+		printf("v ref count is smaller than 0\n");
+}
+
+
+
+
+
+
+void * aaaacc = NULL;
+aaaacc = v;
+v = lst;
+if (v!= NULL) {
+	(*(int *)v)++;
+}
+if (aaaacc!= NULL) {
+	(*(int *)aaaacc)--;
+	if ((*(int *)aaaacc) == 0)
+		x3free(aaaacc);
+	aaaacc = NULL;
+	if ((*(int *)aaaacc) < 0)
+		printf("aaaacc ref count is smaller than 0\n");
+}
+if (lst!= NULL) {
+	(*(int *)lst)--;
+	if ((*(int *)lst) == 0)
+		x3free(lst);
+	lst = NULL;
+	if ((*(int *)lst) < 0)
+		printf("lst ref count is smaller than 0\n");
+}
+	if (v!=NULL) {
+		if ((*((int *)(v+1))) == 0) {
+void * aaaacd = NULL;
+aaaacd = v;
+			v = strToIter( ((String *)v)->value, ((String *)v)->len);
+if (v!= NULL) {
+	(*(int *)v)++;
+}
+if (aaaacd!= NULL) {
+	(*(int *)aaaacd)--;
+	if ((*(int *)aaaacd) == 0)
+		x3free(aaaacd);
+	aaaacd = NULL;
+	if ((*(int *)aaaacd) < 0)
+		printf("aaaacd ref count is smaller than 0\n");
+}
+		}
+	}
+	while (v!=NULL) {
+Iterable * aaaaao = NULL;
+		aaaaao = (Iterable *)v;
+		if (aaaaao!= NULL) {
+	(*(int *)aaaaao)++;
+}
+void * aaaace = NULL;
+aaaace = v;
+		v = aaaaao->value;
+		if (v!= NULL) {
+	(*(int *)v)++;
+}
+		if (aaaace!= NULL) {
+	(*(int *)aaaace)--;
+	if ((*(int *)aaaace) == 0)
+		x3free(aaaace);
+	aaaace = NULL;
+	if ((*(int *)aaaace) < 0)
+		printf("aaaace ref count is smaller than 0\n");
+}
+		
+
+
+void * aaaaaq = NULL;
+void * aaaaar = NULL;
+void * aaaaap = NULL;
+
+
+
+void * aaaacf = NULL;
+aaaacf = aaaaaq;
+aaaaaq = sum;
+if (aaaaaq!= NULL) {
+	(*(int *)aaaaaq)++;
+}
+if (aaaacf!= NULL) {
+	(*(int *)aaaacf)--;
+	if ((*(int *)aaaacf) == 0)
+		x3free(aaaacf);
+	aaaacf = NULL;
+	if ((*(int *)aaaacf) < 0)
+		printf("aaaacf ref count is smaller than 0\n");
+}
+if (sum!= NULL) {
+	(*(int *)sum)--;
+	if ((*(int *)sum) == 0)
+		x3free(sum);
+	sum = NULL;
+	if ((*(int *)sum) < 0)
+		printf("sum ref count is smaller than 0\n");
+}
+
+
+
+void * aaaacg = NULL;
+aaaacg = aaaaar;
+aaaaar = v;
+if (aaaaar!= NULL) {
+	(*(int *)aaaaar)++;
+}
+if (aaaacg!= NULL) {
+	(*(int *)aaaacg)--;
+	if ((*(int *)aaaacg) == 0)
+		x3free(aaaacg);
+	aaaacg = NULL;
+	if ((*(int *)aaaacg) < 0)
+		printf("aaaacg ref count is smaller than 0\n");
+}
+if (v!= NULL) {
+	(*(int *)v)--;
+	if ((*(int *)v) == 0)
+		x3free(v);
+	v = NULL;
+	if ((*(int *)v) < 0)
+		printf("v ref count is smaller than 0\n");
+}
+
+
+
+
+Integer* aaaach;
+aaaach  = (Integer*) x3malloc(sizeof(Integer));
+aaaach->nrefs = 1;
+aaaach->value=((Integer*)aaaaaq)->value + ((Integer*)aaaaar)->value;
+void * aaaaci = NULL;
+aaaaci = sum;
+sum = aaaach;
+if (sum!= NULL) {
+	(*(int *)sum)++;
+}
+if (aaaaci!= NULL) {
+	(*(int *)aaaaci)--;
+	if ((*(int *)aaaaci) == 0)
+		x3free(aaaaci);
+	aaaaci = NULL;
+	if ((*(int *)aaaaci) < 0)
+		printf("aaaaci ref count is smaller than 0\n");
+}
+if (aaaaaq!= NULL) {
+	(*(int *)aaaaaq)--;
+	if ((*(int *)aaaaaq) == 0)
+		x3free(aaaaaq);
+	aaaaaq = NULL;
+	if ((*(int *)aaaaaq) < 0)
+		printf("aaaaaq ref count is smaller than 0\n");
+}
+if (aaaaar!= NULL) {
+	(*(int *)aaaaar)--;
+	if ((*(int *)aaaaar) == 0)
+		x3free(aaaaar);
+	aaaaar = NULL;
+	if ((*(int *)aaaaar) < 0)
+		printf("aaaaar ref count is smaller than 0\n");
+}
+
+
+
+void * aaaacj = NULL;
+aaaacj = aaaaap;
+aaaaap = aaaaao;
+if (aaaaap!= NULL) {
+	(*(int *)aaaaap)++;
+}
+if (aaaacj!= NULL) {
+	(*(int *)aaaacj)--;
+	if ((*(int *)aaaacj) == 0)
+		x3free(aaaacj);
+	aaaacj = NULL;
+	if ((*(int *)aaaacj) < 0)
+		printf("aaaacj ref count is smaller than 0\n");
+}
+if (aaaaao!= NULL) {
+	(*(int *)aaaaao)--;
+	if ((*(int *)aaaaao) == 0)
+		x3free(aaaaao);
+	aaaaao = NULL;
+	if ((*(int *)aaaaao) < 0)
+		printf("aaaaao ref count is smaller than 0\n");
+}
+
+
+
+
+void* aaaack;
+aaaack = iterGetNext((void*) aaaaap);
+void * aaaacl = NULL;
+aaaacl = v;
+v = aaaack;
+if (v!= NULL) {
+	(*(int *)v)++;
+}
+if (aaaacl!= NULL) {
+	(*(int *)aaaacl)--;
+	if ((*(int *)aaaacl) == 0)
+		x3free(aaaacl);
+	aaaacl = NULL;
+	if ((*(int *)aaaacl) < 0)
+		printf("aaaacl ref count is smaller than 0\n");
+}
+if (aaaaap!= NULL) {
+	(*(int *)aaaaap)--;
+	if ((*(int *)aaaaap) == 0)
+		x3free(aaaaap);
+	aaaaap = NULL;
+	if ((*(int *)aaaaap) < 0)
+		printf("aaaaap ref count is smaller than 0\n");
+}
+	}
+if (v!= NULL) {
+	(*(int *)v)--;
+	if ((*(int *)v) == 0)
+		x3free(v);
+	v = NULL;
+	if ((*(int *)v) < 0)
+		printf("v ref count is smaller than 0\n");
+}
+if (sum!= NULL) {
+	(*(int *)sum)--;
+	if ((*(int *)sum) == 0)
+		x3free(sum);
+	sum = NULL;
+	if ((*(int *)sum) < 0)
+		printf("sum ref count is smaller than 0\n");
+}
+
+
+
+
+
+
+String* aaaacm;
+aaaacm = (String *) x3malloc(sizeof(String));
+(aaaacm->isIter) = 0;
+aaaacm->value = (char*) x3malloc(sizeof("20"));
+(aaaacm->nrefs) = 1;
+aaaacm->len = sizeof("20") - 1;
+mystrcpy(aaaacm->value, "20");
+void * aaaacn = NULL;
+aaaacn = aaaaas;
+aaaaas = aaaacm;
+if (aaaaas!= NULL) {
+	(*(int *)aaaaas)++;
+}
+if (aaaacn!= NULL) {
+	(*(int *)aaaacn)--;
+	if ((*(int *)aaaacn) == 0)
+		x3free(aaaacn);
+	aaaacn = NULL;
+	if ((*(int *)aaaacn) < 0)
+		printf("aaaacn ref count is smaller than 0\n");
+}
+
+
+
+Iterable* aaaaco;
+aaaaco = (Iterable*) x3malloc(sizeof(Iterable));
+aaaaco->isIter = 1;
+aaaaco->nrefs = 1;
+aaaaco->value = aaaaas;
+aaaaco->additional = NULL;
+aaaaco->next = NULL;
+aaaaco->concat = NULL;
+if (aaaaas!= NULL) {
+	(*(int *)aaaaas)++;
+}
+if (aaaaco!= NULL) {
+(*(int *)aaaaco)--;
+}
+return aaaaco;
 }
 
 
