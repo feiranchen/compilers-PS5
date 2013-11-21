@@ -17,7 +17,8 @@ public abstract class CuExpr {
 	protected ArrayList<String> def = new ArrayList<String>();
 	protected ArrayList<String> use = new ArrayList<String>();
 	protected Pair<List<CuStat>, CuExpr> hir;
-	private CuType type = null;
+	//decorate the tree with its type when typechecking, %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%TO DO%%%%%%%%%%%%%%%%%%%%
+	protected CuType type = null;
 	protected  Set<CuVvc> containsVar= new HashSet<CuVvc>();
 	public void add(List<CuType> pt, List<CuExpr> es) {}
 	public final CuType getType(CuContext context) throws NoSuchTypeException {
@@ -137,6 +138,7 @@ class AndExpr extends CuExpr{
 	}
 	@Override protected CuType calculateType(CuContext context) throws NoSuchTypeException {
 		//right should pass in a type
+		
 		return binaryExprType(context, left.getType(context).id, super.methodId, right.getType(context));
 	}
 	
