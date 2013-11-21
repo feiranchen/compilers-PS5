@@ -620,8 +620,8 @@ Helper.P("if end, e is " + e.toString());
 }
 
 class WhileStat extends CuStat{
-	private CuExpr e;
-	private CuStat s1;
+	public CuExpr e;
+	public CuStat s1;
 	public WhileStat (CuExpr ex, CuStat st){
 		e = ex;
 		s1 = st;
@@ -711,7 +711,7 @@ class WhileStat extends CuStat{
 }
 
 class ReturnStat extends CuStat{
-	private CuExpr e;
+	public CuExpr e;
 	public ReturnStat (CuExpr ee) {
 		e = ee;
 		super.text = "return " + e.toString() + " ;";

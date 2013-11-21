@@ -237,7 +237,7 @@ Helper.P("common parent of types is " + type.toString());
 	
 	@Override
 	public Pair<List<CuStat>, CuExpr> toHIR() {
-		List<CuStat> stats = new ArrayList<>();
+		List<CuStat> stats = new ArrayList<CuStat>();
 		Pair<List<CuStat>, CuExpr> leftToHir = new Pair<List<CuStat>, CuExpr>();
 		Pair<List<CuStat>, CuExpr> rightToHir = new Pair<List<CuStat>, CuExpr>();
 		String name1 = Helper.getVarName(), name2 = Helper.getVarName();
