@@ -544,13 +544,14 @@ class BrkExpr extends CuExpr {
 					+ tempNameArr.get(i) + "->next = NULL;\n" 
 					+ tempNameArr.get(i)+ "->concat = NULL;\n";
 			
-			if (tempNameArr.get(i+1) != "NULL")
+			if (!tempNameArr.get(i+1).equals("NULL") && !tempDataArr.isEmpty())
 				name += Helper.incrRefCount(tempDataArr.get(i+1));
 			
 			//def.add(tempNameArr.get(i+1));
 		}	
 			
-		name += Helper.incrRefCount(tempDataArr.get(0));
+		if (!tempDataArr.isEmpty())
+			name += Helper.incrRefCount(tempDataArr.get(0));
 		//def.add(tempNameArr.get(0));
 		
 		cText = tempNameArr.get(0);
@@ -693,8 +694,9 @@ class CString extends CuExpr {
 				+ "(%s->isIter) = 0;\n"
 				+ "%s->value = (char*) x3malloc(sizeof(%s));\n"
 				+ "(%s->nrefs) = 0;\n"
+				+ "(%s->isStr) = 1;\n"
 				+ "%s->len = sizeof(%s) - 1;\n"
-				+ "mystrcpy(%s->value, %s);\n", temp, temp, temp, temp, val, temp, temp, val, temp, val);	
+				+ "mystrcpy(%s->value, %s);\n", temp, temp, temp, temp, val, temp, temp, temp, val, temp, val);	
 		
 		super.cText = temp;
 		super.castType = "String";
@@ -2413,8 +2415,11 @@ class ThroughExpr extends CuExpr{
 			
 			else {
 				iterType = "Integer";
-				name += left.construct();
-				name += right.construct();
+				String leftC = left.construct();
+				String rightC = right.construct();
+				
+				name += leftC;
+				name += rightC;
 			
 				name +=  "Iterable* " + iter + ";\n" + iter +  " = (Iterable*) x3malloc(sizeof(Iterable));\n"
 						+ iter + "->isIter = 1;\n"
@@ -2423,6 +2428,11 @@ class ThroughExpr extends CuExpr{
 						+ iter + "->additional = " + rightToC + ";\n"
 						+ iter + "->next = &" + left.getCastType() + "_through;\n"
 						+ iter + "->concat = NULL;\n";
+				
+				if(leftC.equals(""))
+					name += Helper.incrRefCount(leftToC);
+				if(rightC.equals(""))
+					name += Helper.incrRefCount(rightToC);
 				
 				cText = "checkIter(" + iter + ")";
 			}
@@ -3092,18 +3102,25 @@ Helper.P(" 1mapping is " + mapping.toString());
 		if(es == null) 
 		{
 			Pair<List<CuStat>, CuExpr> temp = new Pair<List<CuStat>, CuExpr>();
-			//String name1 = Helper.getVarName();
+			String name1 = Helper.getVarName();
 			List<CuStat> stats = new ArrayList<CuStat>();
 			CuExpr exp = new VvExp(val);
 			
-			//CuVvc vvc = new Vv(name1);			
-			//CuStat a = new AssignStat(vvc, exp);
-			//stats.add(a);
-			
-			exp.use.add(val);
+			if(val.equals("input")) {
+				CuVvc vvc = new Vv(name1);			
+				CuStat a = new AssignStat(vvc, exp);
+				stats.add(a);
+				
+				CuExpr e = new VvExp(name1);
+				e.use.add(e.toString());
+				temp.setSecond(e);
+			}
+			else {
+				exp.use.add(val);
+				temp.setSecond(exp);				
+			}
 			
 			temp.setFirst(stats);
-			temp.setSecond(exp);
 			
 			return temp;
 		}
@@ -3160,6 +3177,7 @@ Helper.P(" 1mapping is " + mapping.toString());
 				castType = "Iterable";
 				String len = Helper.getVarName();
 				String iterNew = Helper.getVarName();
+				//iter = "input";
 								
 				if(!initialized) {
 				

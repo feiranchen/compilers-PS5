@@ -7,34 +7,73 @@ typedef struct top {
 
 typedef struct integer {
 	int nrefs;
-	int value;	
+	int isIter;	
+	int isStr;
+	int value;
 } Integer;
 
 typedef struct string {
 	int nrefs;
 	int isIter;
+	int isStr;
 	char* value;
 	int len;
 } String;
 
 typedef struct boolean {
 	int nrefs;
+	int isIter;
+	int isStr;
 	int value;
 } Boolean;
 
 typedef struct character {
 	int nrefs;
+	int isIter;
+	int isStr;
 	char value;
 } Character;
 
 typedef struct iter{
 	int nrefs;
 	int isIter;
+	int isStr;
 	void* value;
 	void* additional;
 	struct iter* (*next)(void*);
 	struct iter* concat;
 }Iterable;
+
+void freeStr(void* str)
+{
+	if (((String*)str)->value != NULL) {
+		x3free(((String*)str)->value);
+	}
+			
+	if ((String*)str != NULL) {
+		x3free((String*)str);
+	}
+}
+
+Iterable* Integer_through(void* head){
+	Iterable* last;
+	last = (Iterable*) head;
+	if ((((Integer*) last->value)->value) == (((Integer*) last->additional)->value) || (((Integer*) last->value)->value) > (((Integer*) last->additional)->value)){
+		return NULL;
+	}
+	else {
+		Iterable* this=x3malloc(sizeof(Iterable));
+		this->isIter = 1;
+		this->nrefs=1;
+		(((Integer*)(last->value))->value)++; 
+		this->value = last->value; 
+		(((Integer*)(last->value))->nrefs)++;
+		this->additional = last->additional;
+		this->next = last->next;	
+		this->concat = last->concat;
+		return this;
+	}
+}
 
 void freeIter(void* iter) {
 	if (iter == NULL)
@@ -42,17 +81,35 @@ void freeIter(void* iter) {
 	
 	if (((Iterable*)iter)->next!= NULL){	
 		if (((Iterable*)iter)->value != NULL) {
-				(*(int *)(((Iterable*)iter)->value))--;
-				if ((*(int *)(((Iterable*)iter)->value)) == 0)
+			(*(int *)(((Iterable*)iter)->value))--;
+			if ((*(int *)(((Iterable*)iter)->value)) == 0) {
+				if ((*((int*)((Iterable*)iter)->value+2)) == 1)
+					freeStr(((Iterable*)iter)->value);
+				else if ((*((int*)((Iterable*)iter)->value+1)) == 1)
+					freeIter(((Iterable*)iter)->value);
+				else
 					x3free(((Iterable*)iter)->value);
+			}
+			if (((Iterable*)iter)->next == &Integer_through) {
+				if ((*((int*)((Iterable*)iter)->additional+2)) == 1)
+					freeStr(((Iterable*)iter)->additional);
+				else if ((*((int*)((Iterable*)iter)->additional+1)) == 1)
+					freeIter(((Iterable*)iter)->additional);
+				else
+					x3free(((Iterable*)iter)->additional);
+			}
+				
 		}
+		
+		
+			 
 			
 		if (((Iterable*)iter)->concat != NULL)
 				freeIter(((Iterable*)iter)->concat);
 			
 		if ((Iterable*)iter != NULL) {
 				(*(int *)(Iterable*)iter)--;
-				if ((*(int *)(Iterable*)iter) == 0)
+				if ((*(int *)(Iterable*)iter) <= 0)
 					x3free((Iterable*)iter);
 		}
 	}
@@ -63,8 +120,14 @@ void freeIter(void* iter) {
 			iter = iter1;
 			if (((Iterable*)iter)->value != NULL) {
 				(*(int *)(((Iterable*)iter)->value))--;
-				if ((*(int *)(((Iterable*)iter)->value)) == 0)
-					x3free(((Iterable*)iter)->value);
+				if ((*(int *)(((Iterable*)iter)->value)) == 0){
+					if ((*((int*)((Iterable*)iter)->value+2)) == 1)
+						freeStr(((Iterable*)iter)->value);
+					else if ((*((int*)((Iterable*)iter)->value+1)) == 1)
+						freeIter(((Iterable*)iter)->value);
+					else
+						x3free(((Iterable*)iter)->value);
+				}
 			}
 			
 			iter1 = ((Iterable*)iter)->additional;
@@ -72,20 +135,29 @@ void freeIter(void* iter) {
 				freeIter(((Iterable*)iter)->concat);
 			if ((Iterable*)iter != NULL) {
 				(*(int *)(Iterable*)iter)--;
-				if ((*(int *)(Iterable*)iter) == 0)
+				if ((*(int *)(Iterable*)iter) <= 0)
 					x3free((Iterable*)iter);
 			}			
 		}
 			
 			if (((Iterable*)iter2)->value != NULL) {
 				(*(int *)(((Iterable*)iter2)->value))--;
-				if ((*(int *)(((Iterable*)iter2)->value)) == 0)
-					x3free(((Iterable*)iter2)->value);
+				if ((*(int *)(((Iterable*)iter2)->value)) == 0) {
+					if ((*((int*)((Iterable*)iter)->value+2)) == 1)
+						freeStr(((Iterable*)iter2)->value);
+					else if ((*((int*)((Iterable*)iter)->value+1)) == 1)
+						freeIter(((Iterable*)iter2)->value);
+					else
+						x3free(((Iterable*)iter2)->value);
+				}
 			}
+			
+			if (((Iterable*)iter2)->concat != NULL)
+				freeIter(((Iterable*)iter2)->concat);
 			
 			if ((Iterable*)iter2 != NULL) {
 				(*(int *)(Iterable*)iter2)--;
-				if ((*(int *)(Iterable*)iter2) == 0)
+				if ((*(int *)(Iterable*)iter2) <= 0)
 					x3free((Iterable*)iter2);
 			}
 	}
@@ -93,9 +165,10 @@ void freeIter(void* iter) {
 
 
 Iterable* iterGetNext(Iterable* last){
-	Iterable* this;
-	this = x3malloc(sizeof(Iterable));
-	this->isIter = 1;
+	if (last == NULL)
+		return NULL;
+		
+	Iterable* this = NULL;
 	if (last->next!= NULL){	
 		this = (last->next)(last);
 	}
@@ -125,22 +198,6 @@ Iterable* iterGetNext(Iterable* last){
 	}
 	
 	return (this);
-}
-
-
-void freeStr(void* str)
-{
-	if (((String*)str)->value != NULL) {
-	(*(int *)(((String*)str)->value))--;
-	if ((*(int *)(((String*)str)->value)) == 0)
-		x3free(((String*)str)->value);
-	}
-			
-	if ((String*)str != NULL) {
-	(*(int *)(String*)str)--;
-	if ((*(int *)(String*)str) == 0)
-		x3free((String*)str);
-	}
 }
 
 Iterable* concatenate(Iterable* fst, Iterable* snd){
@@ -234,6 +291,8 @@ Iterable* concatenate(Iterable* fst, Iterable* snd){
 	while(temp->concat!=NULL) {
 		temp=temp->concat;
 	}
+	
+	temp->concat = second;
 
 	if (temp->additional != NULL) {
 		while(temp) {
@@ -261,25 +320,7 @@ Iterable* Integer_onwards(void* head){
 	return this;
 }
 
-Iterable* Integer_through(void* head){
-	Iterable* last;
-	last = (Iterable*) head;
-	if ((((Integer*) last->value)->value) == (((Integer*) last->additional)->value) || (((Integer*) last->value)->value) > (((Integer*) last->additional)->value)){
-		return NULL;
-	}
-	else {
-		Iterable* this=x3malloc(sizeof(Iterable));
-		this->isIter = 1;
-		this->nrefs=1;
-		(((Integer*)(last->value))->value)++; 
-		this->value = last->value; 
-		(((Integer*)(last->value))->nrefs)++;
-		this->additional = last->additional;
-		this->next = last->next;	
-		this->concat = last->concat;
-		return this;
-	}
-}
+
 
 Iterable* input_onwards(void* head){
 	int len;
@@ -307,7 +348,6 @@ Iterable* input_onwards(void* head){
 
 	return this;
 }
-
 
 int mystrcmp(const char *s1, const char *s2) 
 { 
