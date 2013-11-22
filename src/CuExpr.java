@@ -175,13 +175,21 @@ class AndExpr extends CuExpr{
 		CuStat a = new AssignStat(temp1, leftToHir.getSecond());
 		CuStat b = new AssignStat(temp2, rightToHir.getSecond());
 		
-		//probably need to do something to the assign statement here
+		//added for primitive optimization
+		a.setUnboxType();
+		b.setUnboxType();
 		
 		stats.add(a);
 		stats.add(b);
 		
 		CuExpr var1 = new VvExp(name1);
 		CuExpr var2 = new VvExp(name2);
+		//we also know var1 and var2 should have be boolean type
+		var1.boxed = false;
+		var1.expType = "Boolean";
+		var2.boxed = false;
+		var2.expType = "Boolean";
+		
 		//AndExpr has box unset in the constructor, so don't need to anything here
 		CuExpr expr = new AndExpr(var1, var2);	
 		
@@ -241,7 +249,13 @@ class AppExpr extends CuExpr {
 		this.right = e2;
 		containsVar.addAll(left.containsVar);
 		containsVar.addAll(right.containsVar);
-		super.text = e1.toString() + " ++ " + e2.toString();
+		
+		super.expType = "Iterable";
+		super.boxed = true;
+	}
+	@Override public String toString() {
+		super.text = left.toString() + " ++ " + right.toString();
+		return super.text;
 	}
 	@Override protected CuType calculateType(CuContext context) throws NoSuchTypeException {
 		CuType t1 = left.calculateType(context);
@@ -281,8 +295,17 @@ Helper.P("common parent of types is " + type.toString());
 		stats.add(a);
 		stats.add(b);
 		
+		//added for opt3
+		a.setUnboxType();
+		b.setUnboxType();
+		
 		CuExpr var1 = new VvExp(name1);
 		CuExpr var2 = new VvExp(name2);
+		//added for opt3
+		var1.boxed = true;
+		var1.expType = "Iterable";
+		var2.boxed = true;
+		var2.expType = "Iterable";		
 		CuExpr expr = new AppExpr(var1, var2);		
 		
 		//if (leftToHir.getFirst().isEmpty())
@@ -414,8 +437,13 @@ class BrkExpr extends CuExpr {
 		for (CuExpr e : es){
 			containsVar.addAll(e.containsVar);
 		}
+		super.boxed = true;
+		super.expType = "Iterable";
+	}
+	@Override
+	public String toString() {
 		super.text=Helper.printList("[", val, "]", ",");
-		
+		return super.text;
 	}
 	@Override protected CuType calculateType(CuContext context) {
 		//System.out.println("in bracket expression, start");
@@ -446,7 +474,14 @@ class BrkExpr extends CuExpr {
 			CuStat a = new AssignStat(temp1, expToHir.getSecond());
 			stats.add(a);
 			
+			//assume getSecond already has boxed and expType set, should be correct but not 100% sure
+			a.setUnboxType();
+			
 			CuExpr var1 = new VvExp(name1);
+			//var1 should be consistent with temp/name1, if that is unboxed, this VvExp is also unboxed
+			var1.boxed = a.boxed;
+			var1.expType = a.statType;
+			
 			expressions.add(var1);
 			
 			use.add(var1.toString());	
