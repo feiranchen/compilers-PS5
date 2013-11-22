@@ -37,7 +37,7 @@ public class Cubex {
 			//even if rejected, we still generate a 
 			//System.exit(-2);
 		}
-		//first, convert to HIR
+		//first, convert to HIR, in debug mode, this print out the first HIR
         ourProgram.toHIR();
         //next, build CFG, use and def sets are built here
         ourProgram.buildCFG();
@@ -45,6 +45,11 @@ public class Cubex {
         CSE.startCSE(((FullPrg)ourProgram).entry);
         // *********for the first optimization, put your method here***************
         
+        //after cse, print out the HIR four debugging
+        if (Helper.debug){
+        	System.out.println("PRINT HIR========================================");
+        	ourProgram.printHIR();
+        }
         //next, build the in out sets
         ourProgram.buildSets();
         

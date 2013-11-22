@@ -147,6 +147,16 @@ class AndExpr extends CuExpr{
 		super.boxed = false;
 	}
 	
+	@Override
+	public boolean equals(Object that){
+		if (that instanceof AndExpr &&
+				left.equals(((AndExpr)that).left)&&
+				right.equals(((AndExpr)that).right))
+			return true;
+		else 
+			return false;
+	}
+	
 	@Override public String toString() {
 		super.text = String.format("%s . %s < > ( %s )", left.toString(), super.methodId, right.toString());
 		return super.text;
@@ -252,6 +262,15 @@ class AppExpr extends CuExpr {
 		
 		super.expType = "Iterable";
 		super.boxed = true;
+	}
+	@Override
+	public boolean equals(Object that){
+		if (that instanceof AppExpr &&
+				left.equals(((AppExpr)that).left)&&
+				right.equals(((AppExpr)that).right))
+			return true;
+		else 
+			return false;
 	}
 	@Override public String toString() {
 		super.text = left.toString() + " ++ " + right.toString();
@@ -574,7 +593,15 @@ class CBoolean extends CuExpr{
 		if (val == null) { throw new NoSuchTypeException(Helper.getLineInfo());}
 		return CuType.bool;
 	}
-	
+
+	@Override
+	public boolean equals(Object that){
+		if (that instanceof CBoolean &&
+				val==(((CBoolean)that).val))
+			return true;
+		else 
+			return false;
+	}
 	@Override
 	public Pair<List<CuStat>, CuExpr> toHIR() {
 		List<CuStat> cuStat = new ArrayList<CuStat>();
@@ -618,6 +645,14 @@ class CInteger extends CuExpr {
 		super.text=i.toString();
 		
 	}
+	@Override
+	public boolean equals(Object that){
+		if (that instanceof CInteger &&
+				val==(((CInteger)that).val))
+			return true;
+		else 
+			return false;
+	}
 	@Override protected CuType calculateType(CuContext context) {
 		if (val == null) { throw new NoSuchTypeException(Helper.getLineInfo());}
 		return CuType.integer;
@@ -654,6 +689,14 @@ class CString extends CuExpr {
 		val=s;
 		super.text=s;
 		
+	}
+	@Override
+	public boolean equals(Object that){
+		if (that instanceof CString &&
+				val.equals(((CString)that).val))
+			return true;
+		else 
+			return false;
 	}
 	@Override protected CuType calculateType(CuContext context) {
 		if (val == null) { throw new NoSuchTypeException(Helper.getLineInfo());}
@@ -2107,6 +2150,15 @@ class PlusExpr extends CuExpr{
 		super.methodId = "plus";
 		super.text = String.format("%s . %s < > ( %s )", left.toString(), super.methodId, right.toString());
 	}
+	@Override
+	public boolean equals(Object that){
+		if (that instanceof PlusExpr &&
+				left.equals(((PlusExpr)that).left)&&
+				right.equals(((PlusExpr)that).right))
+			return true;
+		else 
+			return false;
+	}
 	@Override protected CuType calculateType(CuContext context) throws NoSuchTypeException {
 		//System.out.println("in plus expr begin");
 		CuType lt = left.getType(context);
@@ -2233,7 +2285,18 @@ class ThroughExpr extends CuExpr{
 		super.methodId = "through";
 		super.text = String.format("%s . %s < > ( %s , %s , %s )", left.toString(), methodId, right.toString(), low, up);
 	}
-
+	@Override
+	public boolean equals(Object that){
+		if (that instanceof ThroughExpr &&
+				left.equals(((ThroughExpr)that).left)&&
+				right.equals(((ThroughExpr)that).right)&&
+				bLow==((ThroughExpr)that).bLow&&
+				bUp==((ThroughExpr)that).bUp)
+			return true;
+		else 
+			return false;
+	}
+	
 	@Override protected CuType calculateType(CuContext context) throws NoSuchTypeException {
 		boolean b1 = left.isTypeOf(context, CuType.integer) && right.isTypeOf(context, CuType.integer);
 		boolean b2 = left.isTypeOf(context, CuType.bool) && right.isTypeOf(context, CuType.bool);

@@ -27,6 +27,8 @@ public abstract class CuProgr {
 	public void buildSets() {}
 	
 	public void setUseDef() {}
+	
+	public void printHIR() {}
 }
 
 class FullPrg extends CuProgr {
@@ -47,6 +49,13 @@ class FullPrg extends CuProgr {
 			System.out.println(s.toString());
 		}
 	}
+	
+	@Override public void printHIR() {
+		for (CuProgr pr : elements) 
+			pr.printHIR();
+		System.out.println(s.toString());
+	}
+	
 	@Override public void buildCFG()  {		
 		for (CuProgr pr : elements) {
 			if (pr instanceof ClassPrg) {
@@ -198,6 +207,10 @@ class FunPrg extends CuProgr {
 		}
 	}
 	
+	@Override public void printHIR() {
+		System.out.println(this.statement.toString());
+	}
+	
 	@Override public void buildCFG() {
 		super.entry = this.statement.getFirst();
 		this.statement.buildCFG();
@@ -275,6 +288,9 @@ class StatPrg extends CuProgr {
 		if (Helper.debug) {
 			System.out.println(stat.toString());
 		}
+	}
+	@Override public void printHIR() {
+		System.out.println(stat.toString());
 	}
 	@Override public String toC(ArrayList<String> localVars) {
 		super.ctext = stat.toC(localVars);
