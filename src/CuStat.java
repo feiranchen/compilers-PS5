@@ -59,23 +59,38 @@ public abstract class CuStat {
 	}
 	
 	public CuStat getNext() {
-		return successors.get(0);
+		if (successors.isEmpty())
+			return null;
+		else
+			return successors.get(0);
 	}
 	
 	public CuStat ifBranch() {
-		return successors.get(1);
+		if (successors.size()<1)
+			return null;
+		else
+			return successors.get(1);
 	}
 	
 	public CuStat elseBranch() {
-		return successors.get(0);
+		if (successors.isEmpty())
+			return null;
+		else
+			return successors.get(0);
 	}
 	
 	public CuStat noBranch() {
-		return successors.get(0);
+		if (successors.isEmpty())
+			return null;
+		else
+			return successors.get(0);
 	}
 	
 	public CuStat whileBranch() {
-		return successors.get(1);
+		if (successors.size()<1)
+			return null;
+		else
+			return successors.get(1);
 	}
 	
 }

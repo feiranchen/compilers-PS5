@@ -43,8 +43,8 @@ public class CSE {
 				for (Entry<CuVvc, ArrayList<CuExpr>> elem : varMap.entrySet()){
 					exprMap.put(elem.getValue().get(0),elem.getKey());
 				}
-				varMap.get(s.var).add(s.ee);
 			}
+			varMap.get(s.var).add(s.ee);
 			
 			//simplify and update the expression map
 			((AssignStat) orgS).ee=updateExpr(s.var, s.ee,exprMap);
@@ -114,6 +114,8 @@ public class CSE {
 					//HashMap<CuVvc,ArrayList<CuExpr>>  varMapMerged = new HashMap<CuVvc,ArrayList<CuExpr>>(varMap);
 					//HashMap<CuExpr,CuVvc> 			 exprMapMerged = new HashMap<CuExpr, CuVvc>(exprMap);
 				/*
+				// We only care about: new variables(old, global ones are always immutable) 
+				// that exist in both branches and has the same value (otherwise value can't be exploited and thus no need to store)
 				for (Entry e :varMapElse.entrySet()){
 					if (varMapIf.containsKey(e.getKey())&&
 							(e.getKey().equals(varMapIf.get(e.getKey())){
@@ -147,7 +149,7 @@ public class CSE {
 		else if (orgS instanceof ReturnStat){
 			ReturnStat s=(ReturnStat)orgS;
 			//simplify. no need to maintain map
-			((AssignStat) orgS).ee=updateExpr(null, s.e,exprMap);
+			s.e=updateExpr(null, s.e,exprMap);
 
 			return orgS.getNext();
 		}
@@ -280,10 +282,12 @@ public class CSE {
 				//even if argument set is null that's fine
 				ArrayList<CuExpr> updateInput=new ArrayList<CuExpr>();
 				//TODO: make sure you don't mess up the sequence here
-				for (CuExpr elem :e.es){
-					updateInput.add(updateExpr(null, elem,exprMap));
+				if (e.es!=null){
+					for (CuExpr elem :e.es){
+						updateInput.add(updateExpr(null, elem,exprMap));
+					}
+					e.es=updateInput;
 				}
-				e.es=updateInput;
 				return e;
 			}else {
 				System.out.println("\n\n Did not update expr: "+orgE.toString());
