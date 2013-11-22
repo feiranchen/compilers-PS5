@@ -41,12 +41,13 @@ public class Cubex {
         ourProgram.toHIR();
         //next, build CFG, use and def sets are built here
         ourProgram.buildCFG();
+
+        CSE.startCSE(((FullPrg)ourProgram).entry);
         // *********for the first optimization, put your method here***************
         
         //next, build the in out sets
         ourProgram.buildSets();
         
-        CSE.startCSE(((FullPrg)ourProgram).entry);
         
 		ArrayList<String> localVars = new ArrayList<String>();
 		PrintWriter writer = new PrintWriter("out.c", "UTF-8");
