@@ -1,5 +1,6 @@
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -18,6 +19,7 @@ public abstract class CuStat {
 	protected List<String> defV = new ArrayList<String>();
 	
 	protected List<CuStat> successors = new ArrayList<CuStat>();
+	protected HashSet<IfStat> ifElseMergePoint=new HashSet<IfStat>();
 	
 	//initially just created for assignstatements
 	protected boolean boxed = true;
@@ -57,23 +59,38 @@ public abstract class CuStat {
 	}
 	
 	public CuStat getNext() {
-		return successors.get(0);
+		if (successors.isEmpty())
+			return null;
+		else
+			return successors.get(0);
 	}
 	
 	public CuStat ifBranch() {
-		return successors.get(1);
+		if (successors.size()<1)
+			return null;
+		else
+			return successors.get(1);
 	}
 	
 	public CuStat elseBranch() {
-		return successors.get(0);
+		if (successors.isEmpty())
+			return null;
+		else
+			return successors.get(0);
 	}
 	
 	public CuStat noBranch() {
-		return successors.get(0);
+		if (successors.isEmpty())
+			return null;
+		else
+			return successors.get(0);
 	}
 	
 	public CuStat whileBranch() {
-		return successors.get(1);
+		if (successors.size()<1)
+			return null;
+		else
+			return successors.get(1);
 	}
 	
 }
@@ -536,7 +553,7 @@ class ConvertToIter extends CuStat {
 }
 
 class IfStat extends CuStat{
-	private CuExpr e;
+	public CuExpr e;
 	private CuStat s1=null;
 	private CuStat s2=null;
 	public IfStat (CuExpr ex, CuStat st) {
@@ -740,8 +757,8 @@ Helper.P("if end, e is " + e.toString());
 }
 
 class WhileStat extends CuStat{
-	private CuExpr e;
-	private CuStat s1;
+	public CuExpr e;
+	public CuStat s1;
 	public WhileStat (CuExpr ex, CuStat st){
 		e = ex;
 		s1 = st;
@@ -839,7 +856,7 @@ class WhileStat extends CuStat{
 }
 
 class ReturnStat extends CuStat{
-	private CuExpr e;
+	public CuExpr e;
 	public ReturnStat (CuExpr ee) {
 		e = ee;
 	}
@@ -880,9 +897,19 @@ class ReturnStat extends CuStat{
 		} */
 		
 		//special process for return statement
-		super.ctext += "if (" + exp_toC + "!= NULL) {\n";
+		/*super.ctext += "if (" + exp_toC + "!= NULL) {\n";
 		super.ctext += "(*(int *)" + exp_toC + ")--;\n";
-		super.ctext += "}\n";
+		super.ctext += "}\n"; */
+		
+		if ((e instanceof VvExp) && (!e.isFunCall())) {
+			super.outV.add(e.toString());
+			//we don't deallocate it, but we need to decrease its ref count
+			super.ctext += "if (" + exp_toC + "!= NULL) {\n";
+			super.ctext += "(*(int *)" + exp_toC + ")--;\n";
+			super.ctext += "}\n"; 
+		}
+		
+		super.ctext += Helper.liveVarAnalysis(super.inV, super.defV, super.outV);
 			
 		super.ctext += "return " + exp_toC + ";\n";
 		/*if (e.isFunCall())
@@ -946,9 +973,21 @@ class Stats extends CuStat{
 	
 	@Override public CuStat toHIR() {
 		ArrayList<CuStat> newAl = new ArrayList<CuStat>();
+		IfStat divergePoint= null;
 		for (CuStat cs : al) {
 			//note this will form each element into Stats because of the flattening
-			newAl.add(cs.toHIR());
+			CuStat StatHIR=cs.toHIR();
+			if (divergePoint!=null){
+				StatHIR.ifElseMergePoint.add((IfStat) cs);
+			}
+			newAl.add(StatHIR);
+			
+			if (cs instanceof IfStat){
+				divergePoint=(IfStat) cs;
+			}else{
+				divergePoint=null;
+			}
+				
 		}
 		super.HIR = new Stats(newAl);
 		return super.HIR;

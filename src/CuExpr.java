@@ -278,7 +278,7 @@ Helper.P("common parent of types is " + type.toString());
 	
 	@Override
 	public Pair<List<CuStat>, CuExpr> toHIR() {
-		List<CuStat> stats = new ArrayList<>();
+		List<CuStat> stats = new ArrayList<CuStat>();
 		Pair<List<CuStat>, CuExpr> leftToHir = new Pair<List<CuStat>, CuExpr>();
 		Pair<List<CuStat>, CuExpr> rightToHir = new Pair<List<CuStat>, CuExpr>();
 		String name1 = Helper.getVarName(), name2 = Helper.getVarName();
@@ -461,9 +461,9 @@ class BrkExpr extends CuExpr {
 	
 	@Override
 	public Pair<List<CuStat>, CuExpr> toHIR() {
-		List<CuStat> stats = new ArrayList<>();
+		List<CuStat> stats = new ArrayList<CuStat>();
 		Pair<List<CuStat>, CuExpr> expToHir = new Pair<List<CuStat>, CuExpr>();
-		List<CuExpr> expressions = new ArrayList<>();
+		List<CuExpr> expressions = new ArrayList<CuExpr>();
 		
 		for(CuExpr exp : val){
 			expToHir = exp.toHIR();
@@ -474,7 +474,7 @@ class BrkExpr extends CuExpr {
 			CuStat a = new AssignStat(temp1, expToHir.getSecond());
 			stats.add(a);
 			
-			//assume getSecond already has boxed and expType set, should be correct but not 100% sure
+			//assume getSecond already has boxed and expType fields set, should be correct but not 100% sure
 			a.setUnboxType();
 			
 			CuExpr var1 = new VvExp(name1);
@@ -566,11 +566,18 @@ class BrkExpr extends CuExpr {
 
 class CBoolean extends CuExpr{
 	Boolean val;
+	
 	public CBoolean(Boolean b){
 		val=b;
-		super.text=b.toString();
-		
-		}
+		super.boxed = false;
+		super.expType = "Boolean";
+	}
+	
+	@Override public String toString() {
+		super.text=val.toString();
+		return super.text;
+	}
+	
 	@Override protected CuType calculateType(CuContext context) {
 		if (val == null) { throw new NoSuchTypeException(Helper.getLineInfo());}
 		return CuType.bool;
@@ -578,7 +585,7 @@ class CBoolean extends CuExpr{
 	
 	@Override
 	public Pair<List<CuStat>, CuExpr> toHIR() {
-		List<CuStat> cuStat = new ArrayList<>();
+		List<CuStat> cuStat = new ArrayList<CuStat>();
 		CuExpr cuExpr = this;
 		
 		return new Pair<List<CuStat>, CuExpr>(cuStat, cuExpr);
@@ -616,8 +623,12 @@ class CInteger extends CuExpr {
 	Integer val;
 	public CInteger(Integer i){
 		val=i;
-		super.text=i.toString();
-		
+		super.boxed = false;
+		super.expType = "Integer";
+	}
+	@Override public String toString() {
+		super.text=val.toString();
+		return super.text;
 	}
 	@Override protected CuType calculateType(CuContext context) {
 		if (val == null) { throw new NoSuchTypeException(Helper.getLineInfo());}
@@ -653,8 +664,13 @@ class CString extends CuExpr {
 	String val;
 	public CString(String s){
 		val=s;
-		super.text=s;
-		
+		super.boxed = true;
+		super.expType = "String";
+	}
+	
+	@Override public String toString() {
+		super.text=val;
+		return super.text;
 	}
 	@Override protected CuType calculateType(CuContext context) {
 		if (val == null) { throw new NoSuchTypeException(Helper.getLineInfo());}
@@ -737,7 +753,14 @@ class DivideExpr extends CuExpr{
 		containsVar.addAll(left.containsVar);
 		containsVar.addAll(right.containsVar);
 		super.methodId = "divide";
+		super.boxed = true;
+		super.expType = "Iterable";
+	}
+	
+	@Override 
+	public String toString() {
 		super.text = String.format("%s . %s < > ( %s )", left.toString(), super.methodId, right.toString());
+		return super.text;
 	}
 	@Override protected CuType calculateType(CuContext context) throws NoSuchTypeException {
 		return binaryExprType(context, left.getType(context).id, super.methodId, right.getType(context));
@@ -768,9 +791,17 @@ class DivideExpr extends CuExpr{
 		CuStat b = new AssignStat(temp2, rightToHir.getSecond());
 		stats.add(a);
 		stats.add(b);
+		a.setUnboxType();
+		b.setUnboxType();
 		
 		CuExpr var1 = new VvExp(name1);
 		CuExpr var2 = new VvExp(name2);
+		//for var1 and var2, we know they are integers
+		var1.boxed = false;
+		var1.expType = "Integer";
+		var2.boxed = false;
+		var2.expType = "Integer";
+		
 		CuExpr expr = new DivideExpr(var1, var2);		
 		
 		//if (leftToHir.getFirst().isEmpty())
@@ -1814,7 +1845,7 @@ class OnwardsExpr extends CuExpr{
 	
 	@Override
 	public Pair<List<CuStat>, CuExpr> toHIR() {
-		List<CuStat> stats = new ArrayList<>();
+		List<CuStat> stats = new ArrayList<CuStat>();
 		Pair<List<CuStat>, CuExpr> valToHir = new Pair<List<CuStat>, CuExpr>();
 		String name1 = Helper.getVarName();
 		
@@ -2250,7 +2281,7 @@ class ThroughExpr extends CuExpr{
 	
 	@Override
 	public Pair<List<CuStat>, CuExpr> toHIR() {
-		List<CuStat> stats = new ArrayList<>();
+		List<CuStat> stats = new ArrayList<CuStat>();
 		Pair<List<CuStat>, CuExpr> leftToHir = new Pair<List<CuStat>, CuExpr>();
 		Pair<List<CuStat>, CuExpr> rightToHir = new Pair<List<CuStat>, CuExpr>();
 		String name1 = Helper.getVarName(), name2 = Helper.getVarName();
