@@ -918,8 +918,14 @@ aaaaco->concat = NULL;
 if (aaaaas!= NULL) {
 	(*(int *)aaaaas)++;
 }
-if (aaaaco!= NULL) {
-(*(int *)aaaaco)--;
+if (aaaaas!= NULL) {
+	(*(int *)aaaaas)--;
+	if ((*(int *)aaaaas) == 0)
+		freeStr(aaaaas);
+	aaaaas = NULL;
+	if ((*(int *)aaaaas) < 0)
+		printf("aaaaas ref count is smaller than 0\n");
+	aaaaas = NULL;
 }
 return aaaaco;
 }

@@ -897,9 +897,19 @@ class ReturnStat extends CuStat{
 		} */
 		
 		//special process for return statement
-		super.ctext += "if (" + exp_toC + "!= NULL) {\n";
+		/*super.ctext += "if (" + exp_toC + "!= NULL) {\n";
 		super.ctext += "(*(int *)" + exp_toC + ")--;\n";
-		super.ctext += "}\n";
+		super.ctext += "}\n"; */
+		
+		if ((e instanceof VvExp) && (!e.isFunCall())) {
+			super.outV.add(e.toString());
+			//we don't deallocate it, but we need to decrease its ref count
+			super.ctext += "if (" + exp_toC + "!= NULL) {\n";
+			super.ctext += "(*(int *)" + exp_toC + ")--;\n";
+			super.ctext += "}\n"; 
+		}
+		
+		super.ctext += Helper.liveVarAnalysis(super.inV, super.defV, super.outV);
 			
 		super.ctext += "return " + exp_toC + ";\n";
 		/*if (e.isFunCall())
