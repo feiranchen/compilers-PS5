@@ -257,7 +257,6 @@ public class Helper {
 		
 		//newly added, we feel it should not cause memory bug
 		//make var pointing to null
-		code +=    "\t" + var + " = NULL;\n";
 				
 		if (debug) {
 			code +=    "\t" + "if ((*(int *)" + var + ") < 0)\n";

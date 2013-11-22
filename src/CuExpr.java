@@ -504,7 +504,8 @@ class BrkExpr extends CuExpr {
 		ArrayList<String> tempDataArr=new ArrayList<String>();
 		for (CuExpr e : val) {
 			eToC = e.toC(localVars);
-			name += e.construct();
+			String eC = e.construct();
+			name += eC;
 			
 			/*if (!e.getDef().isEmpty())
 				def.addAll(e.getDef());
@@ -591,11 +592,11 @@ class CBoolean extends CuExpr{
 		
 		if (val)			
 			super.name = String.format("Boolean* %s;\n%s = (Boolean *) x3malloc(sizeof(Boolean));\n"
-					+ "(%s->nrefs) = 1;\n"
+					+ "(%s->nrefs) = 0;\n"
 					+ "%s->value = %d;\n", temp, temp, temp, temp, 1);
 		else
 			super.name = String.format("Boolean* %s;\n%s = (Boolean *) x3malloc(sizeof(Boolean));\n"
-					+ "(%s->nrefs) = 1;\n"
+					+ "(%s->nrefs) = 0;\n"
 					+ "%s->value = %d;\n", temp, temp, temp, temp, 0);
 	
 		//if (!localVars.contains(temp))
@@ -635,7 +636,7 @@ class CInteger extends CuExpr {
 	public String toC(ArrayList<String> localVars) {
 		String temp = Helper.getVarName();
 		super.name = String.format("Integer* %s;\n%s = (Integer*) x3malloc(sizeof(Integer));\n"
-				+ "(%s->nrefs) = 1;\n"
+				+ "(%s->nrefs) = 0;\n"
 				+ "%s->value = %d;\n", temp, temp, temp, temp, val);		
 		super.cText = temp;
 		super.castType = "Integer";
@@ -675,7 +676,7 @@ class CString extends CuExpr {
 				+ "%s = (String *) x3malloc(sizeof(String));\n"
 				+ "(%s->isIter) = 0;\n"
 				+ "%s->value = (char*) x3malloc(sizeof(%s));\n"
-				+ "(%s->nrefs) = 1;\n"
+				+ "(%s->nrefs) = 0;\n"
 				+ "%s->len = sizeof(%s) - 1;\n"
 				+ "mystrcpy(%s->value, %s);\n", temp, temp, temp, temp, val, temp, temp, val, temp, val);	
 		
@@ -690,6 +691,8 @@ class CString extends CuExpr {
 		/*ArrayList<String> tempNameArr=new ArrayList<String>();	
 		ArrayList<String> tempDataArr=new ArrayList<String>();
 		for (int i=(val.length()-1); i>=0; i--) {
+		
+		
 			
 			String tempName = Helper.getVarName();
 			helper += "Character* " + tempName + " = (Character*) malloc(sizeof(Character));\n"
@@ -1880,7 +1883,7 @@ class OnwardsExpr extends CuExpr{
 					
 					name +=  "Iterable* " + iterTemp + ";\n" + iterTemp+ " = (Iterable*) x3malloc(sizeof(Iterable));\n"
 							+ iterTemp + "->isIter = 1;\n"
-							+ iterTemp + "->nrefs = 0;\n"
+							+ iterTemp + "->nrefs = 1;\n"
 							+ iterTemp + "->value = " + trueTemp + ";\n"
 							+ iterTemp + "->additional = NULL;\n"
 							+ iterTemp + "->next = NULL;\n"
@@ -3139,7 +3142,7 @@ Helper.P(" 1mapping is " + mapping.toString());
 				
 					name +=  temp + " = (String*) x3malloc(sizeof(String));\n\t"
 						+ temp + "->isIter = 0;\n\t"
-						+ temp + "->nrefs = 0;\n\t"
+						+ temp + "->nrefs = 1;\n\t"
 						+ temp + "->value = (char*) x3malloc("+ len + " * sizeof(char));\n\t"
 						+ temp + "->len = " + len + ";\n\t"
 						+ "read_line(" + temp + "->value);\n\t";
