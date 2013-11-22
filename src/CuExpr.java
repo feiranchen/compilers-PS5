@@ -411,9 +411,9 @@ class BrkExpr extends CuExpr {
 	
 	@Override
 	public Pair<List<CuStat>, CuExpr> toHIR() {
-		List<CuStat> stats = new ArrayList<>();
+		List<CuStat> stats = new ArrayList<CuStat>();
 		Pair<List<CuStat>, CuExpr> expToHir = new Pair<List<CuStat>, CuExpr>();
-		List<CuExpr> expressions = new ArrayList<>();
+		List<CuExpr> expressions = new ArrayList<CuExpr>();
 		
 		for(CuExpr exp : val){
 			expToHir = exp.toHIR();
@@ -520,7 +520,7 @@ class CBoolean extends CuExpr{
 	
 	@Override
 	public Pair<List<CuStat>, CuExpr> toHIR() {
-		List<CuStat> cuStat = new ArrayList<>();
+		List<CuStat> cuStat = new ArrayList<CuStat>();
 		CuExpr cuExpr = this;
 		
 		return new Pair<List<CuStat>, CuExpr>(cuStat, cuExpr);
@@ -1751,7 +1751,7 @@ class OnwardsExpr extends CuExpr{
 	
 	@Override
 	public Pair<List<CuStat>, CuExpr> toHIR() {
-		List<CuStat> stats = new ArrayList<>();
+		List<CuStat> stats = new ArrayList<CuStat>();
 		Pair<List<CuStat>, CuExpr> valToHir = new Pair<List<CuStat>, CuExpr>();
 		String name1 = Helper.getVarName();
 		
@@ -2182,7 +2182,7 @@ class ThroughExpr extends CuExpr{
 	
 	@Override
 	public Pair<List<CuStat>, CuExpr> toHIR() {
-		List<CuStat> stats = new ArrayList<>();
+		List<CuStat> stats = new ArrayList<CuStat>();
 		Pair<List<CuStat>, CuExpr> leftToHir = new Pair<List<CuStat>, CuExpr>();
 		Pair<List<CuStat>, CuExpr> rightToHir = new Pair<List<CuStat>, CuExpr>();
 		String name1 = Helper.getVarName(), name2 = Helper.getVarName();

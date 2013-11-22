@@ -1,5 +1,6 @@
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -18,6 +19,7 @@ public abstract class CuStat {
 	protected List<String> defV = new ArrayList<String>();
 	
 	protected List<CuStat> successors = new ArrayList<CuStat>();
+	protected HashSet<IfStat> ifElseMergePoint=new HashSet<IfStat>();
 	
 	protected CuStat HIR = null;
 	
@@ -483,7 +485,7 @@ class ConvertToIter extends CuStat {
 }
 
 class IfStat extends CuStat{
-	private CuExpr e;
+	public CuExpr e;
 	private CuStat s1=null;
 	private CuStat s2=null;
 	public IfStat (CuExpr ex, CuStat st) {
@@ -865,9 +867,21 @@ class Stats extends CuStat{
 	
 	@Override public CuStat toHIR() {
 		ArrayList<CuStat> newAl = new ArrayList<CuStat>();
+		IfStat divergePoint= null;
 		for (CuStat cs : al) {
 			//note this will form each element into Stats because of the flattening
-			newAl.add(cs.toHIR());
+			CuStat StatHIR=cs.toHIR();
+			if (divergePoint!=null){
+				StatHIR.ifElseMergePoint.add((IfStat) cs);
+			}
+			newAl.add(StatHIR);
+			
+			if (cs instanceof IfStat){
+				divergePoint=(IfStat) cs;
+			}else{
+				divergePoint=null;
+			}
+				
 		}
 		super.HIR = new Stats(newAl);
 		return super.HIR;

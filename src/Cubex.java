@@ -7,11 +7,11 @@ import java.util.Map;
 import org.antlr.v4.runtime.*;
 
 public class Cubex {
-	public static void main (String args[]) throws IOException {
+	public static void main (String args[]) throws Exception {
 		getParser(args[0]);
 	}
 	
-	protected static void getParser(String fn) throws IOException {
+	protected static void getParser(String fn) throws Exception {
 		CubexLexer2 lexer = new CubexLexer2(new ANTLRFileStream(fn));
 		
 		//bound inputs to a variable input, put in context
@@ -43,6 +43,8 @@ public class Cubex {
         ourProgram.buildCFG();
         //next, build the in out sets
         ourProgram.buildSets();
+        
+        CSE.startCSE(((FullPrg)ourProgram).entry);
         
 		ArrayList<String> localVars = new ArrayList<String>();
 		PrintWriter writer = new PrintWriter("out.c", "UTF-8");

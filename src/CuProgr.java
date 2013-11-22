@@ -40,7 +40,7 @@ class FullPrg extends CuProgr {
 	@Override public void toHIR() {
 		for (CuProgr pr : elements) 
 			pr.toHIR();
-		s = s.toHIR();
+			s = s.toHIR();
 		if (Helper.debug) {
 			System.out.println(s.toString());
 		}

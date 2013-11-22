@@ -1,5 +1,6 @@
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Map.Entry;
 
 
@@ -9,9 +10,16 @@ public class CSE {
 	//delete keys with empty list
 		HashMap<CuVvc,ArrayList<CuExpr>> varMap= new HashMap<CuVvc,ArrayList<CuExpr>>();
 		HashMap<CuExpr, CuVvc> exprMap= new HashMap<CuExpr, CuVvc>();
-		doCSE(orgS,varMap,exprMap);
+		CuStat nextS=doCSE(orgS,varMap,exprMap);
+		while(nextS!=null){
+			nextS=doCSE(nextS,varMap,exprMap);
+		}
 	}
-	static public void doCSE(CuStat orgS,
+	static public void markCSE(){
+		
+	}
+	
+	static public CuStat doCSE(CuStat orgS,
 			HashMap<CuVvc,ArrayList<CuExpr>> varMap,
 			HashMap<CuExpr, CuVvc> exprMap) throws Exception{
 		if (orgS instanceof AssignStat){
@@ -44,24 +52,107 @@ public class CSE {
 				varMap.get(s.var).add(0,((AssignStat) orgS).ee);}
 			if(exprMap.containsKey(((AssignStat) orgS).ee)){
 				exprMap.put(((AssignStat) orgS).ee, s.var);}
-			
-			doCSE(((AssignStat)orgS).getNext(),varMap,exprMap);
+			return orgS.getNext();
 		}
 		else if (orgS instanceof WhileStat){
 			WhileStat s=(WhileStat)orgS;
-			//simplify. no need to maintain map
+			//simplify. no need to maintain map as in Assign
 			((WhileStat) orgS).e=updateExpr(null, s.e,exprMap);
-			doCSE(((WhileStat)orgS).getFirst(),varMap,exprMap);
-			doCSE(((WhileStat)orgS).getSecond(),(HashMap<CuExpr,CuVvc>)varMap.clone(),(HashMap<CuExpr,CuVvc>)exprMap.clone());
+			CuStat nextS=orgS.whileBranch();
+			
+			HashMap<CuVvc,ArrayList<CuExpr>>  varMap2 =new HashMap<CuVvc,ArrayList<CuExpr>>(varMap);
+			HashMap<CuExpr,CuVvc> exprMap2 = new HashMap<CuExpr, CuVvc>(exprMap);
+			
+			//finish evaluating everything in the scope before we say we can move on.
+			while (nextS!=orgS){
+				doCSE(nextS,varMap2,exprMap2);
+				nextS=nextS.getNext();
+			}
+			//end of scope
+			return orgS.noBranch();
+		}
+		else if (orgS instanceof ForToWhileStat){
+			CuStat nextS=orgS.whileBranch();
+			
+			HashMap<CuVvc,ArrayList<CuExpr>>  varMap2 =new HashMap<CuVvc,ArrayList<CuExpr>>(varMap);
+			HashMap<CuExpr,CuVvc> exprMap2 = new HashMap<CuExpr, CuVvc>(exprMap);
+			
+			//finsh evaluating everything in the scope before we say we can move on.
+			while (nextS!=orgS){
+				doCSE(nextS,varMap2,exprMap2);
+				nextS=nextS.getNext();
+			}
+			//end of scope
+			return orgS.noBranch();
 		}
 		else if (orgS instanceof IfStat){
-			
+			IfStat s=(IfStat) orgS;
+
+			//simplify. no need to maintain map as in Assign
+			((IfStat) orgS).e=updateExpr(null, s.e,exprMap);
+
+			CuStat ifS=orgS.ifBranch();
+			HashMap<CuVvc,ArrayList<CuExpr>>  varMapIf = new HashMap<CuVvc,ArrayList<CuExpr>>(varMap);
+			HashMap<CuExpr,CuVvc> 			 exprMapIf = new HashMap<CuExpr, CuVvc>(exprMap);
+			//finish evaluating everything in the scope before we say we can move on.
+			while (!ifS.ifElseMergePoint.contains(orgS)){
+				doCSE(ifS,varMapIf,exprMapIf);
+				ifS=ifS.getNext();
+			}
+
+			//only do else branch handling and merging if there is an else block
+			CuStat elseS=orgS.elseBranch();
+			if (elseS!=null){
+				HashMap<CuVvc,ArrayList<CuExpr>>  varMapElse = new HashMap<CuVvc,ArrayList<CuExpr>>(varMap);
+				HashMap<CuExpr,CuVvc> 			 exprMapElse = new HashMap<CuExpr, CuVvc>(exprMap);
+				while (!elseS.ifElseMergePoint.contains(orgS)){
+					doCSE(elseS,varMapElse,exprMapElse);
+					elseS=elseS.getNext();
+				}
+				//assert:elseS and ifS should be the same
+				//merging and updating old map
+					//HashMap<CuVvc,ArrayList<CuExpr>>  varMapMerged = new HashMap<CuVvc,ArrayList<CuExpr>>(varMap);
+					//HashMap<CuExpr,CuVvc> 			 exprMapMerged = new HashMap<CuExpr, CuVvc>(exprMap);
+				/*
+				for (Entry e :varMapElse.entrySet()){
+					if (varMapIf.containsKey(e.getKey())&&
+							(e.getKey().equals(varMapIf.get(e.getKey())){
+						
+						//both branches has the value, this assignment needs to be preserved
+						if (!varMap.containsKey(e.getKey())){
+							varMap.put(s.var, new ArrayList<CuExpr>());
+						} 
+						//variable already defined, now invalid all of them, update both maps
+						else {
+						for (Entry<CuVvc, ArrayList<CuExpr>> elem : varMap.entrySet()){
+							for(int i =elem.getValue().size()-1;i>=0;i--){
+								if (elem.getValue().get(i).containsVar.contains(s.var)){
+									if (exprMap.get(elem.getValue().get(i)).equals(elem.getKey())){
+										exprMap.remove(elem.getValue().get(i));
+									}
+									elem.getValue().remove(i);
+								}
+							}
+						}
+						for (Entry<CuVvc, ArrayList<CuExpr>> elem : varMap.entrySet()){
+							exprMap.put(elem.getValue().get(0),elem.getKey());
+						}
+						varMap.get(s.var).add(s.ee);
+					}
+				}
+				*/
+			}
+			return ifS;
 		}
 		else if (orgS instanceof ReturnStat){
 			ReturnStat s=(ReturnStat)orgS;
 			//simplify. no need to maintain map
 			((AssignStat) orgS).ee=updateExpr(null, s.e,exprMap);
-			return;
+
+			return orgS.getNext();
+		}
+		else {
+			throw new Exception("Statement not making sense");
 		}
 	}
 	
@@ -196,7 +287,7 @@ public class CSE {
 				return e;
 			}
 			
-			throw new Exception("what is this??? @cse");
+			throw new Exception("what is this Expression??? @cse");
 			
 		}
 	}
