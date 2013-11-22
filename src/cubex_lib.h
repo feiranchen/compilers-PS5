@@ -36,47 +36,11 @@ typedef struct iter{
 	struct iter* concat;
 }Iterable;
 
-
-Iterable* iterGetNext(Iterable* last){
-	Iterable* this;
-	this = x3malloc(sizeof(Iterable));
-	this->isIter = 1;
-	if (last->next!= NULL){	
-		this = (last->next)(last);
-	}
-	else {
-		this = (Iterable*) last->additional;
-	}
-	
-	if (this==NULL && last->concat==NULL && last->next != NULL){
-	  	if (last->nrefs==1) {
-		      freeIter(last);
-		 }
-		 else 
-		     (last->nrefs)--;
-		
-		return NULL;
-	}
-	else if (this==NULL){
-		this=last->concat;
-	}
-	
-	if (last->next != NULL) {
-	if (last->nrefs==1) {
-		freeIter(last);
-	}
-	else 
-		(last->nrefs)--;
-	}
-	
-	return (this);
-}
-
 void freeIter(void* iter) {
 	if (iter == NULL)
 		return;
 	
-	if (iter->next!= NULL){	
+	if (((Iterable*)iter)->next!= NULL){	
 		if (((Iterable*)iter)->value != NULL) {
 				(*(int *)(((Iterable*)iter)->value))--;
 				if ((*(int *)(((Iterable*)iter)->value)) == 0)
@@ -127,6 +91,43 @@ void freeIter(void* iter) {
 	}
 }
 
+
+Iterable* iterGetNext(Iterable* last){
+	Iterable* this;
+	this = x3malloc(sizeof(Iterable));
+	this->isIter = 1;
+	if (last->next!= NULL){	
+		this = (last->next)(last);
+	}
+	else {
+		this = (Iterable*) last->additional;
+	}
+	
+	if (this==NULL && last->concat==NULL && last->next != NULL){
+	  	if (last->nrefs==1) {
+		      freeIter(last);
+		 }
+		 else 
+		     (last->nrefs)--;
+		
+		return NULL;
+	}
+	else if (this==NULL){
+		this=last->concat;
+	}
+	
+	if (last->next != NULL) {
+	if (last->nrefs==1) {
+		freeIter(last);
+	}
+	else 
+		(last->nrefs)--;
+	}
+	
+	return (this);
+}
+
+
 void freeStr(void* str)
 {
 	if (((String*)str)->value != NULL) {
@@ -146,13 +147,13 @@ Iterable* concatenate(Iterable* fst, Iterable* snd){
 	if (fst == NULL) {
 		return snd;
 	}
-	Iterable* head = (Iterable*) malloc(sizeof(Iterable); 
+	Iterable* head = (Iterable*) x3malloc(sizeof(Iterable)); 
 	head->nrefs = 0;
 	head->isIter = 1;
 	head->value = fst->value;
 	if (head->value != NULL)
 		(*(int *)(head->value))++;
-	head->additional = NULL
+	head->additional = NULL;
 	if (head->additional != NULL)
 		(*(int *)(head->additional))++;
 	head->next = fst->next;
@@ -166,13 +167,13 @@ Iterable* concatenate(Iterable* fst, Iterable* snd){
 			temp = temp->additional;
 			temp2 = NULL;
 			if (temp != NULL) {
-				temp2 = (Iterable*) malloc(sizeof(Iterable); 
+				temp2 = (Iterable*) x3malloc(sizeof(Iterable)); 
 				temp2->nrefs = 1;
 				temp2->isIter = 1;
 				temp2->value = temp->value;
 				if (temp1->value!= NULL)
 					(*(int *)(temp1->value))++;
-				temp2->additional = NULL 
+				temp2->additional = NULL;
 				temp2->next = temp->next;
 				temp2->concat = temp->concat;	
 				
@@ -189,13 +190,13 @@ Iterable* concatenate(Iterable* fst, Iterable* snd){
 	if (snd == NULL)
 		return head;
 		
-	Iterable* second = (Iterable*) malloc(sizeof(Iterable); 
+	Iterable* second = (Iterable*) x3malloc(sizeof(Iterable)); 
 	second->nrefs = 1;
 	second->isIter = 1;
 	second->value = snd->value;
 	if (second->value != NULL)
 		(*(int *)(second->value))++;
-	second->additional = NULL
+	second->additional = NULL;
 	if (second->additional != NULL)
 		(*(int *)(second->additional))++;
 	second->next = snd->next;
@@ -209,13 +210,13 @@ Iterable* concatenate(Iterable* fst, Iterable* snd){
 			temp = temp->additional;
 			temp2 = NULL;
 			if (temp != NULL) {
-				temp2 = (Iterable*) malloc(sizeof(Iterable); 
+				temp2 = (Iterable*) x3malloc(sizeof(Iterable)); 
 				temp2->nrefs = 1;
 				temp2->isIter = 1;
 				temp2->value = temp->value;
 				if (temp1->value!= NULL)
 					(*(int *)(temp1->value))++;
-				temp2->additional = NULL 
+				temp2->additional = NULL;
 				temp2->next = temp->next;
 				temp2->concat = temp->concat;	
 				
@@ -238,6 +239,7 @@ Iterable* concatenate(Iterable* fst, Iterable* snd){
 		while(temp) {
 			temp->concat = second;
 			temp = temp->additional;
+		}
 	}
 	return head;
 }

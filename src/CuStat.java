@@ -27,7 +27,7 @@ public abstract class CuStat {
 	
 	protected CuStat HIR = null;
 	
-	void setUnboxType() {}
+	public void setUnboxType() {}
 	
 	@Override public String toString() {
 		return text;
@@ -108,7 +108,7 @@ class AssignStat extends CuStat{
 		return super.text;
 	}
 	
-    @Override void setUnboxType(){
+    @Override public void setUnboxType(){
 		if (ee.expType.equals("Integer")) {
 			super.boxed = false;
 			super.statType = "Integer";
@@ -212,11 +212,13 @@ Helper.P("assign stat end " + ee.toString());
 class ForToWhileStat extends CuStat {
 	private String var, iter_name;
 	private CuStat s1;
+	private String iterType;
 	
-	public ForToWhileStat(String arg_var, String arg_iter_name, CuStat arg_s1) {
+	public ForToWhileStat(String arg_var, String arg_iter_name, CuStat arg_s1, String arg_iterType) {
 		this.var = arg_var;
 		this.iter_name = arg_iter_name;
 		this.s1 = arg_s1;
+		this.iterType = arg_iterType;
 	}
 	
 	@Override public void buildCFG() {
@@ -280,6 +282,8 @@ class ForToWhileStat extends CuStat {
 		String temp_name = Helper.getVarName();
 		super.ctext += Helper.refAcquire(temp_name, var.toString());
 		super.ctext += "\t\t" + var.toString() + " = " + iter_name + "->value;\n";
+		/////////////////////////////note var is changed to iterType here, it is not an iterable any more
+		Helper.cVarType.put(var, this.iterType);
 		super.ctext += "\t\t" + Helper.incrRefCount(var.toString());
 		super.ctext += "\t\t" + Helper.decRefCount(temp_name);
 		
@@ -380,7 +384,7 @@ class ForStat extends CuStat{
 		curHIR.add(new ConvertToIter(var.toString()));
 		//we need to call it here to get the name
 		String iter_name = Helper.getVarName();
-		CuStat temp = new ForToWhileStat(var.toString(), iter_name, s1);
+		CuStat temp = new ForToWhileStat(var.toString(), iter_name, s1, e.getIterType());
 		curHIR.add(temp.toHIR());
 		super.HIR = new Stats(curHIR);
 		return super.HIR;

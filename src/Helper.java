@@ -243,10 +243,15 @@ public class Helper {
 		code +=    "\t" + "(*(int *)" + var + ")--;\n";
 		//check whether it is the last pointer pointing to the object, if yes, x3free memory
 		code +=    "\t" + "if ((*(int *)" + var + ") == 0)\n";
-		if (cVarType.get(var).equals("String"))
-			code +=    "\t\t" + "freeStr(" + var + ");\n";
-		else if(cVarType.get(var).equals("Iterable"))
-			code +=    "\t\t" + "freeIter(" + var + ");\n";
+		String type = cVarType.get(var);
+		if (type != null) {
+			if (type.equals("String"))
+				code += "\t\t" + "freeStr(" + var + ");\n";
+			else if (type.equals("Iterable"))
+				code += "\t\t" + "freeIter(" + var + ");\n";
+			else
+				code += "\t\t" + "x3free(" + var + ");\n";
+		}
 		else
 			code +=    "\t\t" + "x3free(" + var + ");\n";
 		
