@@ -17,8 +17,14 @@ public abstract class CuExpr {
 	protected ArrayList<String> def = new ArrayList<String>();
 	protected ArrayList<String> use = new ArrayList<String>();
 	protected Pair<List<CuStat>, CuExpr> hir;
-	//decorate the tree with its type when typechecking, %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%TO DO%%%%%%%%%%%%%%%%%%%%
+	//decorate the tree with its type when typechecking, 
+	//but for now, will just use castType for most cases
+	protected String expType = "";
+	
+	//castType, expType, type ideally should be the same thing, but for safety, we added them
 	protected CuType type = null;
+	//added for primitive optimization, default is boxed
+	protected boolean boxed = true;
 	protected  Set<CuVvc> containsVar= new HashSet<CuVvc>();
 	public void add(List<CuType> pt, List<CuExpr> es) {}
 	public final CuType getType(CuContext context) throws NoSuchTypeException {
@@ -125,6 +131,7 @@ public abstract class CuExpr {
     }
 }
 
+//verified and method is only for boolean and it returns boolean
 class AndExpr extends CuExpr{
 	public CuExpr left, right;
 	public AndExpr(CuExpr e1, CuExpr e2) {
@@ -134,8 +141,17 @@ class AndExpr extends CuExpr{
 		containsVar.addAll(right.containsVar);
 //		super.desiredType = CuType.bool;
 		super.methodId = "and";
-		super.text = String.format("%s . %s < > ( %s )", left.toString(), super.methodId, right.toString());
+		
+		//since the return type is always boolean, then we can always unbox it
+		super.expType = "Boolean";
+		super.boxed = false;
 	}
+	
+	@Override public String toString() {
+		super.text = String.format("%s . %s < > ( %s )", left.toString(), super.methodId, right.toString());
+		return super.text;
+	}
+	
 	@Override protected CuType calculateType(CuContext context) throws NoSuchTypeException {
 		//right should pass in a type
 		
@@ -158,12 +174,16 @@ class AndExpr extends CuExpr{
 		CuVvc temp2 = new Vv(name2);
 		CuStat a = new AssignStat(temp1, leftToHir.getSecond());
 		CuStat b = new AssignStat(temp2, rightToHir.getSecond());
+		
+		//probably need to do something to the assign statement here
+		
 		stats.add(a);
 		stats.add(b);
 		
 		CuExpr var1 = new VvExp(name1);
 		CuExpr var2 = new VvExp(name2);
-		CuExpr expr = new AndExpr(var1, var2);		
+		//AndExpr has box unset in the constructor, so don't need to anything here
+		CuExpr expr = new AndExpr(var1, var2);	
 		
 		//if (leftToHir.getFirst().isEmpty())
 			expr.use.add(var1.toString());
@@ -553,6 +573,9 @@ class CBoolean extends CuExpr{
 	}
 }
 
+/*as an example, cinteger will always be assigned to a  variable in HIR,
+ * so it should always be unboxed
+ */
 class CInteger extends CuExpr {
 	Integer val;
 	public CInteger(Integer i){
@@ -2034,6 +2057,10 @@ class OrExpr extends CuExpr{
 	}
 }
 
+/*
+ * For plusExpr, left and right can be boxed (caused by generic types, as in the function example Ross gives),
+ * or it can be unboxed. If it is boxed, it left and right will be void pointers
+ */
 class PlusExpr extends CuExpr{
 	public CuExpr left, right;
 	public PlusExpr(CuExpr e1, CuExpr e2) {

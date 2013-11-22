@@ -12,6 +12,10 @@ import java.util.regex.*;
 public class Helper {
 	//change this to false when submit
 	protected static boolean debug = true;
+	//switch for primitive optimization
+	protected static boolean opt_primitive = true;
+	//added for primitive optimization, mapping from variable (VvExp) to boxed or not
+	protected static HashMap<String, Boolean> varToBox = new HashMap<String, Boolean>();
 	//eg. aaa, integer
 	protected static HashMap<String, String> cVarType = new HashMap<String, String>();
 	protected static HashMap<String, String> iterType = new HashMap<String, String>();
@@ -41,6 +45,7 @@ public class Helper {
     		}
     	}
     	return "aaa"+out;
+  
     }
     
 	protected static <T> String printList(String l, List<T> es, String r, String i) {

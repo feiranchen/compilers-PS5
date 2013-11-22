@@ -41,6 +41,8 @@ public class Cubex {
         ourProgram.toHIR();
         //next, build CFG, use and def sets are built here
         ourProgram.buildCFG();
+        // *********for the first optimization, put your method here***************
+        
         //next, build the in out sets
         ourProgram.buildSets();
         

@@ -19,7 +19,13 @@ public abstract class CuStat {
 	
 	protected List<CuStat> successors = new ArrayList<CuStat>();
 	
+	//initially just created for assignstatements
+	protected boolean boxed = true;
+	protected String statType = "";
+	
 	protected CuStat HIR = null;
+	
+	void setUnboxType() {}
 	
 	@Override public String toString() {
 		return text;
@@ -35,6 +41,8 @@ public abstract class CuStat {
 	}
 	
 	public void buildCFG() {}
+	
+	public void setUseDef() {}
 	
 	public CuStat getFirst() {
 		return this;
@@ -76,23 +84,46 @@ class AssignStat extends CuStat{
 	public AssignStat (CuVvc t, CuExpr e) {
 		var = t;
 		ee = e;
+	}
+	
+	@Override public String toString() {
 		super.text = var.toString() + " := " + ee.toString() + " ;";
+		return super.text;
+	}
+	
+    @Override void setUnboxType(){
+		if (ee.expType.equals("Integer")) {
+			super.boxed = false;
+			super.statType = "Integer";
+		}
+		else if (ee.expType.equals("Boolean")) {
+			super.boxed = false;
+			super.statType = "Boolean";
+		}
 	}
 	
 	//transform to a Stats object
 	@Override public CuStat toHIR() {
 		Pair<List<CuStat>, CuExpr> pa =  ee.toHIR();
 		List<CuStat> curHIR = pa.getFirst();
-		curHIR.add(new AssignStat(var, pa.getSecond()));
+		CuStat temp = new AssignStat(var, pa.getSecond());
+		curHIR.add(temp);
+		//every time we create a new assign statement, we need to do that
+		temp.setUnboxType();
 		super.HIR = new Stats(curHIR);
 		return super.HIR;
 	}
 	
 	@Override public void buildCFG() {
+
+	}
+	
+	@Override public void setUseDef() {
 		super.useV.addAll(ee.getUse());
 		//super.defV.addAll(ee.getDef());
-		super.defV.add(var.toString());
+		super.defV.add(var.toString());		
 	}
+	
 	@Override public String toC(ArrayList<String> localVars) {
 		String exp_toC = ee.toC(localVars);
 		Helper.cVarType.put(var.toString(), ee.getCastType());
@@ -175,9 +206,13 @@ class ForToWhileStat extends CuStat {
 		super.successors.add(s1.getFirst());
 		s1.getLast().successors.add(this);
 		s1.buildCFG();
+	}
+	
+	@Override public void setUseDef() {
 		//build use def set along this traversal
 		super.useV.add(var);
 		super.defV.add(iter_name);
+		s1.setUseDef();
 	}
 	
 	@Override public CuStat toHIR() {
@@ -291,7 +326,6 @@ class ForStat extends CuStat{
 		var = v;
 		e = ee;
 		s1 = ss;
-		super.text = "for ( " + var.toString() + " in " + e.toString() + " ) " + s1.toString();
 	}
 	
 	@Override public void buildCFG() {
@@ -309,6 +343,13 @@ class ForStat extends CuStat{
 		//after converting to HIR, this method should never be called
 		if (Helper.debug) {
 			System.out.println("in ForStat buildCFG, error");
+		}
+	}
+	
+	@Override public void setUseDef() {
+		//after converting to HIR, this method should never be called
+		if (Helper.debug) {
+			System.out.println("in ForStat setUseDef, error");
 		}
 	}
 	
@@ -333,7 +374,7 @@ class ForStat extends CuStat{
 	{
 		//after converting to HIR, this method should never be called
 		if (Helper.debug) {
-			System.out.println("in ForStat buildCFG, error");
+			System.out.println("in ForStat toC, error");
 		}
 		/*
 		String exp_toC = e.toC(localVars);
@@ -435,6 +476,11 @@ Helper.P(String.format("FOR %s is %s<%s>", e, eType, eType.map));
 		//System.out.println("in for stat, end");
 		return re;
 	}
+	
+	@Override public String toString() {
+		super.text = "for ( " + var.toString() + " in " + e.toString() + " ) " + s1.toString();
+		return super.text;
+	}
 }
 
 //added in PA5 to convert for to while in AST->HIR conversion
@@ -450,8 +496,11 @@ class ConvertToIter extends CuStat {
 	}
 	
 	@Override public void buildCFG() {
-		super.useV.add(var);
 		//treat this as a whole node, manually do the ref count
+	}
+	
+	@Override public void setUseDef() {
+		super.useV.add(var);
 	}
 	
 	@Override public String toC(ArrayList<String> localVars)
@@ -489,7 +538,6 @@ class IfStat extends CuStat{
 	public IfStat (CuExpr ex, CuStat st) {
 		this.e = ex;
 		this.s1 = st;
-		super.text = "if ( " + e.toString() + " ) " + s1.toString();
 	}
 	
     @Override public void add (CuStat st) {
@@ -526,8 +574,14 @@ class IfStat extends CuStat{
 			//the first successor is always the next big block, for both if and loops
 			super.successors.add(s1.getFirst());
 		}	
+	}
+	
+	@Override public void setUseDef() {
 		//build use def sets, def set is empty
 		super.useV.addAll(e.getUse());
+		s1.setUseDef();
+		if (s2!=null)
+			s2.setUseDef();
 	}
     
     //for if statement, ctext is build here
@@ -673,6 +727,11 @@ Helper.P("e type is " + eType);
 Helper.P("if end, e is " + e.toString());
 		return re_out;
 	}
+	
+	@Override public String toString() {
+		super.text = "if ( " + e.toString() + " ) " + s1.toString();
+		return super.text;
+	}
 
 }
 
@@ -682,7 +741,6 @@ class WhileStat extends CuStat{
 	public WhileStat (CuExpr ex, CuStat st){
 		e = ex;
 		s1 = st;
-		text = "while ( " + e.toString() + " ) " + s1.toString();
 	}
 	@Override public CuStat toHIR() {
 		Pair<List<CuStat>, CuExpr> pa =  e.toHIR();
@@ -700,10 +758,14 @@ class WhileStat extends CuStat{
 		s1.getLast().successors.add(this);
 		//recursive build CFG
 		s1.buildCFG();
-		
+	}
+	
+	@Override public void setUseDef() {
 		//build use def sets, def set is empty, as in the if statement case
 		super.useV = e.getUse();
+		s1.setUseDef();
 	}
+	
 	@Override public String toC(ArrayList<String> localVars) {
 		String exp_toC = e.toC(localVars);
 
@@ -765,13 +827,17 @@ class WhileStat extends CuStat{
     	re.b = false;
     	return re;
     }
+    
+    @Override public String toString() {
+    	text = "while ( " + e.toString() + " ) " + s1.toString();
+    	return text;
+    }
 }
 
 class ReturnStat extends CuStat{
 	private CuExpr e;
 	public ReturnStat (CuExpr ee) {
 		e = ee;
-		super.text = "return " + e.toString() + " ;";
 	}
 	@Override public CuStat toHIR() {
 		Pair<List<CuStat>, CuExpr> pa =  e.toHIR();
@@ -783,7 +849,8 @@ class ReturnStat extends CuStat{
 	@Override public void buildCFG() {
 		//return stat doesn't have any successors
 		super.successors = new ArrayList<CuStat>();
-		
+	}
+	@Override public void setUseDef() {
 		//build the use def set, def set is empty
 		super.useV = e.getUse();
 	}
@@ -834,6 +901,11 @@ Helper.P("e type is " + re.tau);
 		//System.out.println("in return stat, exp is " + e.toString() + " end");
 		return re;
 	}
+	
+	 @Override public String toString() {
+		 super.text = "return " + e.toString() + " ;";
+		 return super.text;
+	 }
 }
 
 class EmptyBody extends CuStat {
@@ -850,6 +922,11 @@ class EmptyBody extends CuStat {
 	public HReturn calculateType(CuContext context) throws NoSuchTypeException {
 		//default is false and bottom
 		return new HReturn();
+	}
+	
+	@Override public String toString() {
+		text=" ;";
+		return text;
 	}
 } 
 
@@ -879,8 +956,13 @@ class Stats extends CuStat{
 		}
 		//recursively build connections for each elements
 		for(int i=0; i<this.al.size(); i++)
-			al.get(i).buildCFG();
+			al.get(i).buildCFG();		
+	}
+	@Override public void setUseDef() {
 		//both use and def set is empty here
+		//recursively build
+		for(int i=0; i<this.al.size(); i++)
+			al.get(i).setUseDef();	
 	}
 	@Override public CuStat getFirst() {
 		//if empty, return itself
