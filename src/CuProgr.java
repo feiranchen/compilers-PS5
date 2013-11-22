@@ -25,6 +25,8 @@ public abstract class CuProgr {
 	public abstract String toC(ArrayList<String> localVars);
 	
 	public void buildSets() {}
+	
+	public void setUseDef() {}
 }
 
 class FullPrg extends CuProgr {
@@ -57,14 +59,20 @@ class FullPrg extends CuProgr {
 				statements.add(((StatPrg)pr).stat);
 			}
 		}
-		super.entry = statements.get(0).getFirst();
 		statements.add(s);
+		super.entry = statements.get(0).getFirst();
 		//the same way as dealing with stats
 		CuStat temp = new Stats(statements);
 		temp.buildCFG();
 	}
 	
 	@Override public void buildSets() {
+		//first build the use def sets
+		//the same way as dealing with stats
+		CuStat temp = new Stats(statements);
+		temp.setUseDef();
+		
+		//next, iteratively build the in out sets
 		Helper.buildSet(entry);
 		for (CuProgr pr : elements) {
 			if (pr instanceof ClassPrg) {
@@ -193,6 +201,10 @@ class FunPrg extends CuProgr {
 	@Override public void buildCFG() {
 		super.entry = this.statement.getFirst();
 		this.statement.buildCFG();
+	}
+	
+	@Override public void setUseDef() {
+		this.statement.setUseDef();
 	}
 	
 	@Override public String toString() {

@@ -12,6 +12,10 @@ import java.util.regex.*;
 public class Helper {
 	//change this to false when submit
 	protected static boolean debug = true;
+	//switch for primitive optimization
+	protected static boolean opt_primitive = true;
+	//added for primitive optimization, mapping from variable (VvExp) to boxed or not
+	protected static HashMap<String, Boolean> varToBox = new HashMap<String, Boolean>();
 	//eg. aaa, integer
 	protected static HashMap<String, String> cVarType = new HashMap<String, String>();
 	protected static HashMap<String, String> iterType = new HashMap<String, String>();
@@ -239,7 +243,16 @@ public class Helper {
 		code +=    "\t" + "(*(int *)" + var + ")--;\n";
 		//check whether it is the last pointer pointing to the object, if yes, x3free memory
 		code +=    "\t" + "if ((*(int *)" + var + ") == 0)\n";
-		code +=    "\t\t" + "x3free(" + var + ");\n";
+		if (cVarType.get(var).equals("String"))
+			code +=    "\t\t" + "freeStr(" + var + ");\n";
+		else if(cVarType.get(var).equals("Iterable"))
+			code +=    "\t\t" + "freeIter(" + var + ");\n";
+		else
+			code +=    "\t\t" + "x3free(" + var + ");\n";
+		
+		//newly added, we feel it should not cause memory bug
+		//make var pointing to null
+		code +=    "\t" + var + " = NULL;\n";
 				
 		if (debug) {
 			code +=    "\t" + "if ((*(int *)" + var + ") < 0)\n";
