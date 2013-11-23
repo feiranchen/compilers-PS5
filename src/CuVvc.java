@@ -28,6 +28,14 @@ class Vv extends CuVvc{
 	public Vv (String s){
 		text=s;
 	}
+	@Override
+	public boolean equals(Object that){
+		if (that instanceof Vv &&
+				text.equals(((Vv)that).text))
+			return true;
+		else 
+			return false;
+	}
 }
 
 class Vvc extends CuVvc{

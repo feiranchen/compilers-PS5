@@ -41,16 +41,17 @@ public class Cubex {
         ourProgram.toHIR();
         //next, build CFG, use and def sets are built here
         ourProgram.buildCFG();
-        // *********for the second optimization, put your method here***************
+
+        CSE.startCSE(((FullPrg)ourProgram).entry);
+        // *********for the first optimization, put your method here***************
         
         //after cse, print out the HIR four debugging
-        if (Helper.debug)
+        if (Helper.debug){
+        	System.out.println("PRINT HIR========================================");
         	ourProgram.printHIR();
-        
+        }
         //next, build the in out sets
         ourProgram.buildSets();
-        
-       // CSE.startCSE(((FullPrg)ourProgram).entry);
         
 		ArrayList<String> localVars = new ArrayList<String>();
 		PrintWriter writer = new PrintWriter("out.c", "UTF-8");
