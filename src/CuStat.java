@@ -38,7 +38,7 @@ public abstract class CuStat {
 		return ctext;
 	}
 	
-	//the 
+	//the toC method with primitive generation, should not be called together with toC
 	public String toC_opt() {
 		return ctext;
 	}
@@ -156,17 +156,7 @@ class AssignStat extends CuStat{
 		super.ctext += ee.construct();
 		//the below sentence can be removed by higher level blocks
 		if (!Helper.funArgList.contains(var.toString())) {
-			//if opt_primitve doesn't work, we can always switch it off
-			if (!Helper.opt_primitive)
-				super.ctext += "void * " + var.toString() +" = NULL;\n";
-			else {
-				if (this.boxed) {
-					super.ctext += "void * " + var.toString() +" = NULL;\n";
-				}
-				else {
-					super.ctext += this.statType + " " + var.toString() + ";\n";
-				}
-			}
+			super.ctext += "void * " + var.toString() +" = NULL;\n";
 		}
 		
 		/* super.ctext += "if (" + var.toString() + "!= NULL) {\n";
@@ -197,6 +187,58 @@ class AssignStat extends CuStat{
 			super.newVars.add(var.toString());
 		if (!localVars.contains(var.toString()) && !Helper.funArgList.contains(var.toString()))
 			localVars.add(var.toString());
+		return super.ctext;
+	}
+	
+	@Override public String toC_opt() {
+		String exp_toC = ee.toC_opt();
+		Helper.cVarType.put(var.toString(), ee.getCastType());
+		Helper.iterType.put(var.toString(), ee.getIterType());
+		super.ctext ="\n\n\n";
+		super.ctext += ee.construct();
+		//the below sentence can be removed by higher level blocks
+		if (!Helper.funArgList.contains(var.toString())) {
+			if (this.boxed) {
+				super.ctext += "void * " + var.toString() +" = NULL;\n";
+			}
+			else {
+				super.ctext += "int" + " " + var.toString() + ";\n";
+			}
+		}
+		
+		if (this.boxed) {
+			//I feel if this is boxed, exp_to should also be boxed
+			//normal ref count
+			String temp_name = Helper.getVarName();
+			super.ctext += Helper.refAcquire(temp_name, var.toString());
+			if (ee.boxed)
+				super.ctext += var.toString() + " = " + exp_toC + ";\n";
+			else {
+				if (Helper.debug) {
+					System.out.println("in assign stat " + this.toString() + "var is boxed, expr is not boxed");
+				}
+			}
+				
+			//normal ref count
+			super.ctext += Helper.incrRefCount(var.toString());
+			super.ctext += Helper.decRefCount(temp_name);
+		}
+		else {
+			if (ee.boxed) {
+				super.ctext += var.toString() + " = " + Helper.unbox(exp_toC, ee.expType) + ";\n";
+			}
+			else {
+				super.ctext += var.toString() + " = " + exp_toC + ";\n";
+			}
+		}
+
+		
+		//live variable analysis
+		super.ctext += Helper.liveVarAnalysis(super.inV, super.defV, super.outV);
+
+		if (!Helper.funArgList.contains(var.toString()))
+			super.newVars.add(var.toString());
+
 		return super.ctext;
 	}
 	

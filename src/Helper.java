@@ -299,4 +299,8 @@ public class Helper {
 		code += temp_name + " = " + var + ";\n";
 		return code;
 	}
+	
+	public static String unbox(String var_name, String var_type) {
+		return "((" + var_type +" *)" + var_name + ")->value";
+	}
 }
