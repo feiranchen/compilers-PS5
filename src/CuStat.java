@@ -159,16 +159,6 @@ class AssignStat extends CuStat{
 			super.ctext += "void * " + var.toString() +" = NULL;\n";
 		}
 		
-		/* super.ctext += "if (" + var.toString() + "!= NULL) {\n";
-		//check whether it is the last pointer pointing to the object, if yes, x3free memory
-		super.ctext += "\tif ((*(int *)" + var.toString() + ") == 1)\n";
-		super.ctext += "\t\tx3free(" + var.toString() + ");\n";
-		super.ctext += "\telse\n";
-		//decrement the reference count
-		super.ctext += "\t(*(int *)" + var.toString() + ")--;\n";
-		super.ctext += "}\n"; */
-		//((int*) &test)[0]
-		
 		//normal ref count
 		String temp_name = Helper.getVarName();
 		super.ctext += Helper.refAcquire(temp_name, var.toString());		
@@ -197,26 +187,26 @@ class AssignStat extends CuStat{
 		super.ctext ="\n\n\n";
 		super.ctext += ee.construct();
 		//the below sentence can be removed by higher level blocks
+		//variable declaration
 		if (!Helper.funArgList.contains(var.toString())) {
-			if (this.boxed) {
+			if (Helper.unboxedVar.containsKey(var.toString())) {
 				super.ctext += "void * " + var.toString() +" = NULL;\n";
 			}
 			else {
-				super.ctext += "int" + " " + var.toString() + ";\n";
+				//bool is also int in C, so we only need to store the variable name for declaration elimination
+				super.ctext += "int " + var.toString() + ";\n";
 			}
 		}
 		
-		if (this.boxed) {
-			//I feel if this is boxed, exp_to should also be boxed
-			//normal ref count
+		if (!Helper.unboxedVar.containsKey(var.toString())) {
+			//this variable is boxed doesn't mean the expression is boxed
 			String temp_name = Helper.getVarName();
 			super.ctext += Helper.refAcquire(temp_name, var.toString());
 			if (ee.boxed)
 				super.ctext += var.toString() + " = " + exp_toC + ";\n";
 			else {
-				if (Helper.debug) {
-					System.out.println("in assign stat " + this.toString() + "var is boxed, expr is not boxed");
-				}
+				//if expression is unboxed, it must be boolean or integer
+				super.ctext += var.toString() + " = " + Helper.box(exp_toC, ee.expType) + ";\n";
 			}
 				
 			//normal ref count
@@ -635,6 +625,7 @@ class IfStat extends CuStat{
 			s2 = s2.toHIR();
 			temp.add(s2);
 		}
+		curHIR.add(temp);
 		super.HIR = new Stats(curHIR);
 		return super.HIR;
     }
