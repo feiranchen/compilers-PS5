@@ -263,6 +263,7 @@ class AppExpr extends CuExpr {
 		super.expType = "Iterable";
 		super.boxed = true;
 	}
+	
 	@Override
 	public boolean equals(Object that){
 		if (that instanceof AppExpr &&
@@ -272,6 +273,7 @@ class AppExpr extends CuExpr {
 		else 
 			return false;
 	}
+	
 	@Override public String toString() {
 		super.text = left.toString() + " ++ " + right.toString();
 		return super.text;
@@ -458,7 +460,17 @@ class BrkExpr extends CuExpr {
 		}
 		super.boxed = true;
 		super.expType = "Iterable";
+	}	
+	
+	@Override
+	public boolean equals(Object that){
+		if (that instanceof BrkExpr &&
+				val.equals(((BrkExpr)that).val))
+			return true;
+		else 
+			return false;
 	}
+	
 	@Override
 	public String toString() {
 		super.text=Helper.printList("[", val, "]", ",");
@@ -493,7 +505,7 @@ class BrkExpr extends CuExpr {
 			CuStat a = new AssignStat(temp1, expToHir.getSecond());
 			stats.add(a);
 			
-			//assume getSecond already has boxed and expType set, should be correct but not 100% sure
+			//assume getSecond already has boxed and expType fields set, should be correct but not 100% sure
 			a.setUnboxType();
 			
 			CuExpr var1 = new VvExp(name1);
@@ -523,7 +535,8 @@ class BrkExpr extends CuExpr {
 		ArrayList<String> tempDataArr=new ArrayList<String>();
 		for (CuExpr e : val) {
 			eToC = e.toC(localVars);
-			name += e.construct();
+			String eC = e.construct();
+			name += eC;
 			
 			/*if (!e.getDef().isEmpty())
 				def.addAll(e.getDef());
@@ -584,11 +597,18 @@ class BrkExpr extends CuExpr {
 
 class CBoolean extends CuExpr{
 	Boolean val;
+	
 	public CBoolean(Boolean b){
 		val=b;
-		super.text=b.toString();
-		
-		}
+		super.boxed = false;
+		super.expType = "Boolean";
+	}
+	
+	@Override public String toString() {
+		super.text=val.toString();
+		return super.text;
+	}
+	
 	@Override protected CuType calculateType(CuContext context) {
 		if (val == null) { throw new NoSuchTypeException(Helper.getLineInfo());}
 		return CuType.bool;
@@ -618,11 +638,11 @@ class CBoolean extends CuExpr{
 		
 		if (val)			
 			super.name = String.format("Boolean* %s;\n%s = (Boolean *) x3malloc(sizeof(Boolean));\n"
-					+ "(%s->nrefs) = 1;\n"
+					+ "(%s->nrefs) = 0;\n"
 					+ "%s->value = %d;\n", temp, temp, temp, temp, 1);
 		else
 			super.name = String.format("Boolean* %s;\n%s = (Boolean *) x3malloc(sizeof(Boolean));\n"
-					+ "(%s->nrefs) = 1;\n"
+					+ "(%s->nrefs) = 0;\n"
 					+ "%s->value = %d;\n", temp, temp, temp, temp, 0);
 	
 		//if (!localVars.contains(temp))
@@ -642,8 +662,12 @@ class CInteger extends CuExpr {
 	Integer val;
 	public CInteger(Integer i){
 		val=i;
-		super.text=i.toString();
-		
+		super.boxed = false;
+		super.expType = "Integer";
+	}
+	@Override public String toString() {
+		super.text=val.toString();
+		return super.text;
 	}
 	@Override
 	public boolean equals(Object that){
@@ -670,7 +694,7 @@ class CInteger extends CuExpr {
 	public String toC(ArrayList<String> localVars) {
 		String temp = Helper.getVarName();
 		super.name = String.format("Integer* %s;\n%s = (Integer*) x3malloc(sizeof(Integer));\n"
-				+ "(%s->nrefs) = 1;\n"
+				+ "(%s->nrefs) = 0;\n"
 				+ "%s->value = %d;\n", temp, temp, temp, temp, val);		
 		super.cText = temp;
 		super.castType = "Integer";
@@ -687,8 +711,13 @@ class CString extends CuExpr {
 	String val;
 	public CString(String s){
 		val=s;
-		super.text=s;
-		
+		super.boxed = true;
+		super.expType = "String";
+	}
+	
+	@Override public String toString() {
+		super.text=val;
+		return super.text;
 	}
 	@Override
 	public boolean equals(Object that){
@@ -718,7 +747,7 @@ class CString extends CuExpr {
 				+ "%s = (String *) x3malloc(sizeof(String));\n"
 				+ "(%s->isIter) = 0;\n"
 				+ "%s->value = (char*) x3malloc(sizeof(%s));\n"
-				+ "(%s->nrefs) = 1;\n"
+				+ "(%s->nrefs) = 0;\n"
 				+ "%s->len = sizeof(%s) - 1;\n"
 				+ "mystrcpy(%s->value, %s);\n", temp, temp, temp, temp, val, temp, temp, val, temp, val);	
 		
@@ -733,6 +762,8 @@ class CString extends CuExpr {
 		/*ArrayList<String> tempNameArr=new ArrayList<String>();	
 		ArrayList<String> tempDataArr=new ArrayList<String>();
 		for (int i=(val.length()-1); i>=0; i--) {
+		
+		
 			
 			String tempName = Helper.getVarName();
 			helper += "Character* " + tempName + " = (Character*) malloc(sizeof(Character));\n"
@@ -777,7 +808,14 @@ class DivideExpr extends CuExpr{
 		containsVar.addAll(left.containsVar);
 		containsVar.addAll(right.containsVar);
 		super.methodId = "divide";
+		super.boxed = true;
+		super.expType = "Iterable";
+	}
+	
+	@Override 
+	public String toString() {
 		super.text = String.format("%s . %s < > ( %s )", left.toString(), super.methodId, right.toString());
+		return super.text;
 	}
 	@Override protected CuType calculateType(CuContext context) throws NoSuchTypeException {
 		return binaryExprType(context, left.getType(context).id, super.methodId, right.getType(context));
@@ -789,6 +827,16 @@ class DivideExpr extends CuExpr{
 		return CuType.integer;
 	}
 	 */
+	
+	@Override
+	public boolean equals(Object that){
+		if (that instanceof DivideExpr &&
+				left.equals(((DivideExpr)that).left)&&
+				right.equals(((DivideExpr)that).right))
+			return true;
+		else 
+			return false;
+	}
 	
 	@Override
 	public Pair<List<CuStat>, CuExpr> toHIR() {
@@ -808,9 +856,17 @@ class DivideExpr extends CuExpr{
 		CuStat b = new AssignStat(temp2, rightToHir.getSecond());
 		stats.add(a);
 		stats.add(b);
+		a.setUnboxType();
+		b.setUnboxType();
 		
 		CuExpr var1 = new VvExp(name1);
 		CuExpr var2 = new VvExp(name2);
+		//for var1 and var2, we know they are integers
+		var1.boxed = false;
+		var1.expType = "Integer";
+		var2.boxed = false;
+		var2.expType = "Integer";
+		
 		CuExpr expr = new DivideExpr(var1, var2);		
 		
 		//if (leftToHir.getFirst().isEmpty())
@@ -914,6 +970,7 @@ class EqualExpr extends CuExpr{
 	public CuExpr left, right;
 	private String method2= null;
 	Boolean bool;
+	
 	public EqualExpr(CuExpr e1, CuExpr e2, Boolean eq) {
 		left = e1;
 		right = e2;
@@ -929,7 +986,33 @@ class EqualExpr extends CuExpr{
 			method2 = "negate";
 			super.text = String.format("%s . %s < > ( %s ) . negate ( )", left.toString(), super.methodId, right.toString());
 		}
+		
+		super.boxed = false;
+		super.expType = "Boolean";
 	}
+	
+	@Override 
+	public String toString() {
+		if (bool) {
+			super.text = String.format("%s . %s < > ( %s )", left.toString(), super.methodId, right.toString());
+		}
+		else {
+			super.text = String.format("%s . %s < > ( %s ) . negate ( )", left.toString(), super.methodId, right.toString());
+		}
+		return super.text;
+	}
+
+	@Override
+	public boolean equals(Object that){
+		if (that instanceof EqualExpr &&
+				left.equals(((EqualExpr)that).left)&&
+				right.equals(((EqualExpr)that).right)&&
+				bool==((EqualExpr)that).bool)
+			return true;
+		else 
+			return false;
+	}
+	
 	@Override protected CuType calculateType(CuContext context) throws NoSuchTypeException {
 		CuType t = binaryExprType(context, left.getType(context).id, super.methodId, right.getType(context));
 		if (method2 != null) {
@@ -958,8 +1041,17 @@ class EqualExpr extends CuExpr{
 		stats.add(a);
 		stats.add(b);
 		
+		a.setUnboxType();
+		b.setUnboxType();
+		
 		CuExpr var1 = new VvExp(name1);
 		CuExpr var2 = new VvExp(name2);
+		
+		var1.boxed = a.boxed;
+		var1.expType = a.statType;
+		var2.boxed = b.boxed;
+		var2.expType = b.statType;
+		
 		CuExpr expr = new EqualExpr(var1, var2, bool);		
 		
 		//if (leftToHir.getFirst().isEmpty())
@@ -1146,9 +1238,26 @@ class GreaterThanExpr extends CuExpr{
 		b = strict;
 		super.methodId = "greaterThan";
 		Helper.ToDo("strict boolean??");
-		super.text = String.format("%s . %s < > ( %s , %s )", left.toString(), super.methodId, right.toString(), strict);
+		super.boxed = false;
+		super.expType = "Boolean";
+	}
+	
+	@Override public String toString() {
+		super.text = String.format("%s . %s < > ( %s , %s )", left.toString(), super.methodId, right.toString(), b);
+		return super.text;
 	}
 
+	@Override
+	public boolean equals(Object that){
+		if (that instanceof GreaterThanExpr &&
+				left.equals(((GreaterThanExpr)that).left)&&
+				right.equals(((GreaterThanExpr)that).right)&&
+				b==((GreaterThanExpr)that).b)
+			return true;
+		else 
+			return false;
+	}
+	
 	@Override protected CuType calculateType(CuContext context) throws NoSuchTypeException {
 		boolean b1 = left.isTypeOf(context, CuType.integer) && right.isTypeOf(context, CuType.integer);
 		boolean b2 = left.isTypeOf(context, CuType.bool) && right.isTypeOf(context, CuType.bool);
@@ -1176,8 +1285,17 @@ class GreaterThanExpr extends CuExpr{
 		stats.add(a);
 		stats.add(b);
 		
+		a.setUnboxType();
+		b.setUnboxType();
+		
 		CuExpr var1 = new VvExp(name1);
 		CuExpr var2 = new VvExp(name2);
+		
+		var1.boxed = a.boxed;
+		var1.expType = a.statType;
+		var2.boxed = b.boxed;
+		var2.expType = b.statType;
+		
 		CuExpr expr = new GreaterThanExpr(var1, var2, this.b);		
 		
 		//if (leftToHir.getFirst().isEmpty())
@@ -1279,9 +1397,26 @@ class LessThanExpr extends CuExpr{
 		containsVar.addAll(right.containsVar);
 		b = strict;
 		super.methodId = "lessThan";
-		super.text = String.format("%s . %s < > ( %s, %s )", left.toString(), super.methodId, right.toString(), strict);
 		
-		
+		super.boxed = false;
+		super.expType = "Boolean";
+	}
+	
+	@Override
+	public boolean equals(Object that){
+		if (that instanceof LessThanExpr &&
+				left.equals(((LessThanExpr)that).left)&&
+				right.equals(((LessThanExpr)that).right)&&
+				b==((LessThanExpr)that).b)
+			return true;
+		else 
+			return false;
+	}
+	
+	@Override
+	public String toString() {
+		super.text = String.format("%s . %s < > ( %s, %s )", left.toString(), super.methodId, right.toString(), b);
+		return super.text;
 	}
 	@Override protected CuType calculateType(CuContext context) throws NoSuchTypeException {
 		boolean b1 = left.isTypeOf(context, CuType.integer) && right.isTypeOf(context, CuType.integer);
@@ -1310,8 +1445,17 @@ class LessThanExpr extends CuExpr{
 		stats.add(a);
 		stats.add(b);
 		
+		a.setUnboxType();
+		b.setUnboxType();
+		
 		CuExpr var1 = new VvExp(name1);
 		CuExpr var2 = new VvExp(name2);
+		
+		var1.boxed = a.boxed;
+		var1.expType = a.statType;
+		var2.boxed = b.boxed;
+		var2.expType = b.statType;	
+		
 		CuExpr expr = new LessThanExpr(var1, var2, this.b);		
 		
 		//if (leftToHir.getFirst().isEmpty())
@@ -1410,9 +1554,27 @@ class MinusExpr extends CuExpr{
 		containsVar.addAll(left.containsVar);
 		containsVar.addAll(right.containsVar);
 		super.methodId = "minus";
-		super.text = String.format("%s . %s < > ( %s )", left.toString(), super.methodId, right.toString());
 		
+		super.boxed = false;
+		super.expType = "Integer";
 	}
+	
+	@Override 
+	public String toString() {
+		super.text = String.format("%s . %s < > ( %s )", left.toString(), super.methodId, right.toString());
+		return super.text;
+	}
+	
+	@Override
+	public boolean equals(Object that){
+		if (that instanceof MinusExpr &&
+				left.equals(((MinusExpr)that).left)&&
+				right.equals(((MinusExpr)that).right))
+			return true;
+		else 
+			return false;
+	}
+	
 	@Override protected CuType calculateType(CuContext context) throws NoSuchTypeException {
 		return binaryExprType(context, left.getType(context).id, super.methodId, right.getType(context));
 	}
@@ -1442,8 +1604,17 @@ class MinusExpr extends CuExpr{
 		stats.add(a);
 		stats.add(b);
 		
+		a.setUnboxType();
+		b.setUnboxType();
+		
 		CuExpr var1 = new VvExp(name1);
 		CuExpr var2 = new VvExp(name2);
+		
+		var1.boxed = false;
+		var1.expType = "Integer";
+		var2.boxed = false;
+		var2.expType = "Integer";
+		
 		CuExpr expr = new MinusExpr(var1, var2);		
 		
 		//if (leftToHir.getFirst().isEmpty())
@@ -1535,9 +1706,26 @@ class ModuloExpr extends CuExpr{
 		containsVar.addAll(left.containsVar);
 		containsVar.addAll(right.containsVar);
 		super.methodId = "modulo";
+		
+		super.boxed = true;
+		super.expType = "Iterable";
+		
+	}
+	
+	@Override
+	public boolean equals(Object that){
+		if (that instanceof ModuloExpr &&
+				left.equals(((ModuloExpr)that).left)&&
+				right.equals(((ModuloExpr)that).right))
+			return true;
+		else 
+			return false;
+	}
+	
+	@Override
+	public String toString() {
 		super.text = String.format("%s . %s < > ( %s )", left.toString(), super.methodId, right.toString());
-		
-		
+		return super.text;
 	}
 	@Override protected CuType calculateType(CuContext context) throws NoSuchTypeException {
 		return binaryExprType(context, left.getType(context).id, super.methodId, right.getType(context));
@@ -1562,8 +1750,17 @@ class ModuloExpr extends CuExpr{
 		stats.add(a);
 		stats.add(b);
 		
+		a.setUnboxType();
+		b.setUnboxType();
+		
 		CuExpr var1 = new VvExp(name1);
 		CuExpr var2 = new VvExp(name2);
+		
+		var1.boxed = false;
+		var1.expType = "Integer";
+		var2.boxed = false;
+		var2.expType = "Integer";
+		
 		CuExpr expr = new ModuloExpr(var1, var2);		
 		
 		//if (leftToHir.getFirst().isEmpty())
@@ -1669,8 +1866,25 @@ class NegateExpr extends CuExpr{
 		val = e;
 		containsVar.addAll(val.containsVar);
 		super.methodId = "negate";
-		super.text = String.format("%s . %s < > ( )", val.toString(), super.methodId);
 
+		super.boxed = false;
+		super.expType = "Boolean";
+
+	}
+
+	@Override
+	public boolean equals(Object that){
+		if (that instanceof NegateExpr &&
+				val.equals(((NegateExpr)that).val))
+			return true;
+		else 
+			return false;
+	}
+	
+	@Override
+	public String toString() {
+		super.text = String.format("%s . %s < > ( )", val.toString(), super.methodId);
+		return super.text;
 	}
 	@Override protected CuType calculateType(CuContext context) throws NoSuchTypeException {
 		return unaryExprType(context, val.getType(context).id, super.methodId);
@@ -1689,7 +1903,13 @@ class NegateExpr extends CuExpr{
 		CuStat a = new AssignStat(temp1, valToHir.getSecond());
 		stats.add(a);
 		
+		a.setUnboxType();
+		
 		CuExpr var1 = new VvExp(name1);
+		
+		var1.boxed = false;
+		var1.expType = "Boolean";
+		
 		CuExpr expr = new NegateExpr(var1);		
 		
 		//if (valToHir.getFirst().isEmpty())
@@ -1754,9 +1974,26 @@ class NegativeExpr extends CuExpr{
 		val = e;
 		containsVar.addAll(val.containsVar);
 		super.methodId = "negative";
-		super.text = String.format("%s . %s < > ( )", val.toString(), super.methodId);
-
+		
+		super.boxed = false;
+		super.expType = "Integer";
 	}
+
+	@Override
+	public boolean equals(Object that){
+		if (that instanceof NegativeExpr &&
+				val.equals(((NegativeExpr)that).val))
+			return true;
+		else 
+			return false;
+	}
+	
+	@Override
+	public String toString() {
+		super.text = String.format("%s . %s < > ( )", val.toString(), super.methodId);
+		return super.text;
+	}
+	
 	@Override protected CuType calculateType(CuContext context) throws NoSuchTypeException {
 		return unaryExprType(context, val.getType(context).id, super.methodId);
 	}
@@ -1780,7 +2017,13 @@ class NegativeExpr extends CuExpr{
 		CuStat a = new AssignStat(temp1, valToHir.getSecond());
 		stats.add(a);
 		
+		a.setUnboxType();
+		
 		CuExpr var1 = new VvExp(name1);
+		
+		var1.boxed = false;
+		var1.expType = "Integer";
+		
 		CuExpr expr = new NegativeExpr(var1);		
 		
 		//if (valToHir.getFirst().isEmpty())
@@ -1846,7 +2089,24 @@ class OnwardsExpr extends CuExpr{
 		containsVar.addAll(e.containsVar);
 		inclusive = inclusiveness;
 		super.methodId = "onwards";
-		super.text = String.format("%s . %s < > ( %s )", val.toString(), super.methodId, inclusiveness);
+		
+		super.boxed = true;
+		super.expType = "Iterable";
+	}
+
+	@Override
+	public boolean equals(Object that){
+		if (that instanceof OnwardsExpr &&
+				val.equals(((OnwardsExpr)that).val)&&
+				inclusive==((OnwardsExpr)that).inclusive)
+			return true;
+		else 
+			return false;
+	}
+	
+	@Override public String toString() {
+		super.text = String.format("%s . %s < > ( %s )", val.toString(), super.methodId, inclusive);
+		return super.text;
 	}
 	@Override protected CuType calculateType(CuContext context) throws NoSuchTypeException {
 		return binaryExprType(context, val.getType(context).id, super.methodId, CuType.bool);
@@ -1865,7 +2125,14 @@ class OnwardsExpr extends CuExpr{
 		CuStat a = new AssignStat(temp1, valToHir.getSecond());
 		stats.add(a);
 		
+		a.setUnboxType();
+		
 		CuExpr var1 = new VvExp(name1);
+		
+		//I suddenly feel this is better, because this vvexpr needs to consistent with variable declaration
+		var1.boxed = a.boxed;
+		var1.expType = a.statType;
+		
 		CuExpr expr = new OnwardsExpr(var1, inclusive);		
 		
 		//if (valToHir.getFirst().isEmpty())
@@ -1923,7 +2190,7 @@ class OnwardsExpr extends CuExpr{
 					
 					name +=  "Iterable* " + iterTemp + ";\n" + iterTemp+ " = (Iterable*) x3malloc(sizeof(Iterable));\n"
 							+ iterTemp + "->isIter = 1;\n"
-							+ iterTemp + "->nrefs = 0;\n"
+							+ iterTemp + "->nrefs = 1;\n"
 							+ iterTemp + "->value = " + trueTemp + ";\n"
 							+ iterTemp + "->additional = NULL;\n"
 							+ iterTemp + "->next = NULL;\n"
@@ -2025,9 +2292,27 @@ class OrExpr extends CuExpr{
 		containsVar.addAll(left.containsVar);
 		containsVar.addAll(right.containsVar);
 		super.methodId = "or";
-		super.text = String.format("%s . %s < > ( %s )", left.toString(), super.methodId, right.toString());
-
+		
+		super.boxed = false;
+		super.expType = "Boolean";
 	}
+
+	@Override
+	public boolean equals(Object that){
+		if (that instanceof OrExpr &&
+				left.equals(((OrExpr)that).left)&&
+				right.equals(((OrExpr)that).right))
+			return true;
+		else 
+			return false;
+	}
+	
+	@Override 
+	public String toString() {
+		super.text = String.format("%s . %s < > ( %s )", left.toString(), super.methodId, right.toString());
+		return super.text;
+	}
+	
 	@Override protected CuType calculateType(CuContext context) throws NoSuchTypeException {
 		return binaryExprType(context, left.getType(context).id, super.methodId, right.getType(context));
 	}
@@ -2051,8 +2336,17 @@ class OrExpr extends CuExpr{
 		stats.add(a);
 		stats.add(b);
 		
+		a.setUnboxType();
+		b.setUnboxType();
+		
 		CuExpr var1 = new VvExp(name1);
 		CuExpr var2 = new VvExp(name2);
+		
+		var1.boxed = a.boxed;
+		var1.expType = a.statType;
+		var2.boxed = b.boxed;
+		var2.expType = b.statType;
+		
 		CuExpr expr = new OrExpr(var1, var2);		
 		
 		//if (leftToHir.getFirst().isEmpty())
@@ -2148,7 +2442,14 @@ class PlusExpr extends CuExpr{
 		containsVar.addAll(left.containsVar);
 		containsVar.addAll(right.containsVar);
 		super.methodId = "plus";
+		
+		super.boxed = false;
+		super.expType = "Integer";
+	}
+	
+	@Override public String toString() {
 		super.text = String.format("%s . %s < > ( %s )", left.toString(), super.methodId, right.toString());
+		return super.text;
 	}
 	@Override
 	public boolean equals(Object that){
@@ -2159,6 +2460,7 @@ class PlusExpr extends CuExpr{
 		else 
 			return false;
 	}
+	
 	@Override protected CuType calculateType(CuContext context) throws NoSuchTypeException {
 		//System.out.println("in plus expr begin");
 		CuType lt = left.getType(context);
@@ -2189,8 +2491,17 @@ class PlusExpr extends CuExpr{
 		stats.add(a);
 		stats.add(b);
 		
+		a.setUnboxType();
+		b.setUnboxType();
+		
 		CuExpr var1 = new VvExp(name1);
 		CuExpr var2 = new VvExp(name2);
+		
+		var1.boxed = a.boxed;
+		var1.expType = a.statType;
+		var2.boxed = b.boxed;
+		var2.expType = b.statType;		
+		
 		CuExpr expr = new PlusExpr(var1, var2);		
 		
 		//if (leftToHir.getFirst().isEmpty())
@@ -2283,7 +2594,15 @@ class ThroughExpr extends CuExpr{
 		containsVar.addAll(left.containsVar);
 		containsVar.addAll(right.containsVar);
 		super.methodId = "through";
-		super.text = String.format("%s . %s < > ( %s , %s , %s )", left.toString(), methodId, right.toString(), low, up);
+		
+		super.boxed = true;
+		super.expType = "Iterable";
+	}
+	
+	@Override
+	public String toString() {
+		super.text = String.format("%s . %s < > ( %s , %s , %s )", left.toString(), methodId, right.toString(), bLow, bUp);
+		return super.text;
 	}
 	@Override
 	public boolean equals(Object that){
@@ -2327,9 +2646,19 @@ class ThroughExpr extends CuExpr{
 		stats.add(a);
 		stats.add(b);
 		
+		a.setUnboxType();
+		b.setUnboxType();
+		
+		
 		CuExpr var1 = new VvExp(name1);
 		CuExpr var2 = new VvExp(name2);
-		CuExpr expr = new ThroughExpr(var1, var2, bLow, bUp);			
+		
+		var1.boxed = a.boxed;
+		var1.expType = a.statType;
+		var2.boxed = b.boxed;
+		var2.expType = b.statType;	
+		
+		CuExpr expr = new ThroughExpr(var1, var2, bLow, bUp);	
 		
 		//if (leftToHir.getFirst().isEmpty())
 			expr.use.add(var1.toString());
@@ -2620,9 +2949,28 @@ class TimesExpr extends CuExpr{
 		containsVar.addAll(left.containsVar);
 		containsVar.addAll(right.containsVar);
 		super.methodId = "times";
-		super.text = String.format("%s . %s < > ( %s )", left.toString(), super.methodId, right.toString());
+		
+		super.boxed = false;
+		super.expType = "Integer";
 
 	}
+
+	@Override
+	public boolean equals(Object that){
+		if (that instanceof TimesExpr &&
+				left.equals(((TimesExpr)that).left)&&
+				right.equals(((TimesExpr)that).right))
+			return true;
+		else 
+			return false;
+	}
+	
+	@Override
+	public String toString() {
+		super.text = String.format("%s . %s < > ( %s )", left.toString(), super.methodId, right.toString());
+		return super.text;
+	}
+	
 	@Override protected CuType calculateType(CuContext context) throws NoSuchTypeException {
 		return binaryExprType(context, left.getType(context).id, super.methodId, right.getType(context));
 	}
@@ -2646,8 +2994,17 @@ class TimesExpr extends CuExpr{
 		stats.add(a);
 		stats.add(b);
 		
+		a.setUnboxType();
+		b.setUnboxType();
+		
 		CuExpr var1 = new VvExp(name1);
 		CuExpr var2 = new VvExp(name2);
+		
+		var1.boxed = a.boxed;
+		var1.expType = a.statType;
+		var2.boxed = b.boxed;
+		var2.expType = b.statType;	
+		
 		CuExpr expr = new TimesExpr(var1, var2);		
 		
 		//if (leftToHir.getFirst().isEmpty())
@@ -2730,8 +3087,8 @@ class TimesExpr extends CuExpr{
 
 class VarExpr extends CuExpr{// e.vv<tao1...>(e1,...)
 	public CuExpr val;
-	private String method;
-	private List<CuType> types;
+	public String method;
+	public List<CuType> types;
 	List<CuExpr> es;
 	public VarExpr(CuExpr e, String var, List<CuType> pt, List<CuExpr> es) {		
 		this.val = e;
@@ -2742,9 +3099,26 @@ class VarExpr extends CuExpr{// e.vv<tao1...>(e1,...)
 		for (CuExpr elem : es){
 			containsVar.addAll(elem.containsVar);
 		}
+	}
+
+	@Override
+	public boolean equals(Object that){
+		if (that instanceof VarExpr &&
+				val.equals(((VarExpr)that).val)&&
+				((types==null&&((VarExpr)that).types==null)||types.equals(((VarExpr)that).types))&&
+				((es==null&&((VarExpr)that).es==null)||es.equals(((VarExpr)that).es)))
+			return true;
+		else 
+			return false;
+	}
+	
+	@Override
+	public String toString() {
 		super.text = String.format("%s . %s %s %s", this.val.toString(), this.method, 
 				Helper.printList("<", this.types, ">", ","), Helper.printList("(", this.es, ")", ","));
+		return super.text;
 	}
+	
 	@Override public boolean isFunCall () {
 		return true;
 	}
@@ -2894,8 +3268,8 @@ class VarExpr extends CuExpr{// e.vv<tao1...>(e1,...)
 
 }
 class VcExp extends CuExpr {// vc<tao1...>(e1,...)
-	private String val; 
-	private List<CuType> types;
+	public String val; 
+	public List<CuType> types;
 	public List<CuExpr> es;
 	public VcExp(String v, List<CuType> pt, List<CuExpr> e){
 		//System.out.println("in VcExp constructor, begin");
@@ -2906,10 +3280,25 @@ class VcExp extends CuExpr {// vc<tao1...>(e1,...)
 		for (CuExpr elem : es){
 			containsVar.addAll(elem.containsVar);
 		}
-		super.text=val.toString()+Helper.printList("<", types, ">", ",")+Helper.printList("(", es, ")", ",");
-Helper.P("VcExp= "+text);
-		//System.out.println("in VcExp constructor, end");
 	}
+
+	@Override
+	public boolean equals(Object that){
+		if (that instanceof VcExp &&
+				val.equals(((VcExp)that).val)&&
+				((types==null&&((VcExp)that).types==null)||types.equals(((VcExp)that).types))&&
+				((es==null&&((VcExp)that).es==null)||es.equals(((VcExp)that).es)))
+			return true;
+		else 
+			return false;
+	}
+	
+	@Override 
+	public String toString() {
+		super.text=val.toString()+Helper.printList("<", types, ">", ",")+Helper.printList("(", es, ")", ",");
+		return super.text;
+	}
+	
 	@Override public boolean isFunCall () {
 		return true;
 	}
@@ -3044,10 +3433,12 @@ Helper.P("VcExp= "+text);
 
 class VvExp extends CuExpr{//varname or function call
 	public String val;
-	private List<CuType> types = new ArrayList<CuType>();
+	public List<CuType> types = new ArrayList<CuType>();
 	public List<CuExpr> es = null;
 	static private boolean initialized = false;
 	static String  iter = Helper.getVarName(), temp = Helper.getVarName();
+	
+	private CuType retype = null;
 	
 	public VvExp(String str){
 		val = str;
@@ -3060,7 +3451,24 @@ class VvExp extends CuExpr{//varname or function call
 		es = e;
 		super.text += Helper.printList("<", pt, ">", ",")+Helper.printList("(", es, ")", ",");
 	}
+
+	@Override
+	public boolean equals(Object that){
+		if (that instanceof VvExp &&
+				val.equals(((VvExp)that).val)&&
+				((types==null&&((VvExp)that).types==null)||types.equals(((VvExp)that).types))&&
+				((es==null&&((VvExp)that).es==null)||es.equals(((VvExp)that).es)))
+			return true;
+		else 
+			return false;
+	}
 	
+	@Override public String toString() {
+		super.text=val;
+		if (es!=null)
+			super.text += Helper.printList("<", types, ">", ",")+Helper.printList("(", es, ")", ",");
+		return super.text;
+	}
 	@Override public boolean isFunCall () {
 		if (es == null)
 			return false;
@@ -3113,17 +3521,30 @@ Helper.P(" 1mapping is " + mapping.toString());
 		if (reType.isTypePara() && mapping.containsKey(reType.id)) {
 			return mapping.get(reType.id);
 		}
+		this.retype = reType;
 		return reType;
 	}
-	
+
+
+
 	@Override
 	public Pair<List<CuStat>, CuExpr> toHIR() {
+		//it can either be there in the original cubex program, or get generated in toHIR
+		if (this.retype != null) {
+			if (retype.id.equals("Integer") || retype.id.equals("Boolean")) {
+				this.boxed = false;
+				this.expType = retype.id;
+			}			
+		}
 		if(es == null) 
 		{
 			Pair<List<CuStat>, CuExpr> temp = new Pair<List<CuStat>, CuExpr>();
 			//String name1 = Helper.getVarName();
 			List<CuStat> stats = new ArrayList<CuStat>();
 			CuExpr exp = new VvExp(val);
+			
+			exp.boxed = this.boxed;
+			exp.expType = this.expType;
 			
 			//CuVvc vvc = new Vv(name1);			
 			//CuStat a = new AssignStat(vvc, exp);
@@ -3151,7 +3572,13 @@ Helper.P(" 1mapping is " + mapping.toString());
 				CuStat a = new AssignStat(vvc, expToHir.getSecond());
 				stats.add(a);
 				
+				a.setUnboxType();
+				
 				CuExpr e = new VvExp(name1);
+				
+				e.boxed = a.boxed;
+				e.expType = a.statType;
+				
 				newEs.add(e);
 				//if (expToHir.getFirst().isEmpty())
 					use.add(e.toString());
@@ -3160,6 +3587,9 @@ Helper.P(" 1mapping is " + mapping.toString());
 			CuExpr exp = new VvExp(val);
 			exp.add(types, newEs);
 			exp.use = use;
+			
+			exp.boxed = this.boxed;
+			exp.expType = this.expType;
 			
 			temp.setFirst(stats);
 			temp.setSecond(exp);
@@ -3202,7 +3632,7 @@ Helper.P(" 1mapping is " + mapping.toString());
 				
 					name +=  temp + " = (String*) x3malloc(sizeof(String));\n\t"
 						+ temp + "->isIter = 0;\n\t"
-						+ temp + "->nrefs = 0;\n\t"
+						+ temp + "->nrefs = 1;\n\t"
 						+ temp + "->value = (char*) x3malloc("+ len + " * sizeof(char));\n\t"
 						+ temp + "->len = " + len + ";\n\t"
 						+ "read_line(" + temp + "->value);\n\t";
@@ -3347,5 +3777,14 @@ Helper.P(" 1mapping is " + mapping.toString());
 		}
 		return super.toC(localVars);
 	}
+}
+
+class NullExp extends CuExpr{
+	public NullExp(){
+		text="";
+	}
 	
+	public boolean equals(Object that){
+		return true;
+	}
 }

@@ -152,12 +152,14 @@ public class CSE {
 			return orgS.getNext();
 		}
 		else {
-			throw new Exception("Statement not making sense");
+			System.out.println("\n\n Did not process stat: "+orgS.toString());
+			return orgS.getNext();
 		}
 	}
 	
 	static private CuExpr updateExpr(CuVvc name,CuExpr orgE,
 			HashMap<CuExpr, CuVvc> exprMap,HashMap<CuVvc,ArrayList<CuExpr>> varMap) throws Exception{
+		CuExpr temp=rootExpr(orgE,exprMap,varMap);
 		if(myContainsKey(exprMap,rootExpr(orgE,exprMap,varMap))){
 			return new VvExp(myGet(exprMap,rootExpr(orgE,exprMap,varMap)).text);
 		}else{
@@ -282,11 +284,7 @@ public class CSE {
 						updateInput.add(updateExpr(null, elem, exprMap, varMap));
 					}
 					((VvExp) orgE).es=updateInput;
-				}else{
-					if(myContainsKey(varMap, new Vv(((VvExp) orgE).val)))
-						return myGet(varMap,new Vv(((VvExp) orgE).val)).get(0);
 				}
-
 				return finalReturn(name,orgE, exprMap, varMap);
 			}else {
 				if(name!=null){
@@ -302,12 +300,11 @@ public class CSE {
 	private static CuExpr finalReturn(CuVvc name,CuExpr orgE,
 			HashMap<CuExpr, CuVvc> exprMap,HashMap<CuVvc,ArrayList<CuExpr>> varMap){
 		CuVvc betterE=null;
+
+		CuExpr temp=rootExpr(orgE,exprMap,varMap);
 		if(myContainsKey(exprMap,rootExpr(orgE,exprMap,varMap))){
 			betterE=myGet(exprMap,rootExpr(orgE,exprMap,varMap));
-			if(myContainsKey(varMap, betterE))
-				return myGet(varMap,betterE).get(0);
-			else
-				return new VvExp(betterE.text);
+			return new VvExp(betterE.text);
 		}
 		else{
 			if(name!=null){
@@ -319,121 +316,142 @@ public class CSE {
 		
 	}
 
+	//make sure this is returning a new copy
 	private static CuExpr rootExpr(CuExpr orgE, 
 			HashMap<CuExpr, CuVvc> exprMap,HashMap<CuVvc,ArrayList<CuExpr>> varMap){
+		CuExpr newE=null;
 		if (orgE instanceof AndExpr){
-			((AndExpr)orgE).left=rootExpr(((AndExpr)orgE).left,exprMap, varMap);//shouldn't need a name
-			((AndExpr)orgE).right=rootExpr(((AndExpr)orgE).right,exprMap, varMap);
+			newE=new AndExpr(new NullExp(), new NullExp());
+			((AndExpr)newE).left=rootExpr(((AndExpr)orgE).left,exprMap, varMap);//shouldn't need a name
+			((AndExpr)newE).right=rootExpr(((AndExpr)orgE).right,exprMap, varMap);
 
-			return orgE;
+			return newE;
 		}
 		else if (orgE instanceof AppExpr){
-			((AppExpr) orgE).left=rootExpr(((AppExpr) orgE).left,exprMap, varMap);//shouldn't need a name
-			((AppExpr) orgE).right=rootExpr(((AppExpr) orgE).right,exprMap, varMap);
+			newE=new AppExpr(new NullExp(), new NullExp());
+			((AppExpr) newE).left=rootExpr(((AppExpr) orgE).left,exprMap, varMap);//shouldn't need a name
+			((AppExpr) newE).right=rootExpr(((AppExpr) orgE).right,exprMap, varMap);
 
-			return orgE;
+			return newE;
 		}
 		else if (orgE instanceof BrkExpr){
+			newE=new BrkExpr(new ArrayList<CuExpr>());
 			ArrayList<CuExpr> updateInput=new ArrayList<CuExpr>();
 			//TODO: make sure you don't mess up the sequence here
 			for (CuExpr elem :((BrkExpr) orgE).val){
 				updateInput.add(rootExpr(elem,exprMap, varMap));
 			}
-			((BrkExpr) orgE).val=updateInput;
+			((BrkExpr) newE).val=updateInput;
 
-			return orgE;
+			return newE;
 		}
 		else if (orgE instanceof DivideExpr){
-			((DivideExpr) orgE).left=rootExpr(((DivideExpr) orgE).left,exprMap, varMap);//shouldn't need a name
-			((DivideExpr) orgE).right=rootExpr(((DivideExpr) orgE).right,exprMap, varMap);
+			newE=new DivideExpr(new NullExp(), new NullExp());
+			((DivideExpr) newE).left=rootExpr(((DivideExpr) orgE).left,exprMap, varMap);//shouldn't need a name
+			((DivideExpr) newE).right=rootExpr(((DivideExpr) orgE).right,exprMap, varMap);
 
-			return orgE;
+			return newE;
 		}
 		else if (orgE instanceof EqualExpr){
-			((EqualExpr) orgE).left=rootExpr(((EqualExpr) orgE).left,exprMap, varMap);//shouldn't need a name
-			((EqualExpr) orgE).right=rootExpr(((EqualExpr) orgE).right,exprMap, varMap);
+			newE=new EqualExpr(new NullExp(), new NullExp(),((EqualExpr) orgE).bool);
+			((EqualExpr) newE).left=rootExpr(((EqualExpr) orgE).left,exprMap, varMap);//shouldn't need a name
+			((EqualExpr) newE).right=rootExpr(((EqualExpr) orgE).right,exprMap, varMap);
 
-			return orgE;
+			return newE;
 		}
 		else if (orgE instanceof GreaterThanExpr){
-			((GreaterThanExpr) orgE).left=rootExpr(((GreaterThanExpr) orgE).left,exprMap, varMap);//shouldn't need a name
-			((GreaterThanExpr) orgE).right=rootExpr(((GreaterThanExpr) orgE).right,exprMap, varMap);
+			newE=new GreaterThanExpr(new NullExp(), new NullExp(),((GreaterThanExpr) orgE).b);
+			((GreaterThanExpr) newE).left=rootExpr(((GreaterThanExpr) orgE).left,exprMap, varMap);//shouldn't need a name
+			((GreaterThanExpr) newE).right=rootExpr(((GreaterThanExpr) orgE).right,exprMap, varMap);
 
-			return orgE;
+			return newE;
 		}
 		else if (orgE instanceof LessThanExpr){
-			((LessThanExpr) orgE).left=rootExpr(((LessThanExpr) orgE).left,exprMap, varMap);//shouldn't need a name
-			((LessThanExpr) orgE).right=rootExpr(((LessThanExpr) orgE).right,exprMap, varMap);
+			newE=new LessThanExpr(new NullExp(), new NullExp(),((LessThanExpr) orgE).b);
+			((LessThanExpr) newE).left=rootExpr(((LessThanExpr) orgE).left,exprMap, varMap);//shouldn't need a name
+			((LessThanExpr) newE).right=rootExpr(((LessThanExpr) orgE).right,exprMap, varMap);
 
-			return orgE;
+			return newE;
 		}
 		else if (orgE instanceof MinusExpr){
-			((MinusExpr) orgE).left=rootExpr(((MinusExpr) orgE).left,exprMap, varMap);//shouldn't need a name
-			((MinusExpr) orgE).right=rootExpr(((MinusExpr) orgE).right,exprMap, varMap);
+			newE=new MinusExpr(new NullExp(), new NullExp());
+			((MinusExpr) newE).left=rootExpr(((MinusExpr) orgE).left,exprMap, varMap);//shouldn't need a name
+			((MinusExpr) newE).right=rootExpr(((MinusExpr) orgE).right,exprMap, varMap);
 
-			return orgE;
+			return newE;
 		}
 		else if (orgE instanceof ModuloExpr){
-			((ModuloExpr) orgE).left=rootExpr(((ModuloExpr) orgE).left,exprMap, varMap);//shouldn't need a name
-			((ModuloExpr) orgE).right=rootExpr(((ModuloExpr) orgE).right,exprMap, varMap);
+			newE=new ModuloExpr(new NullExp(), new NullExp());
+			((ModuloExpr) newE).left=rootExpr(((ModuloExpr) orgE).left,exprMap, varMap);//shouldn't need a name
+			((ModuloExpr) newE).right=rootExpr(((ModuloExpr) orgE).right,exprMap, varMap);
 
-			return orgE;
+			return newE;
 		}
 		else if (orgE instanceof NegateExpr){
-			((NegateExpr) orgE).val=rootExpr(((NegateExpr) orgE).val,exprMap, varMap);//shouldn't need a name
+			newE=new NegateExpr(new NullExp());
+			((NegateExpr) newE).val=rootExpr(((NegateExpr) orgE).val,exprMap, varMap);//shouldn't need a name
 
-			return orgE;
+			return newE;
 		}
 		else if (orgE instanceof NegativeExpr){
-			((NegativeExpr) orgE).val=rootExpr(((NegativeExpr) orgE).val,exprMap, varMap);//shouldn't need a name
+			newE=new NegativeExpr(new NullExp());
+			((NegativeExpr) newE).val=rootExpr(((NegativeExpr) orgE).val,exprMap, varMap);//shouldn't need a name
 
-			return orgE;
+			return newE;
 		}
 		else if (orgE instanceof OrExpr){
-			((OrExpr) orgE).left=rootExpr(((OrExpr) orgE).left,exprMap, varMap);//shouldn't need a name
-			((OrExpr) orgE).right=rootExpr(((OrExpr) orgE).right,exprMap, varMap);
+			newE=new OrExpr(new NullExp(),new NullExp());
+			((OrExpr) newE).left=rootExpr(((OrExpr) orgE).left,exprMap, varMap);//shouldn't need a name
+			((OrExpr) newE).right=rootExpr(((OrExpr) orgE).right,exprMap, varMap);
 
-			return orgE;
+			return newE;
 		}
 		else if (orgE instanceof PlusExpr){
-			((PlusExpr) orgE).left=rootExpr(((PlusExpr) orgE).left,exprMap, varMap);//shouldn't need a name
-			((PlusExpr) orgE).right=rootExpr(((PlusExpr) orgE).right,exprMap, varMap);
+			newE=new PlusExpr(new NullExp(),new NullExp());
+			((PlusExpr) newE).left=rootExpr(((PlusExpr) orgE).left,exprMap, varMap);//shouldn't need a name
+			((PlusExpr) newE).right=rootExpr(((PlusExpr) orgE).right,exprMap, varMap);
 
-			return orgE;
+			return newE;
 		}
 		else if (orgE instanceof ThroughExpr){
-			((ThroughExpr) orgE).left=rootExpr(((ThroughExpr) orgE).left,exprMap, varMap);//shouldn't need a name
-			((ThroughExpr) orgE).right=rootExpr(((ThroughExpr) orgE).right,exprMap, varMap);
+			newE=new ThroughExpr(new NullExp(),new NullExp(),((ThroughExpr) orgE).bLow,((ThroughExpr) orgE).bUp);
+			((ThroughExpr) newE).left=rootExpr(((ThroughExpr) orgE).left,exprMap, varMap);//shouldn't need a name
+			((ThroughExpr) newE).right=rootExpr(((ThroughExpr) orgE).right,exprMap, varMap);
 
-			return orgE;
+			return newE;
 		}
 		else if (orgE instanceof TimesExpr){
-			((TimesExpr) orgE).left=rootExpr(((TimesExpr) orgE).left,exprMap, varMap);//shouldn't need a name
-			((TimesExpr) orgE).right=rootExpr(((TimesExpr) orgE).right,exprMap, varMap);
+			newE=new TimesExpr(new NullExp(),new NullExp());
+			((TimesExpr) newE).left=rootExpr(((TimesExpr) orgE).left,exprMap, varMap);//shouldn't need a name
+			((TimesExpr) newE).right=rootExpr(((TimesExpr) orgE).right,exprMap, varMap);
 
-			return orgE;
+			return newE;
 		}
 		else if (orgE instanceof VarExpr){
-			((VarExpr) orgE).val=rootExpr(((VarExpr) orgE).val,exprMap, varMap);//shouldn't need a name
+			newE=new VarExpr(new NullExp(),orgE.methodId,((VarExpr) orgE).types,null);
+			((VarExpr) newE).val=rootExpr(((VarExpr) orgE).val,exprMap, varMap);//shouldn't need a name
 			ArrayList<CuExpr> updateInput=new ArrayList<CuExpr>();
 			//TODO: make sure you don't mess up the sequence here
 			for (CuExpr elem :((VarExpr) orgE).es){
 				updateInput.add(rootExpr(elem,exprMap, varMap));
 			}
-			((VarExpr) orgE).es=updateInput;
+			((VarExpr) newE).es=updateInput;
 
-			return orgE;
+			return newE;
 		}
 		else if (orgE instanceof VcExp){
+			newE=new VcExp(((VcExp) orgE).val, ((VcExp) orgE).types, null);
 			ArrayList<CuExpr> updateInput=new ArrayList<CuExpr>();
 			//TODO: make sure you don't mess up the sequence here
 			for (CuExpr elem :((VcExp) orgE).es){
 				updateInput.add(rootExpr(elem, exprMap, varMap));
 			}
-			((VcExp) orgE).es=updateInput;
-			return orgE;
+			((VcExp) newE).es=updateInput;
+			return newE;
 		}
 		else if (orgE instanceof VvExp){
+			newE=new VvExp(((VvExp) orgE).val);
+			newE.add(((VvExp) orgE).types, new ArrayList<CuExpr>());
 			//even if argument set is null that's fine
 			ArrayList<CuExpr> updateInput=new ArrayList<CuExpr>();
 			//TODO: make sure you don't mess up the sequence here
@@ -441,13 +459,16 @@ public class CSE {
 				for (CuExpr elem :((VvExp) orgE).es){
 					updateInput.add(rootExpr(elem, exprMap, varMap));
 				}
-				((VvExp) orgE).es=updateInput;
-			}else{
-				if(myContainsKey(varMap, new Vv(((VvExp) orgE).val)))
-					return myGet(varMap,new Vv(((VvExp) orgE).val)).get(0);
+				((VvExp) newE).es=updateInput;
+			}
+			//this is just a variable name
+			else if(myContainsKey(varMap, new Vv(((VvExp) orgE).val))){
+				CuExpr root= myGet(varMap,new Vv(((VvExp) orgE).val)).get(0);
+				root=rootExpr(root, exprMap, varMap);
+				return root;
 			}
 
-			return orgE;
+			return newE;
 		}
 		
 		return orgE;

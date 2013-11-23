@@ -32,7 +32,14 @@ public abstract class CuStat {
 	@Override public String toString() {
 		return text;
 	}
+	
+	//the toC method without primitive generation
 	public String toC(ArrayList<String> localVars) {
+		return ctext;
+	}
+	
+	//the 
+	public String toC_opt() {
 		return ctext;
 	}
 	public void add (CuStat st){}
@@ -148,8 +155,19 @@ class AssignStat extends CuStat{
 		super.ctext ="\n\n\n";
 		super.ctext += ee.construct();
 		//the below sentence can be removed by higher level blocks
-		if (!Helper.funArgList.contains(var.toString()))
-			super.ctext += "void * " + var.toString() +" = NULL;\n";
+		if (!Helper.funArgList.contains(var.toString())) {
+			//if opt_primitve doesn't work, we can always switch it off
+			if (!Helper.opt_primitive)
+				super.ctext += "void * " + var.toString() +" = NULL;\n";
+			else {
+				if (this.boxed) {
+					super.ctext += "void * " + var.toString() +" = NULL;\n";
+				}
+				else {
+					super.ctext += this.statType + " " + var.toString() + ";\n";
+				}
+			}
+		}
 		
 		/* super.ctext += "if (" + var.toString() + "!= NULL) {\n";
 		//check whether it is the last pointer pointing to the object, if yes, x3free memory
@@ -897,9 +915,19 @@ class ReturnStat extends CuStat{
 		} */
 		
 		//special process for return statement
-		super.ctext += "if (" + exp_toC + "!= NULL) {\n";
+		/*super.ctext += "if (" + exp_toC + "!= NULL) {\n";
 		super.ctext += "(*(int *)" + exp_toC + ")--;\n";
-		super.ctext += "}\n";
+		super.ctext += "}\n"; */
+		
+		if ((e instanceof VvExp) && (!e.isFunCall())) {
+			super.outV.add(e.toString());
+			//we don't deallocate it, but we need to decrease its ref count
+			super.ctext += "if (" + exp_toC + "!= NULL) {\n";
+			super.ctext += "(*(int *)" + exp_toC + ")--;\n";
+			super.ctext += "}\n"; 
+		}
+		
+		super.ctext += Helper.liveVarAnalysis(super.inV, super.defV, super.outV);
 			
 		super.ctext += "return " + exp_toC + ";\n";
 		/*if (e.isFunCall())

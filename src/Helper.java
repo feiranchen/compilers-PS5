@@ -241,6 +241,13 @@ public class Helper {
 		String code = "if (" + var + "!= NULL) {\n";
 		//decrement ref count
 		code +=    "\t" + "(*(int *)" + var + ")--;\n";
+		
+		if (debug) {
+			code +=    "\t" + "if ((*(int *)" + var + ") < 0)\n";
+			//need to include stdio for debugging
+			code +=    "\t\t" + "printf(\"" + var + " ref count is smaller than 0\\n\");\n";
+		}
+		
 		//check whether it is the last pointer pointing to the object, if yes, x3free memory
 		code +=    "\t" + "if ((*(int *)" + var + ") == 0)\n";
 		String type = cVarType.get(var);
@@ -257,13 +264,7 @@ public class Helper {
 		
 		//newly added, we feel it should not cause memory bug
 		//make var pointing to null
-		code +=    "\t" + var + " = NULL;\n";
 				
-		if (debug) {
-			code +=    "\t" + "if ((*(int *)" + var + ") < 0)\n";
-			//need to include stdio for debugging
-			code +=    "\t\t" + "printf(\"" + var + " ref count is smaller than 0\\n\");\n";
-		}
 		//newly added, we feel it should not cause memory bug
 		//make var pointing to null
 		code +=    "\t" + var + " = NULL;\n";

@@ -53,7 +53,6 @@ public class Cubex {
         //next, build the in out sets
         ourProgram.buildSets();
         
-        
 		ArrayList<String> localVars = new ArrayList<String>();
 		PrintWriter writer = new PrintWriter("out.c", "UTF-8");
 		String cProgram = ourProgram.toC(localVars);
