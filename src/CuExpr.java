@@ -39,6 +39,10 @@ public abstract class CuExpr {
 		return cText;
 	}
 	
+	public String toC_opt() {
+		return cText;
+	}
+	
 	public String construct(){
 		return name;
 	}
@@ -3449,6 +3453,7 @@ class VvExp extends CuExpr{//varname or function call
 	static String  iter = Helper.getVarName(), temp = Helper.getVarName();
 	
 	private CuType retype = null;
+	private CuType oriReType = null;
 	
 	public VvExp(String str){
 		val = str;
@@ -3489,7 +3494,10 @@ class VvExp extends CuExpr{//varname or function call
 	@Override protected CuType calculateType(CuContext context) {
 Helper.P("in VvExp typechecker, var is " + val.toString());
 		//System.out.println(String.format("in VvExp %s, begin %s", text, val));
-		if (es == null) return context.getVariable(val);
+		if (es == null) {
+			this.retype = context.getVariable(val);
+			return this.retype;
+		}
 Helper.P("es is not null, es is " + es.toString());
 		//else, it will be the same as in VcExp
         // check tao in scope
@@ -3502,6 +3510,10 @@ Helper.P("es is not null, es is " + es.toString());
 		}     
         // check each es 
         TypeScheme cur_ts = (TypeScheme) context.getFunction(val);
+        
+        //added in PA5
+        this.oriReType = cur_ts.data_t;
+        		
         List<CuType> tList = new ArrayList<CuType>();
         for (CuType cur_type : cur_ts.data_tc.values()) {
         	//if(cur_type.id.equals("Iterable"))
@@ -3529,7 +3541,8 @@ Helper.P(" 1mapping is " + mapping.toString());
         reType.plugIn(mapping);
         Helper.P("   VvExp reType %s isTypePara %b, mapping %s get %s", reType, reType.isTypePara(), mapping, mapping.get(reType.id));
 		if (reType.isTypePara() && mapping.containsKey(reType.id)) {
-			return mapping.get(reType.id);
+			this.retype = mapping.get(reType.id);
+			return this.retype;
 		}
 		this.retype = reType;
 		return reType;
@@ -3542,7 +3555,9 @@ Helper.P(" 1mapping is " + mapping.toString());
 		//it can either be there in the original cubex program, or get generated in toHIR
 		if (this.retype != null) {
 			if (retype.id.equals("Integer") || retype.id.equals("Boolean")) {
-				this.boxed = false;
+				//for generic functions, boxed is still true
+				if ((this.oriReType==null) || !(this.oriReType instanceof VTypePara))
+					this.boxed = false;  
 				this.expType = retype.id;
 			}			
 		}

@@ -14,8 +14,10 @@ public class Helper {
 	protected static boolean debug = true;
 	//switch for primitive optimization
 	protected static boolean opt_primitive = true;
-	//added for primitive optimization, mapping from variable (VvExp) to boxed or not
-	protected static HashMap<String, Boolean> varToBox = new HashMap<String, Boolean>();
+	//added for primitive optimization, unboxed variables, from name to type
+	protected static HashMap<String, String> unboxedVar = new HashMap<String, String>();
+	//added for primitive optimization, boxed variables, from name to type
+	protected static HashMap<String, String> boxedVar = new HashMap<String, String>();
 	//eg. aaa, integer
 	protected static HashMap<String, String> cVarType = new HashMap<String, String>();
 	protected static HashMap<String, String> iterType = new HashMap<String, String>();
@@ -298,5 +300,15 @@ public class Helper {
 		String code = "void * " + temp_name +" = NULL;\n";
 		code += temp_name + " = " + var + ";\n";
 		return code;
+	}
+	
+	public static String unbox(String var_name, String var_type) {
+		return "((" + var_type +" *)" + var_name + ")->value";
+	}
+	
+	//havent done yet
+	public static String box(String exp_name, String exp_type) {
+		String a = "to do";
+		return a;
 	}
 }

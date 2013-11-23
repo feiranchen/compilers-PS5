@@ -38,7 +38,7 @@ public abstract class CuStat {
 		return ctext;
 	}
 	
-	//the 
+	//the toC method with primitive generation, should not be called together with toC
 	public String toC_opt() {
 		return ctext;
 	}
@@ -156,28 +156,8 @@ class AssignStat extends CuStat{
 		super.ctext += ee.construct();
 		//the below sentence can be removed by higher level blocks
 		if (!Helper.funArgList.contains(var.toString())) {
-			//if opt_primitve doesn't work, we can always switch it off
-			if (!Helper.opt_primitive)
-				super.ctext += "void * " + var.toString() +" = NULL;\n";
-			else {
-				if (this.boxed) {
-					super.ctext += "void * " + var.toString() +" = NULL;\n";
-				}
-				else {
-					super.ctext += this.statType + " " + var.toString() + ";\n";
-				}
-			}
+			super.ctext += "void * " + var.toString() +" = NULL;\n";
 		}
-		
-		/* super.ctext += "if (" + var.toString() + "!= NULL) {\n";
-		//check whether it is the last pointer pointing to the object, if yes, x3free memory
-		super.ctext += "\tif ((*(int *)" + var.toString() + ") == 1)\n";
-		super.ctext += "\t\tx3free(" + var.toString() + ");\n";
-		super.ctext += "\telse\n";
-		//decrement the reference count
-		super.ctext += "\t(*(int *)" + var.toString() + ")--;\n";
-		super.ctext += "}\n"; */
-		//((int*) &test)[0]
 		
 		//normal ref count
 		String temp_name = Helper.getVarName();
@@ -197,6 +177,58 @@ class AssignStat extends CuStat{
 			super.newVars.add(var.toString());
 		if (!localVars.contains(var.toString()) && !Helper.funArgList.contains(var.toString()))
 			localVars.add(var.toString());
+		return super.ctext;
+	}
+	
+	@Override public String toC_opt() {
+		String exp_toC = ee.toC_opt();
+		Helper.cVarType.put(var.toString(), ee.getCastType());
+		Helper.iterType.put(var.toString(), ee.getIterType());
+		super.ctext ="\n\n\n";
+		super.ctext += ee.construct();
+		//the below sentence can be removed by higher level blocks
+		//variable declaration
+		if (!Helper.funArgList.contains(var.toString())) {
+			if (Helper.unboxedVar.containsKey(var.toString())) {
+				super.ctext += "void * " + var.toString() +" = NULL;\n";
+			}
+			else {
+				//bool is also int in C, so we only need to store the variable name for declaration elimination
+				super.ctext += "int " + var.toString() + ";\n";
+			}
+		}
+		
+		if (!Helper.unboxedVar.containsKey(var.toString())) {
+			//this variable is boxed doesn't mean the expression is boxed
+			String temp_name = Helper.getVarName();
+			super.ctext += Helper.refAcquire(temp_name, var.toString());
+			if (ee.boxed)
+				super.ctext += var.toString() + " = " + exp_toC + ";\n";
+			else {
+				//if expression is unboxed, it must be boolean or integer
+				super.ctext += var.toString() + " = " + Helper.box(exp_toC, ee.expType) + ";\n";
+			}
+				
+			//normal ref count
+			super.ctext += Helper.incrRefCount(var.toString());
+			super.ctext += Helper.decRefCount(temp_name);
+		}
+		else {
+			if (ee.boxed) {
+				super.ctext += var.toString() + " = " + Helper.unbox(exp_toC, ee.expType) + ";\n";
+			}
+			else {
+				super.ctext += var.toString() + " = " + exp_toC + ";\n";
+			}
+		}
+
+		
+		//live variable analysis
+		super.ctext += Helper.liveVarAnalysis(super.inV, super.defV, super.outV);
+
+		if (!Helper.funArgList.contains(var.toString()))
+			super.newVars.add(var.toString());
+
 		return super.ctext;
 	}
 	
@@ -593,6 +625,7 @@ class IfStat extends CuStat{
 			s2 = s2.toHIR();
 			temp.add(s2);
 		}
+		curHIR.add(temp);
 		super.HIR = new Stats(curHIR);
 		return super.HIR;
     }
