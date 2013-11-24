@@ -128,7 +128,7 @@ public class Helper {
 	}
 	
 	//added for PA5
-	public static void buildSet(CuStat entry) {
+	public static ArrayList<CuStat> buildSet(CuStat entry) {
 		ArrayList<CuStat> nodes = new ArrayList<CuStat>();
 		LinkedList<CuStat> myQ = new LinkedList<CuStat>();
 		boolean suc = myQ.offer(entry);
@@ -230,6 +230,8 @@ public class Helper {
 				i = i+1;
 			}
 		}
+		
+		return nodes;
 	}
 	public static String incrRefCount(String var) {
 		String code = "if (" + var + "!= NULL) {\n";
