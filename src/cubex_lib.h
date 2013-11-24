@@ -300,8 +300,8 @@ Iterable* concatenate(Iterable* fst, Iterable* snd){
 	else {
 		temp = head;
 		
-		while (temp->additional || temp->concat) {
-			while(temp->additional) {
+		while ((temp->additional && temp->next == NULL) || temp->concat) {
+			while(temp->additional && temp->next == NULL) {
 				temp = temp->additional;
 			}
 			
@@ -392,6 +392,25 @@ String* concatChars(Iterable *charIter){
 	x3free(combined);
 	new->len = count;
 	return new;
+}
+
+#define decRef(VAR) \
+if (VAR!= NULL) {\
+	(*(int *)(VAR))--;\
+	if ((*(int *)(VAR)) == 0) {\
+		if ((*((int*)(VAR)+2)) == 1)\
+			freeStr(VAR);\
+		else if ((*((int*)(VAR)+1)) == 1)\
+			freeIter((VAR));\
+		else\
+			x3free((VAR));\
+	}\
+	VAR = NULL;\
+}
+
+#define incRef(VAR) \
+if (VAR != NULL) {\
+	(*(int *)(VAR))++;\
 }
 
 Iterable* strToIter (char* input, int length){

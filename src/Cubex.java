@@ -53,6 +53,12 @@ public class Cubex {
         //next, build the in out sets
         ourProgram.buildSets();
         
+        //after cse, print out the HIR four debugging
+        if (Helper.debug){
+        	System.out.println("PRINT HIR, after deadcode elimination====================");
+        	ourProgram.printHIR();
+        }
+        
 		ArrayList<String> localVars = new ArrayList<String>();
 		PrintWriter writer = new PrintWriter("out.c", "UTF-8");
 		String cProgram = ourProgram.toC(localVars);
