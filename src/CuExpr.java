@@ -1348,7 +1348,7 @@ class EqualExpr extends CuExpr{
 		
 		String temp = Helper.getVarName();
 		
-		name += "Boolean* " + temp + " = (Boolean*) malloc(sizeof(Boolean);\n" +
+		name += "Boolean* " + temp + " = (Boolean*) x3malloc(sizeof(Boolean));\n" +
 				temp + "->nrefs = 0;\n" +
 				temp + "->value = ";
 		
@@ -1664,7 +1664,7 @@ class GreaterThanExpr extends CuExpr{
 		
 		String temp = Helper.getVarName();
 		
-		name += "Boolean* " + temp + " = (Boolean*) malloc(sizeof(Boolean);\n" +
+		name += "Boolean* " + temp + " = (Boolean*) x3malloc(sizeof(Boolean));\n" +
 				temp + "->nrefs = 0;\n" +
 				temp + "->value = ";
 		
@@ -1828,7 +1828,7 @@ class LessThanExpr extends CuExpr{
 		
 		String temp = Helper.getVarName();
 		
-		name += "Boolean* " + temp + " = (Boolean*) malloc(sizeof(Boolean);\n" +
+		name += "Boolean* " + temp + " = (Boolean*) x3malloc(sizeof(Boolean));\n" +
 				temp + "->nrefs = 0;\n" +
 				temp + "->value = ";
 		
@@ -3817,11 +3817,21 @@ class VvExp extends CuExpr{//varname or function call
 		super.text += Helper.printList("<", pt, ">", ",")+Helper.printList("(", es, ")", ",");
 	}
 	
-	/*@Override public ArrayList<String> getUse(){
+	@Override public ArrayList<String> getUse(){
+		use = new ArrayList<String>();
 		if (es==null) {
-			
+			use.add(val);
 		}
-	}*/
+		else {
+			for (CuExpr ce : es) {
+				for (String str : ce.getUse()) {
+					if (!use.contains(str))
+						use.add(str);
+				}
+			}
+		}
+		return use;
+	}
 
 	@Override 
 	public boolean equals(Object that){

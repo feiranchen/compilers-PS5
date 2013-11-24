@@ -313,6 +313,9 @@ Helper.P("in func program " + name);
 		sb.append(") {\n");
 		sb.append(statement.toC(local));
 		sb.append("}\n");
+		//added by Yinglei, when we get out of function, should clear this because this is 
+		//a global list
+		Helper.funArgList = new ArrayList<String>();
 		return sb.toString();
 	}
 
