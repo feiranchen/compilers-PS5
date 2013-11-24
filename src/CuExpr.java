@@ -39,8 +39,11 @@ public abstract class CuExpr {
 		return cText;
 	}
 	
+	//by default, it is the same as toC
 	public String toC_opt() {
-		return cText;
+		ArrayList<String> fake_localVars = new ArrayList<String>();
+		//I verified that this will call the actual class's toC, instead of this toC
+		return toC(fake_localVars);
 	}
 	
 	public String construct(){
@@ -133,6 +136,19 @@ public abstract class CuExpr {
         Helper.P(String.format("this=%s<%s> parent %s, that=%s<%s>, map=%s", type,type.map,type.parentType, t,t.map, map));
         return type.isSubtypeOf(t);
     }
+    
+	public boolean expBoxed () {
+		//if the expression is a variable, need to look it up from the map
+		if ((this instanceof VvExp) && !this.isFunCall()) {
+			if (Helper.unboxedVar.containsKey(((VvExp)this).val))
+				return false;
+			else
+				return true;
+		}
+		else {
+			return this.boxed;
+		}
+	}
 }
 
 //verified and method is only for boolean and it returns boolean
@@ -189,9 +205,9 @@ class AndExpr extends CuExpr{
 		CuStat a = new AssignStat(temp1, leftToHir.getSecond());
 		CuStat b = new AssignStat(temp2, rightToHir.getSecond());
 		
-		//added for primitive optimization
-		a.setUnboxType();
-		b.setUnboxType();
+		//the assign statement constructor does this now
+		//a.setUnboxType();
+		//b.setUnboxType();
 		
 		stats.add(a);
 		stats.add(b);
@@ -199,9 +215,11 @@ class AndExpr extends CuExpr{
 		CuExpr var1 = new VvExp(name1);
 		CuExpr var2 = new VvExp(name2);
 		//we also know var1 and var2 should have be boolean type
-		var1.boxed = false;
+		//for variable expression (VvExp but not function call)
+		//boxed or not is know, it is only know in toC, after the AST is constructed
+
 		var1.expType = "Boolean";
-		var2.boxed = false;
+
 		var2.expType = "Boolean";
 		
 		//AndExpr has box unset in the constructor, so don't need to anything here
@@ -252,6 +270,40 @@ class AndExpr extends CuExpr{
 			name += "x3free(" + rightToC + ");\n";
 		
 		return super.toC(localVars);
+	}
+	
+	@Override
+	public String toC_opt() {
+		
+		super.castType = "Boolean";
+		String leftToC = left.toC_opt();
+		String rightToC = right.toC_opt();
+		String leftC = left.construct();
+		String rightC = right.construct();
+		
+		name += "\n" + leftC + rightC;
+		
+	    if (left.expBoxed())
+	    	super.cText = Helper.unbox(leftToC, left.expType);
+	    else
+	    	super.cText = leftToC;
+	    
+	    super.cText += " && ";
+	    
+	    if (right.expBoxed())
+	    	super.cText += Helper.unbox(rightToC, right.expType);
+	    else
+	    	super.cText += rightToC;
+	    
+	    super.cText += ";\n";
+		
+	    //I don't think this will be used anymore, as "false" expression won't have any construct
+		/*if (!leftC.equals(""))
+			name += "x3free(" + leftToC + ");\n";
+		if (!rightC.equals(""))
+			name += "x3free(" + rightToC + ");\n";*/
+		
+		return super.toC_opt();
 	}
 }
 
@@ -321,8 +373,8 @@ Helper.P("common parent of types is " + type.toString());
 		stats.add(b);
 		
 		//added for opt3
-		a.setUnboxType();
-		b.setUnboxType();
+		//a.setUnboxType();
+		//b.setUnboxType();
 		
 		CuExpr var1 = new VvExp(name1);
 		CuExpr var2 = new VvExp(name2);
@@ -452,6 +504,13 @@ Helper.P("common parent of types is " + type.toString());
 			name += Helper.decRefCount(rightToC);
 		
 		return super.toC(localVars);
+	}
+	
+	//this is the same as toC
+	@Override
+	public String toC_opt() {
+		ArrayList<String> fake_localVars = new ArrayList<String>();
+		return this.toC(fake_localVars);
 	}
 }
 
@@ -597,6 +656,74 @@ class BrkExpr extends CuExpr {
 		super.castType = "Iterable";
 		return super.toC(localVars);
 	}
+	
+	@Override
+	public String toC_opt() {
+		String eToC = "", typeCast = "";
+		
+		ArrayList<String> tempNameArr=new ArrayList<String>();	
+		ArrayList<String> tempDataArr=new ArrayList<String>();
+		for (CuExpr e : val) {
+			eToC = e.toC_opt();
+			String eC = e.construct();
+			name += eC;
+						
+			String eCastType = e.getCastType();
+			if (eCastType.equals(""))
+				eCastType = Helper.cVarType.get(e.toString());
+			
+			if(iterType == null)
+				iterType = "";
+			
+			if(iterType.equals("")) 
+				iterType = eCastType;
+			else if (!iterType.equals(eCastType))
+				iterType = "Thing";
+			
+			
+			tempNameArr.add(Helper.getVarName());
+			tempDataArr.add(eToC);
+			typeCast = e.getCastType();
+			if(typeCast == null) 
+				typeCast = Helper.cVarType.get(eToC);
+		}
+		tempNameArr.add("NULL");
+
+		int i;
+		for (i= val.size() - 1; i >= 0; i--) {
+			String boxedValue = tempDataArr.get(i);
+			if (!val.get(i).expBoxed()) {
+				String reName = Helper.getVarName();
+				name += Helper.box(tempDataArr.get(i), val.get(i).expType, reName);
+				boxedValue = reName;
+			}
+			name += "Iterable* " + tempNameArr.get(i) + ";\n" 
+					+ tempNameArr.get(i) + " = (Iterable*) x3malloc(sizeof(Iterable));\n"
+					+ tempNameArr.get(i) + "->isIter = 1;\n"
+					+ tempNameArr.get(i) + "->nrefs = 0;\n" 
+					+ tempNameArr.get(i) + "->value = " + boxedValue + ";\n"
+					+ tempNameArr.get(i) + "->additional = " + tempNameArr.get(i + 1) + ";\n" 
+					+ tempNameArr.get(i) + "->next = NULL;\n" 
+					+ tempNameArr.get(i)+ "->concat = NULL;\n";
+			
+			name += Helper.incrRefCount(boxedValue);
+			//if (!tempNameArr.get(i+1).equals("NULL") && !tempDataArr.isEmpty())
+			//	name += Helper.incrRefCount(tempDataArr.get(i+1));
+			
+			//def.add(tempNameArr.get(i+1));
+		}	
+			
+		//if (!tempDataArr.isEmpty())
+		//	name += Helper.incrRefCount(tempDataArr.get(0));
+		
+		cText = tempNameArr.get(0);
+		
+		if(val.size() == 0) 
+			iterType = "Empty";
+		
+		super.castType = "Iterable";
+		return super.toC_opt();
+	}
 
 }
 
@@ -658,6 +785,19 @@ class CBoolean extends CuExpr{
 		
 		return super.toC(localVars);
 	}
+	
+	@Override
+	public String toC_opt() {
+		//name is empty string
+		//I don't think this castType will be used, but put it here for safety
+		super.castType = "Boolean";
+		if (val)
+			super.cText = "1";
+		else
+			super.cText = "0";
+		
+		return super.cText;
+	}
 }
 
 /*as an example, cinteger will always be assigned to a  variable in HIR,
@@ -709,6 +849,15 @@ class CInteger extends CuExpr {
 		
 		//def.add(temp);
 		return super.toC(localVars);
+	}
+	
+	@Override
+	public String toC_opt() {
+		//name is empty string
+		//I don't think this castType will be used, but put it here for safety
+		super.castType = "Integer";
+		super.cText = val.toString();
+		return super.cText;
 	}
 }
 
@@ -804,6 +953,13 @@ class CString extends CuExpr {
 		
 		return super.toC(localVars);
 	}
+	
+	//this is the same as toC
+	@Override
+	public String toC_opt() {
+		ArrayList<String> fake_localVars = new ArrayList<String>();
+		return this.toC(fake_localVars);
+	}
 }
 
 class DivideExpr extends CuExpr{
@@ -862,15 +1018,15 @@ class DivideExpr extends CuExpr{
 		CuStat b = new AssignStat(temp2, rightToHir.getSecond());
 		stats.add(a);
 		stats.add(b);
-		a.setUnboxType();
-		b.setUnboxType();
+		//a.setUnboxType();
+		//b.setUnboxType();
 		
 		CuExpr var1 = new VvExp(name1);
 		CuExpr var2 = new VvExp(name2);
 		//for var1 and var2, we know they are integers
-		var1.boxed = false;
+		//var1.boxed = false;
 		var1.expType = "Integer";
-		var2.boxed = false;
+		//var2.boxed = false;
 		var2.expType = "Integer";
 		
 		CuExpr expr = new DivideExpr(var1, var2);		
@@ -969,6 +1125,93 @@ class DivideExpr extends CuExpr{
 			super.name += String.format("%s.value / %s.value;\n", left.toC(), right.toC());
 		}*/
 		return super.toC(localVars);
+	}
+	
+	//not done yet
+	@Override
+	public String toC_opt() {
+		String temp = Helper.getVarName();
+		
+		super.castType = "Iterable";
+		super.iterType = "Integer";
+		String leftToC = left.toC_opt();
+		String rightToC = right.toC_opt();
+		String leftC = left.construct();
+		String rightC = right.construct();
+		
+		String intName = Helper.getVarName();
+		
+		name += "\n" + leftC + rightC;
+		
+		super.name += "Iterable* " + temp + ";\n"
+				+ "Integer* " + intName + ";\n";
+		super.name += String.format("if(((%s*)%s)->value == 0) \n\t"
+				+ temp + " = NULL;\n"
+				,  "Integer", rightToC);
+		super.name += "else {\n";
+		super.name += String.format("\t%s  = (Integer*) x3malloc(sizeof(Integer));\n"
+				+ "\t%s->nrefs = 0;\n"
+				+ "\t%s->value=", intName, intName, intName);
+		super.name += String.format("((%s*)%s)->value / ((%s*)%s)->value;\n", "Integer", leftToC, "Integer", rightToC);	
+		
+		super.name += "\t" + temp + " = (Iterable*) x3malloc(sizeof(Iterable));\n\t"
+				+ temp + "->isIter = 1;\n"
+				+ temp + "->nrefs = 0;\n\t"
+				+ temp + "->value = " + intName + ";\n\t"
+				+ temp + "->additional = NULL;\n\t"
+				+ temp + "->next = NULL;\n\t"
+				+ temp + "->concat = NULL;\n";
+		
+		super.name += Helper.incrRefCount(intName);		
+		super.name += "}\n";
+		super.cText = temp;
+		Helper.cVarType.put(temp, "Iterable");
+		Helper.cVarType.put(intName, "Integer");
+		
+		/*		if (!left.getDef().isEmpty())
+			def.addAll(left.getDef());
+		if (!right.getDef().isEmpty())
+			def.addAll(right.getDef());
+		if (!left.getUse().isEmpty())
+			use.addAll(left.getUse());
+		if (!right.getUse().isEmpty())
+			use.addAll(right.getUse());
+
+		def.add(temp);
+		def.add(intName);
+		if (leftC.equals(""))
+			use.add(leftToC);
+		if (rightC.equals(""))
+			use.add(rightToC);
+		*/
+		if (!leftC.equals(""))
+			name += "x3free(" + leftToC + ");\n";
+		if (!rightC.equals(""))
+			name += "x3free(" + rightToC + ");\n";
+		
+		/*if (leftC.equals("") && rightC.equals("")){
+			//both are variables
+			super.name += String.format("Integer %s;\n%s.value=", temp, temp);
+			super.name += String.format("((%s*)%s)->value / ((%s*)%s)->value;\n", "Integer", left.toC(), "Integer", right.toC());			
+		}
+		else if (leftC.equals("") && !rightC.equals("")) { 
+			//right is number
+			leftCastType = "(" + right.getCastType() + "*)";			
+			super.name += String.format("Integer %s;\n%s.value=", temp, temp);
+			super.name += String.format("(%s %s)->value / %s.value;\n", leftCastType, left.toC(), right.toC());
+		}
+		else if (!leftC.equals("") && rightC.equals("")) {
+			//left is number
+			rightCastType = "(" + left.getCastType() + "*)";
+			super.name += String.format("Integer %s;\n%s.value=", temp, temp);
+			super.name += String.format("%s.value / (%s %s)->value;\n", left.toC(), rightCastType, right.toC());
+		}
+		else {
+			//both are numbers
+			super.name += String.format("Integer %s;\n%s.value=", temp, temp);
+			super.name += String.format("%s.value / %s.value;\n", left.toC(), right.toC());
+		}*/
+		return super.toC_opt();
 	}
 }
 

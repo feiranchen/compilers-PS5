@@ -306,9 +306,12 @@ public class Helper {
 		return "((" + var_type +" *)" + var_name + ")->value";
 	}
 	
-	//havent done yet
-	public static String box(String exp_name, String exp_type) {
-		String a = "to do";
-		return a;
+	public static String box(String value, String exp_type, String reName) {
+		String name;		
+		name = exp_type + " * " + reName + "= NULL;\n";
+		name += reName + " = (" + exp_type + "*) x3malloc(sizeof(" + exp_type + "));\n";
+		name += "(" + reName + "->nrefs) = 0;\n";
+		name += reName + "->value = " + value + ";\n";
+		return name;
 	}
 }

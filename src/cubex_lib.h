@@ -401,16 +401,21 @@ String* concatChars(Iterable *charIter){
 Iterable* strToIter (char* input, int length){
   if(length==0)
   	return NULL;
-  Iterable *curr=(Iterable*) x3malloc(sizeof(Iterable));
+  Iterable *curr;
+  curr=(Iterable*) x3malloc(sizeof(Iterable));
   curr->isIter = 1;
-  Iterable *result=curr;
+  Iterable *result;
+  result=curr;
   int i=0;
   for (i=0;i<length;i++){
-    Iterable* temp = (Iterable*) x3malloc(sizeof(Iterable));
+    Iterable* temp;
+    temp = (Iterable*) x3malloc(sizeof(Iterable));
     temp->isIter = 1;
-    Character* v = (Character*) x3malloc(sizeof(Character));
+    Character* v;
+    v = (Character*) x3malloc(sizeof(Character));
     v->value = input[i];
     temp->value=v;
+    (v->value)->nrefs = 1;
     temp->nrefs=1;
     temp->next=NULL;
     temp->concat=NULL;
@@ -418,7 +423,10 @@ Iterable* strToIter (char* input, int length){
     curr=curr->additional;
   }
   curr->additional = NULL;
-  return result->additional;
+  Iterable * returnElement = result->additional;
+  if (returnElement != NULL) returnElement->nrefs = 0;
+  x3free(result);
+  return returnElement;
 }
 
 void* checkIter (void* test) {
