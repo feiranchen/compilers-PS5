@@ -50,8 +50,8 @@ void freeStr(void* str)
 		x3free(((String*)str)->value);
 	}
 			
-	if ((String*)str != NULL) {
-		x3free((String*)str);
+	if (str != NULL) {
+		x3free(str);
 	}
 }
 
@@ -64,7 +64,7 @@ Iterable* Integer_through(void* head){
 	else {
 		Iterable* this=x3malloc(sizeof(Iterable));
 		this->isIter = 1;
-		this->nrefs=1;
+		this->nrefs=0;
 		(((Integer*)(last->value))->value)++; 
 		this->value = last->value; 
 		(((Integer*)(last->value))->nrefs)++;
@@ -91,75 +91,60 @@ void freeIter(void* iter) {
 					x3free(((Iterable*)iter)->value);
 			}
 			if (((Iterable*)iter)->next == &Integer_through) {
-				if ((*((int*)((Iterable*)iter)->additional+2)) == 1)
-					freeStr(((Iterable*)iter)->additional);
-				else if ((*((int*)((Iterable*)iter)->additional+1)) == 1)
-					freeIter(((Iterable*)iter)->additional);
-				else
-					x3free(((Iterable*)iter)->additional);
+				(*(int *)(((Iterable*)iter)->additional))--;
+				if ((*(int *)(((Iterable*)iter)->additional)) == 0) {
+					if ((*((int*)((Iterable*)iter)->additional+2)) == 1)
+						freeStr(((Iterable*)iter)->additional);
+					else if ((*((int*)((Iterable*)iter)->additional+1)) == 1)
+						freeIter(((Iterable*)iter)->additional);
+					else
+						x3free(((Iterable*)iter)->additional);
+				}
 			}
 				
 		}
-		
-		
-			 
 			
-		if (((Iterable*)iter)->concat != NULL)
-				freeIter(((Iterable*)iter)->concat);
+		if (((Iterable*)iter)->concat != NULL) {
+				(*(int*)(((Iterable*)iter)->concat))--;
+				if ((*(int*)(((Iterable*)iter)->concat)) == 0)
+					freeIter(((Iterable*)iter)->concat);
+		}
 			
 		if ((Iterable*)iter != NULL) {
-				(*(int *)(Iterable*)iter)--;
-				if ((*(int *)(Iterable*)iter) <= 0)
-					x3free((Iterable*)iter);
+				if ((*(int *)iter) == 0)
+					x3free(iter);
 		}
 	}
 	else {
-		void *iter1, *iter2 = iter;
-		iter1 = ((Iterable*)iter)->additional;
-		while (iter1) {
-			iter = iter1;
-			if (((Iterable*)iter)->value != NULL) {
-				(*(int *)(((Iterable*)iter)->value))--;
-				if ((*(int *)(((Iterable*)iter)->value)) == 0){
-					if ((*((int*)((Iterable*)iter)->value+2)) == 1)
-						freeStr(((Iterable*)iter)->value);
-					else if ((*((int*)((Iterable*)iter)->value+1)) == 1)
-						freeIter(((Iterable*)iter)->value);
-					else
-						x3free(((Iterable*)iter)->value);
-				}
+		void *iter2 = iter;
+		if (((Iterable*)iter2)->value != NULL) {
+			(*(int *)(((Iterable*)iter2)->value))--;
+			if ((*(int *)(((Iterable*)iter2)->value)) == 0) {
+				if ((*((int*)((Iterable*)iter)->value+2)) == 1)
+					freeStr(((Iterable*)iter2)->value);
+				else if ((*((int*)((Iterable*)iter)->value+1)) == 1)
+					freeIter(((Iterable*)iter2)->value);
+				else
+					x3free(((Iterable*)iter2)->value);
 			}
-			
-			iter1 = ((Iterable*)iter)->additional;
-			if (iter1 == NULL && ((Iterable*)iter)->concat != NULL)
-				freeIter(((Iterable*)iter)->concat);
-			if ((Iterable*)iter != NULL) {
-				(*(int *)(Iterable*)iter)--;
-				if ((*(int *)(Iterable*)iter) <= 0)
-					x3free((Iterable*)iter);
-			}			
 		}
-			
-			if (((Iterable*)iter2)->value != NULL) {
-				(*(int *)(((Iterable*)iter2)->value))--;
-				if ((*(int *)(((Iterable*)iter2)->value)) == 0) {
-					if ((*((int*)((Iterable*)iter)->value+2)) == 1)
-						freeStr(((Iterable*)iter2)->value);
-					else if ((*((int*)((Iterable*)iter)->value+1)) == 1)
-						freeIter(((Iterable*)iter2)->value);
-					else
-						x3free(((Iterable*)iter2)->value);
-				}
-			}
-			
-			if (((Iterable*)iter2)->concat != NULL)
+		
+		if (((Iterable*)iter2)->additional != NULL) {
+			(*(int*)(((Iterable*)iter2)->additional))--;
+			if ((*(int*)(((Iterable*)iter2)->additional)) == 0) 
+				freeIter(((Iterable*)iter2)->additional);
+		}
+		
+		if (((Iterable*)iter2)->concat != NULL) {
+			(*(int*)(((Iterable*)iter2)->concat))--;
+			if ((*(int*)(((Iterable*)iter2)->concat)) == 0)
 				freeIter(((Iterable*)iter2)->concat);
-			
-			if ((Iterable*)iter2 != NULL) {
-				(*(int *)(Iterable*)iter2)--;
-				if ((*(int *)(Iterable*)iter2) <= 0)
-					x3free((Iterable*)iter2);
-			}
+		}
+		
+		if ((Iterable*)iter2 != NULL) {
+			if ((*(int *)iter2) == 0)
+				x3free(iter2);
+		}
 	}
 }
 
@@ -176,25 +161,11 @@ Iterable* iterGetNext(Iterable* last){
 		this = (Iterable*) last->additional;
 	}
 	
-	if (this==NULL && last->concat==NULL && last->next != NULL){
-	  	if (last->nrefs==1) {
-		      freeIter(last);
-		 }
-		 else 
-		     (last->nrefs)--;
-		
-		return NULL;
+	if (this==NULL && last->concat==NULL){
+	  return NULL;
 	}
 	else if (this==NULL){
 		this=last->concat;
-	}
-	
-	if (last->next != NULL) {
-	if (last->nrefs==1) {
-		freeIter(last);
-	}
-	else 
-		(last->nrefs)--;
 	}
 	
 	return (this);
@@ -211,8 +182,6 @@ Iterable* concatenate(Iterable* fst, Iterable* snd){
 	if (head->value != NULL)
 		(*(int *)(head->value))++;
 	head->additional = NULL;
-	if (head->additional != NULL)
-		(*(int *)(head->additional))++;
 	head->next = fst->next;
 	head->concat = fst->concat;
 	
@@ -254,8 +223,6 @@ Iterable* concatenate(Iterable* fst, Iterable* snd){
 	if (second->value != NULL)
 		(*(int *)(second->value))++;
 	second->additional = NULL;
-	if (second->additional != NULL)
-		(*(int *)(second->additional))++;
 	second->next = snd->next;
 	second->concat = snd->concat;
 	
@@ -309,7 +276,7 @@ Iterable* Integer_onwards(void* head){
 	last = (Iterable*) head;
 	this = x3malloc(sizeof(Iterable));
 	this->isIter = 1;
-	this->nrefs=1; 
+	this->nrefs=0; 
 	(((Integer*)(last->value))->value)++;
 	this->value = last->value;
 	(((Integer*)(last->value))->nrefs)++;	
@@ -444,8 +411,11 @@ void* checkIter (void* test) {
 	Iterable* temp = (Iterable*) test;
 	if (temp == NULL)
 		return NULL;
-	if ( ((Integer*)temp->value)->value > ((Integer*)temp->additional)->value )
-			return checkIter((Integer*)temp->concat); 
+	if ( ((Integer*)temp->value)->value > ((Integer*)temp->additional)->value ) {
+		temp = ((Iterable*)test)->concat;
+		freeIter(test);
+		return checkIter(temp); 
+	}
 	else 
 		return test;
 }

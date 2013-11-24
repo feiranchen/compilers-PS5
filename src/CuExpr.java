@@ -650,20 +650,20 @@ class BrkExpr extends CuExpr {
 			name += "Iterable* " + tempNameArr.get(i) + ";\n" 
 					+ tempNameArr.get(i) + " = (Iterable*) x3malloc(sizeof(Iterable));\n"
 					+ tempNameArr.get(i) + "->isIter = 1;\n"
-					+ tempNameArr.get(i) + "->nrefs = 0;\n" 
+					+ tempNameArr.get(i) + "->nrefs = 1;\n" 
 					+ tempNameArr.get(i) + "->value = " + tempDataArr.get(i) + ";\n"
 					+ tempNameArr.get(i) + "->additional = " + tempNameArr.get(i + 1) + ";\n" 
 					+ tempNameArr.get(i) + "->next = NULL;\n" 
 					+ tempNameArr.get(i)+ "->concat = NULL;\n";
 			
-			if (!tempNameArr.get(i+1).equals("NULL") && !tempDataArr.isEmpty())
-				name += Helper.incrRefCount(tempDataArr.get(i+1));
+			if (!tempDataArr.isEmpty())
+				name += Helper.incrRefCount(tempDataArr.get(i));
 			
 			//def.add(tempNameArr.get(i+1));
 		}	
 			
 		if (!tempDataArr.isEmpty())
-			name += Helper.incrRefCount(tempDataArr.get(0));
+			name += tempNameArr.get(0) + "->nrefs = 0;\n";
 		//def.add(tempNameArr.get(0));
 		
 		cText = tempNameArr.get(0);
@@ -2597,6 +2597,8 @@ class OnwardsExpr extends CuExpr{
 						+ iter + "->additional = NULL;\n"
 						+ iter + "->next = &" + val.getCastType() + "_onwards;\n"
 						+ iter + "->concat = NULL;\n";
+				
+				name += Helper.incrRefCount(valToC);
 		
 				cText = iter;
 				Helper.cVarType.put(iter, "Iterable");
@@ -2618,6 +2620,8 @@ class OnwardsExpr extends CuExpr{
 						+ iter + "->additional = NULL;\n"
 						+ iter + "->next = &" + val.getCastType() + "_onwards;\n"
 						+ iter + "->concat = NULL;\n";
+				
+				name += Helper.incrRefCount(temp);
 				
 				cText = iter;
 				Helper.cVarType.put(iter, "Iterable");
@@ -3097,7 +3101,7 @@ class ThroughExpr extends CuExpr{
 					name += String.format("Boolean* %s;\n%s = (Boolean*) x3malloc(sizeof(Boolean));\n"
 							+ "%s->value = 0;\n"
 							+ "%s->nrefs = 1;\n",
-							temp, temp, temp);
+							temp, temp, temp, temp);
 					
 					name +=  "Iterable* " + iter + ";\n" + iter +  " = (Iterable*) x3malloc(sizeof(Iterable));\n"
 							+ iter + "->isIter = 1;\n"
