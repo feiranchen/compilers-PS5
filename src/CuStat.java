@@ -4,6 +4,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 
 public abstract class CuStat {
@@ -31,6 +32,10 @@ public abstract class CuStat {
 	
 	@Override public String toString() {
 		return text;
+	}
+
+	public Set<String> getContainsVar(){
+		return new HashSet<String>();
 	}
 	
 	//the toC method without primitive generation
@@ -113,6 +118,12 @@ class AssignStat extends CuStat{
 	@Override public String toString() {
 		super.text = var.toString() + " := " + ee.toString() + " ;";
 		return super.text;
+	}
+	
+	@Override public Set<String> getContainsVar(){
+		Set<String> temp=new HashSet<String>();
+		temp.add(var.text);
+		return temp;
 	}
 	
     @Override public void setUnboxType(){
@@ -284,6 +295,13 @@ class ForToWhileStat extends CuStat {
 		s1.setUseDef();
 	}
 	
+	@Override public Set<String> getContainsVar(){
+		Set<String> temp=s1.getContainsVar();
+		temp.add(var);
+		temp.add(iter_name);
+		return temp;
+	}
+	
 	@Override public CuStat toHIR() {
 		//this node includes the 
 		/*
@@ -397,6 +415,12 @@ class ForStat extends CuStat{
 		var = v;
 		e = ee;
 		s1 = ss;
+	}
+	
+	@Override public Set<String> getContainsVar(){
+		Set<String> temp=s1.getContainsVar();
+		temp.add(var.text);
+		return temp;
 	}
 	
 	@Override public void buildCFG() {
@@ -574,6 +598,12 @@ class ConvertToIter extends CuStat {
 		super.useV.add(var);
 	}
 	
+	@Override public Set<String> getContainsVar(){
+		Set<String> temp=new HashSet<String>();
+		temp.add(var);
+		return temp;
+	}
+	
 	@Override public String toC(ArrayList<String> localVars)
 	{
 		super.ctext += "\t" + "if ("+ var.toString() +"!=NULL) {\n";
@@ -629,6 +659,17 @@ class IfStat extends CuStat{
 		super.HIR = new Stats(curHIR);
 		return super.HIR;
     }
+    
+	
+	@Override public Set<String> getContainsVar(){
+		Set<String> temp=s1.getContainsVar();
+		if (s1!=null)
+			temp.addAll(s1.getContainsVar());
+		if (s2!=null)
+			temp.addAll(s2.getContainsVar());
+		return temp;
+	}
+	
     
 	@Override public void buildCFG() {
 		s1.getLast().successors = super.successors;
@@ -822,6 +863,11 @@ class WhileStat extends CuStat{
 		super.HIR = new Stats(curHIR);
 		return super.HIR;
 	}
+	
+
+	@Override public Set<String> getContainsVar(){
+		return s1.getContainsVar();
+	}
 	//while is the same as for statement
 	@Override public void buildCFG() {
 		//the outer level has added the other branch to its successors
@@ -831,6 +877,7 @@ class WhileStat extends CuStat{
 		//recursive build CFG
 		s1.buildCFG();
 	}
+	
 	
 	@Override public void setUseDef() {
 		//build use def sets, def set is empty, as in the if statement case
@@ -910,6 +957,11 @@ class ReturnStat extends CuStat{
 	public CuExpr e;
 	public ReturnStat (CuExpr ee) {
 		e = ee;
+	}
+	
+
+	@Override public Set<String> getContainsVar(){
+		return new HashSet<String>();
 	}
 	@Override public CuStat toHIR() {
 		Pair<List<CuStat>, CuExpr> pa =  e.toHIR();
@@ -994,6 +1046,11 @@ class EmptyBody extends CuStat {
 	public EmptyBody(){
 		text=" ;";
 	}
+	
+
+	@Override public Set<String> getContainsVar(){
+		return new HashSet<String>();
+	}
 	@Override public CuStat toHIR() {
 		return this;
 	}
@@ -1021,7 +1078,14 @@ class Stats extends CuStat{
 		text = "{ " + Helper.listFlatten(al) + " }";
 		return text;
 	}
-	
+
+	@Override public Set<String> getContainsVar(){
+		Set<String> temp= new HashSet<String>();
+		for (CuStat s: al){
+			temp.addAll(s.getContainsVar());
+		}
+		return temp;
+	}
 	@Override public CuStat toHIR() {
 		ArrayList<CuStat> newAl = new ArrayList<CuStat>();
 		IfStat divergePoint= null;
