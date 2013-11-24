@@ -119,6 +119,23 @@ public class CSE {
 						myPut(exprMap, (CuExpr)e1.getKey(), (CuVvc)e1.getValue());
 					}
 				}
+				
+				//update expr table with new shortcuts
+				for (Entry<CuVvc, ArrayList<CuExpr>> elem : varMap.entrySet()){
+					CuExpr temp=rootExpr(elem.getValue().get(0),exprMap,varMap);
+					if (!myContainsKey(exprMap, temp)){
+						CuVvc optVar=elem.getKey();
+						CuExpr replaceVar=elem.getValue().get(0);
+						while((replaceVar instanceof VvExp)&&
+								((VvExp)replaceVar).es==null){
+							optVar=new Vv(((VvExp)replaceVar).val);
+							if(myContainsKey(varMap, optVar))
+								replaceVar=myGet(varMap, optVar).get(0);
+						}
+						myPut(exprMap,temp,optVar);
+					}
+				}
+				
 			}
 			return ifS;
 		}
