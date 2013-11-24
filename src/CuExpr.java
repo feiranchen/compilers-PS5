@@ -316,11 +316,10 @@ class AndExpr extends CuExpr{
 	    
 	    super.cText += ";\n";
 		
-	    //I don't think this will be used anymore, as "false" expression won't have any construct
-		/*if (!leftC.equals(""))
+		if (!leftC.equals(""))
 			name += "x3free(" + leftToC + ");\n";
 		if (!rightC.equals(""))
-			name += "x3free(" + rightToC + ");\n";*/
+			name += "x3free(" + rightToC + ");\n";
 		
 		return super.toC_opt();
 	}
@@ -1146,7 +1145,6 @@ class DivideExpr extends CuExpr{
 		return super.toC(localVars);
 	}
 	
-	//not done yet
 	@Override
 	public String toC_opt() {
 		String temp = Helper.getVarName();
@@ -1164,14 +1162,30 @@ class DivideExpr extends CuExpr{
 		
 		super.name += "Iterable* " + temp + ";\n"
 				+ "Integer* " + intName + ";\n";
-		super.name += String.format("if(((%s*)%s)->value == 0) \n\t"
-				+ temp + " = NULL;\n"
-				,  "Integer", rightToC);
+		
+		if (right.expBoxed()) {
+			super.name += String.format("if(((%s*)%s)->value == 0) \n\t"
+					+ temp + " = NULL;\n"
+					,  "Integer", rightToC);
+		}
+		else {
+			super.name += "if (" + rightToC + "==0) {\n";
+			super.name += "\t" + temp + " = NULL;\n";
+			super.name += "}\n";
+		}
 		super.name += "else {\n";
 		super.name += String.format("\t%s  = (Integer*) x3malloc(sizeof(Integer));\n"
 				+ "\t%s->nrefs = 0;\n"
 				+ "\t%s->value=", intName, intName, intName);
-		super.name += String.format("((%s*)%s)->value / ((%s*)%s)->value;\n", "Integer", leftToC, "Integer", rightToC);	
+		
+		String fLeft = leftToC;
+		if (left.expBoxed()) 
+			fLeft = Helper.unbox(leftToC, "Integer");
+		String fRight = rightToC;
+		if (right.expBoxed())
+			fRight = Helper.unbox(rightToC, "Integer");
+		//super.name += String.format("((%s*)%s)->value / ((%s*)%s)->value;\n", "Integer", leftToC, "Integer", rightToC);	
+		super.name += fLeft + " / " + fRight + ";\n";
 		
 		super.name += "\t" + temp + " = (Iterable*) x3malloc(sizeof(Iterable));\n\t"
 				+ temp + "->isIter = 1;\n"
@@ -1187,49 +1201,12 @@ class DivideExpr extends CuExpr{
 		Helper.cVarType.put(temp, "Iterable");
 		Helper.cVarType.put(intName, "Integer");
 		
-		/*		if (!left.getDef().isEmpty())
-			def.addAll(left.getDef());
-		if (!right.getDef().isEmpty())
-			def.addAll(right.getDef());
-		if (!left.getUse().isEmpty())
-			use.addAll(left.getUse());
-		if (!right.getUse().isEmpty())
-			use.addAll(right.getUse());
 
-		def.add(temp);
-		def.add(intName);
-		if (leftC.equals(""))
-			use.add(leftToC);
-		if (rightC.equals(""))
-			use.add(rightToC);
-		*/
 		if (!leftC.equals(""))
 			name += "x3free(" + leftToC + ");\n";
 		if (!rightC.equals(""))
 			name += "x3free(" + rightToC + ");\n";
 		
-		/*if (leftC.equals("") && rightC.equals("")){
-			//both are variables
-			super.name += String.format("Integer %s;\n%s.value=", temp, temp);
-			super.name += String.format("((%s*)%s)->value / ((%s*)%s)->value;\n", "Integer", left.toC(), "Integer", right.toC());			
-		}
-		else if (leftC.equals("") && !rightC.equals("")) { 
-			//right is number
-			leftCastType = "(" + right.getCastType() + "*)";			
-			super.name += String.format("Integer %s;\n%s.value=", temp, temp);
-			super.name += String.format("(%s %s)->value / %s.value;\n", leftCastType, left.toC(), right.toC());
-		}
-		else if (!leftC.equals("") && rightC.equals("")) {
-			//left is number
-			rightCastType = "(" + left.getCastType() + "*)";
-			super.name += String.format("Integer %s;\n%s.value=", temp, temp);
-			super.name += String.format("%s.value / (%s %s)->value;\n", left.toC(), rightCastType, right.toC());
-		}
-		else {
-			//both are numbers
-			super.name += String.format("Integer %s;\n%s.value=", temp, temp);
-			super.name += String.format("%s.value / %s.value;\n", left.toC(), right.toC());
-		}*/
 		return super.toC_opt();
 	}
 }
@@ -1309,15 +1286,15 @@ class EqualExpr extends CuExpr{
 		stats.add(a);
 		stats.add(b);
 		
-		a.setUnboxType();
-		b.setUnboxType();
+		//a.setUnboxType();
+		//b.setUnboxType();
 		
 		CuExpr var1 = new VvExp(name1);
 		CuExpr var2 = new VvExp(name2);
 		
-		var1.boxed = a.boxed;
+		//var1.boxed = a.boxed;
 		var1.expType = a.statType;
-		var2.boxed = b.boxed;
+		//var2.boxed = b.boxed;
 		var2.expType = b.statType;
 		
 		CuExpr expr = new EqualExpr(var1, var2, bool);		
@@ -1362,28 +1339,37 @@ class EqualExpr extends CuExpr{
 			rightCastType = "(" + right.getCastType() + "*)";
 		}
 		
+		String temp = Helper.getVarName();
+		
+		name += "Boolean* " + temp + " = (Boolean*) malloc(sizeof(Boolean);\n" +
+				temp + "->nrefs = 0;\n" +
+				temp + "->value = ";
+		
 		if (!leftCastType.equals("(String*)") && !rightCastType.equals("(String*)")) {
 			if (method2 == null)
-				super.cText = String.format(
+				name += String.format(
 						"(%s %s)->value == (%s %s)->value", leftCastType,
 						leftToC, rightCastType, rightToC);
 			else
-				super.cText = String.format(
+				name += String.format(
 						"(%s %s)->value != (%s %s)->value", leftCastType,
 						leftToC, rightCastType, rightToC);
 		}
 		else {
 			if (method2 == null)
-				super.cText = String.format(
-						"(mystrcmp(((%s %s)->value), ((%s %s)->value)) ? 1 : 0)", leftCastType,
+				name += String.format(
+						"(mystrcmp(((%s %s)->value), ((%s %s)->value)) ? 0 : 1)", leftCastType,
 						leftToC, rightCastType, rightToC);
 			else
-				super.cText = String.format(
-						"(mystrcmp(((%s %s)->value), ((%s %s)->value)) ? 0 : 1)", leftCastType,
+				name += String.format(
+						"(mystrcmp(((%s %s)->value), ((%s %s)->value)) ? 1 : 0)", leftCastType,
 						leftToC, rightCastType, rightToC);
 		
 		}
 		
+		name += ";\n";
+		
+		cText = temp;
 		/*if (!left.getDef().isEmpty())
 			def.addAll(left.getDef());
 		if (!right.getDef().isEmpty())
@@ -1493,6 +1479,81 @@ class EqualExpr extends CuExpr{
 		}*/
 		return super.toC(localVars);
 	}
+	
+	@Override
+	public String toC_opt() {
+		castType = "Boolean";
+		String leftToC = left.toC_opt();
+		String rightToC = right.toC_opt();
+		String leftC = left.construct();
+		String rightC = right.construct();
+		
+		String leftCastType = ""; 
+		String rightCastType = "";
+		
+		name += "\n" + leftC + rightC;
+		
+		if (leftC.equals("") && rightC.equals("")){
+			leftCastType = "(" + Helper.cVarType.get(leftToC) + "*)";
+			rightCastType = "(" + Helper.cVarType.get(rightToC) + "*)";
+		}
+		else if (leftC.equals("") && !rightC.equals("")) { 
+			leftCastType = "(" + right.getCastType() + "*)";
+			rightCastType = "(" + right.getCastType() + "*)";
+		}
+		else if (!leftC.equals("") && rightC.equals("")) {
+			rightCastType = "(" + left.getCastType() + "*)";
+			leftCastType = "(" + left.getCastType() + "*)";
+		}
+		else {
+			leftCastType =  "(" + left.getCastType() + "*)";
+			rightCastType = "(" + right.getCastType() + "*)";
+		}
+		
+		/*String temp = Helper.getVarName();
+		
+		name += "Boolean* " + temp + " = (Boolean*) malloc(sizeof(Boolean);\n" +
+				temp + "->nrefs = 0;\n" +
+				temp + "->value = ";*/
+		
+		String fLeft = leftToC;
+		String fRight = rightToC;
+		
+		if (left.expBoxed()) {
+			fLeft = String.format("(%s %s)->value", leftCastType, leftToC);
+		}
+		
+		if (right.expBoxed()) {
+			fRight = String.format("(%s %s)->value", rightCastType, rightToC);
+		}
+		
+		if (!leftCastType.equals("(String*)") && !rightCastType.equals("(String*)")) {			
+			if (method2 == null)
+				super.cText = String.format(
+						"%s == %s", fLeft, fRight);
+			else
+				super.cText = String.format(
+						"%s != %s", fLeft, fRight);
+		}
+		else {
+			if (method2 == null)
+				super.cText = String.format(
+						"(mystrcmp(%s, %s) ? 0 : 1)", fLeft, fRight);
+			else
+				super.cText = String.format(
+						"(mystrcmp(%s, %s) ? 1 : 0)", fLeft, fRight);
+		
+		}
+		
+		super.cText += ";\n";
+
+		if (!leftC.equals(""))
+			name += "x3free(" + leftToC + ");\n";
+		if (!rightC.equals(""))
+			name += "x3free(" + rightToC + ");\n";
+	
+		return super.toC_opt();
+	}
 }
 
 class GreaterThanExpr extends CuExpr{
@@ -1553,15 +1614,15 @@ class GreaterThanExpr extends CuExpr{
 		stats.add(a);
 		stats.add(b);
 		
-		a.setUnboxType();
-		b.setUnboxType();
+		//a.setUnboxType();
+		//b.setUnboxType();
 		
 		CuExpr var1 = new VvExp(name1);
 		CuExpr var2 = new VvExp(name2);
 		
-		var1.boxed = a.boxed;
+		//var1.boxed = a.boxed;
 		var1.expType = a.statType;
-		var2.boxed = b.boxed;
+		//var2.boxed = b.boxed;
 		var2.expType = b.statType;
 		
 		CuExpr expr = new GreaterThanExpr(var1, var2, this.b);		
@@ -1594,64 +1655,68 @@ class GreaterThanExpr extends CuExpr{
 		if(rightCastType.equals(""))
 			rightCastType = "(" + Helper.cVarType.get(rightToC) + "*)";
 		
+		String temp = Helper.getVarName();
+		
+		name += "Boolean* " + temp + " = (Boolean*) malloc(sizeof(Boolean);\n" +
+				temp + "->nrefs = 0;\n" +
+				temp + "->value = ";
+		
 		if (b)
-			super.cText = String.format("(%s %s)->value > (%s %s)->value", leftCastType, leftToC, rightCastType, rightToC);
+			name += String.format("(%s %s)->value > (%s %s)->value", leftCastType, leftToC, rightCastType, rightToC);
 		else
-			super.cText = String.format("(%s %s)->value >= (%s %s)->value", leftCastType, leftToC, rightCastType, rightToC);
+			name += String.format("(%s %s)->value >= (%s %s)->value", leftCastType, leftToC, rightCastType, rightToC);
+		
+		name += ";\n";
+		
+		super.cText = temp;
 
 		if (!leftC.equals(""))
 			name += "x3free(" + leftToC + ");\n";
 		if (!rightC.equals(""))
-			name += "x3free(" + rightToC + ");\n";
-		
-		/*if (!left.getDef().isEmpty())
-			def.addAll(left.getDef());
-		if (!right.getDef().isEmpty())
-			def.addAll(right.getDef());
-		if (!left.getUse().isEmpty())
-			use.addAll(left.getUse());
-		if (!right.getUse().isEmpty())
-			use.addAll(right.getUse());
-
-		if (leftC.equals(""))
-			use.add(leftToC);
-		if (rightC.equals(""))
-			use.add(rightToC);*/
-		
-		/*if (leftC.equals("") && rightC.equals("")){
-			leftCastType = "(" + Helper.cVarType.get(left.toC()) + "*)";
-			rightCastType = "(" + Helper.cVarType.get(right.toC()) + "*)";
-			if (strict)
-				super.cText = String.format("(%s %s)->value > (%s %s)->value", leftCastType, left.toC(), rightCastType, right.toC());
-			else
-				super.cText = String.format("(%s %s)->value >= (%s %s)->value", leftCastType, left.toC(), rightCastType, right.toC());
-		}
-		else if (leftC.equals("") && !rightC.equals("")) { 
-			//right is number
-			leftCastType = "(" + right.getCastType() + "*)";
+			name += "x3free(" + rightToC + ");\n";	
 			
-			if (strict)
-				super.cText = String.format("(%s %s)->value > %s.value", leftCastType, left.toC(), right.toC());
-			else
-				super.cText = String.format("(%s %s)->value >= %s.value", leftCastType, left.toC(), right.toC());
-		}
-		else if (!leftC.equals("") && rightC.equals("")) {
-			//left is number
-			rightCastType = "(" + left.getCastType() + "*)";
-			
-			if (strict)
-				super.cText = String.format("%s.value > (%s %s)->value", left.toC(), rightCastType, right.toC());
-			else
-				super.cText = String.format("%s.value >= (%s %s)->value", left.toC(), rightCastType, right.toC());
-		}
-		else {
-			//both are numbers
-			if (strict)
-				super.cText = String.format("%s.value > %s.value", left.toC(), right.toC());
-			else
-				super.cText = String.format("%s.value >= %s.value", left.toC(), right.toC());
-		}*/		
 		return super.toC(localVars);
+	}
+	
+	@Override
+	public String toC_opt() {
+		castType = "Boolean";
+		String leftToC = left.toC_opt();
+		String rightToC = right.toC_opt();
+		String leftC = left.construct();
+		String rightC = right.construct();
+		
+		String leftCastType = "(" + left.getCastType() + "*)"; 
+		String rightCastType = "(" + right.getCastType() + "*)";
+		
+		name += "\n" + leftC + rightC;
+		
+		if(leftCastType.equals(""))
+			leftCastType = "(" + Helper.cVarType.get(leftToC) + "*)";
+		if(rightCastType.equals(""))
+			rightCastType = "(" + Helper.cVarType.get(rightToC) + "*)";
+		
+		String fLeft = leftToC;
+		String fRight = rightToC;
+		if (left.expBoxed())
+			fLeft = String.format("(%s %s)->value", leftCastType, leftToC);
+		if (right.expBoxed())
+			fRight = String.format("(%s %s)->value", rightCastType, rightToC);
+		
+		if (b)
+			super.cText = String.format("%s > %s", fLeft, fRight);
+		else
+			super.cText = String.format("%s >= %s", fLeft, fRight);
+		
+		super.cText += ";\n";
+		
+
+		if (!leftC.equals(""))
+			name += "x3free(" + leftToC + ");\n";
+		if (!rightC.equals(""))
+			name += "x3free(" + rightToC + ");\n";	
+			
+		return super.toC_opt();
 	}
 }
 
@@ -1713,15 +1778,15 @@ class LessThanExpr extends CuExpr{
 		stats.add(a);
 		stats.add(b);
 		
-		a.setUnboxType();
-		b.setUnboxType();
+		//a.setUnboxType();
+		//b.setUnboxType();
 		
 		CuExpr var1 = new VvExp(name1);
 		CuExpr var2 = new VvExp(name2);
 		
-		var1.boxed = a.boxed;
+		//var1.boxed = a.boxed;
 		var1.expType = a.statType;
-		var2.boxed = b.boxed;
+		//var2.boxed = b.boxed;
 		var2.expType = b.statType;	
 		
 		CuExpr expr = new LessThanExpr(var1, var2, this.b);		
@@ -1753,10 +1818,21 @@ class LessThanExpr extends CuExpr{
 			leftCastType = "(" + Helper.cVarType.get(leftToC) + "*)";
 		if(rightCastType.equals(""))
 			rightCastType = "(" + Helper.cVarType.get(rightToC) + "*)";
+		
+		String temp = Helper.getVarName();
+		
+		name += "Boolean* " + temp + " = (Boolean*) malloc(sizeof(Boolean);\n" +
+				temp + "->nrefs = 0;\n" +
+				temp + "->value = ";
+		
 		if (b)
-			super.cText = String.format("(%s %s)->value < (%s %s)->value", leftCastType, leftToC, rightCastType, rightToC);
+			name += String.format("(%s %s)->value < (%s %s)->value", leftCastType, leftToC, rightCastType, rightToC);
 		else
-			super.cText = String.format("(%s %s)->value <= (%s %s)->value", leftCastType, leftToC, rightCastType, rightToC);
+			name += String.format("(%s %s)->value <= (%s %s)->value", leftCastType, leftToC, rightCastType, rightToC);
+		
+		name += ";\n";
+		
+		super.cText = temp;
 
 		if (!leftC.equals(""))
 			name += "x3free(" + leftToC + ");\n";

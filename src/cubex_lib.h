@@ -351,10 +351,21 @@ Iterable* input_onwards(void* head){
 
 int mystrcmp(const char *s1, const char *s2) 
 { 
+    if(*s1=='\0' && *s2 != '\0')
+      return(1);
+    if(*s1!='\0' && *s2 == '\0')
+      return (1);
+  
     while (*s1==*s2) 
     { 
-        if(*s1=='\0') 
+        if(*s1=='\0' && *s2 == '\0') 
            return(0); 
+	if(*s1=='\0' && *s2 != '\0')
+	  return(1);
+	if(*s1!='\0' && *s2 == '\0')
+	  return (1);
+  
+
         s1++; 
         s2++; 
     } 
@@ -415,7 +426,7 @@ Iterable* strToIter (char* input, int length){
     v = (Character*) x3malloc(sizeof(Character));
     v->value = input[i];
     temp->value=v;
-    (v->value)->nrefs = 1;
+    v->nrefs = 1;
     temp->nrefs=1;
     temp->next=NULL;
     temp->concat=NULL;
