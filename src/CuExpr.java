@@ -1407,7 +1407,7 @@ class EqualExpr extends CuExpr{
 		
 		String temp = Helper.getVarName();
 		
-		name += "Boolean* " + temp + " = (Boolean*) malloc(sizeof(Boolean);\n" +
+		name += "Boolean* " + temp + " = (Boolean*) x3malloc(sizeof(Boolean));\n" +
 				temp + "->nrefs = 0;\n" +
 				temp + "->value = ";
 		
@@ -1732,7 +1732,7 @@ class GreaterThanExpr extends CuExpr{
 		
 		String temp = Helper.getVarName();
 		
-		name += "Boolean* " + temp + " = (Boolean*) malloc(sizeof(Boolean);\n" +
+		name += "Boolean* " + temp + " = (Boolean*) x3malloc(sizeof(Boolean));\n" +
 				temp + "->nrefs = 0;\n" +
 				temp + "->value = ";
 		
@@ -1905,7 +1905,7 @@ class LessThanExpr extends CuExpr{
 		
 		String temp = Helper.getVarName();
 		
-		name += "Boolean* " + temp + " = (Boolean*) malloc(sizeof(Boolean);\n" +
+		name += "Boolean* " + temp + " = (Boolean*) x3malloc(sizeof(Boolean));\n" +
 				temp + "->nrefs = 0;\n" +
 				temp + "->value = ";
 		
