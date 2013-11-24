@@ -75,6 +75,35 @@ Iterable* Integer_through(void* head){
 	}
 }
 
+Iterable* input_onwards(void* head){
+	int len;
+	len = next_line_len();
+	Iterable* last;
+	Iterable* this;
+	this = NULL;
+	last = (Iterable*) head;
+	if (len != 0) {
+		this = x3malloc(sizeof(Iterable));
+		this->isIter=1;
+		this->nrefs=1; 
+		this->value = x3malloc(sizeof(String));
+		((String*) this->value)->isIter = 0;
+		((String*) this->value)->isStr = 1;
+		((String*) this->value)->value = (char*) x3malloc(len* sizeof(char));
+		read_line(((String*) this->value)->value);
+		((String*) this->value)->nrefs = 1;
+		((String*) this->value)->len = len;
+		this->additional=NULL;
+		this->next=last->next;	
+		this->concat=last->concat;
+		last->additional = this;		
+		last->next = NULL;
+	}
+
+	return this;
+}
+
+
 void freeIter(void* iter) {
 	if (iter == NULL)
 		return;
@@ -90,15 +119,17 @@ void freeIter(void* iter) {
 				else
 					x3free(((Iterable*)iter)->value);
 			}
-			if (((Iterable*)iter)->next == &Integer_through) {
-				(*(int *)(((Iterable*)iter)->additional))--;
-				if ((*(int *)(((Iterable*)iter)->additional)) == 0) {
-					if ((*((int*)((Iterable*)iter)->additional+2)) == 1)
-						freeStr(((Iterable*)iter)->additional);
-					else if ((*((int*)((Iterable*)iter)->additional+1)) == 1)
-						freeIter(((Iterable*)iter)->additional);
-					else
-						x3free(((Iterable*)iter)->additional);
+			if (((Iterable*)iter)->next == &Integer_through || ((Iterable*)iter)->next == &input_onwards) {
+				if (((Iterable*)iter)->additional != NULL) {	
+					(*(int *)(((Iterable*)iter)->additional))--;
+					if ((*(int *)(((Iterable*)iter)->additional)) == 0) {
+						if ((*((int*)((Iterable*)iter)->additional+2)) == 1)
+							freeStr(((Iterable*)iter)->additional);
+						else if ((*((int*)((Iterable*)iter)->additional+1)) == 1)
+							freeIter(((Iterable*)iter)->additional);
+						else
+							x3free(((Iterable*)iter)->additional);
+					}
 				}
 			}
 				
@@ -172,45 +203,52 @@ Iterable* iterGetNext(Iterable* last){
 }
 
 Iterable* concatenate(Iterable* fst, Iterable* snd){
-	if (fst == NULL) {
-		return snd;
-	}
-	Iterable* head = (Iterable*) x3malloc(sizeof(Iterable)); 
-	head->nrefs = 0;
-	head->isIter = 1;
-	head->value = fst->value;
-	if (head->value != NULL)
-		(*(int *)(head->value))++;
-	head->additional = NULL;
-	head->next = fst->next;
-	head->concat = fst->concat;
-	
+	Iterable* head = NULL;
+	Iterable *temp, *temp1, *temp2;
+	if (fst != NULL) {
 		
-	Iterable* temp = head, *temp1, *temp2;
-	if(temp->next == NULL) {
-		while(temp!=NULL) {
-			temp1 = temp;
-			temp = temp->additional;
-			temp2 = NULL;
-			if (temp != NULL) {
-				temp2 = (Iterable*) x3malloc(sizeof(Iterable)); 
-				temp2->nrefs = 1;
-				temp2->isIter = 1;
-				temp2->value = temp->value;
-				if (temp1->value!= NULL)
-					(*(int *)(temp1->value))++;
-				temp2->additional = NULL;
-				temp2->next = temp->next;
-				temp2->concat = temp->concat;	
-				
-				temp1->additional = temp2;
+		head = (Iterable*) x3malloc(sizeof(Iterable)); 
+		head->nrefs = 0;
+		head->isIter = 1;
+		head->value = fst->value;
+		if (head->value != NULL)
+			(*(int *)(head->value))++;
+		head->additional = NULL;
+		head->next = fst->next;
+		head->concat = fst->concat;
+		if (head->concat!= NULL)
+			(*(int *)(head->concat))++;
+		
+			
+		temp = head;
+		if(temp->next == NULL) {
+			while(temp!=NULL) {
+				temp1 = temp;
+				temp = temp->additional;
+				temp2 = NULL;
+				if (temp != NULL) {
+					temp2 = (Iterable*) x3malloc(sizeof(Iterable)); 
+					temp2->nrefs = 1;
+					temp2->isIter = 1;
+					temp2->value = temp->value;
+					if (temp2->value!= NULL)
+						(*(int *)(temp2->value))++;
+					temp2->additional = NULL;
+					temp2->next = temp->next;
+					temp2->concat = temp->concat;	
+					if (temp2->concat!= NULL)
+						(*(int *)(temp2->concat))++;
+					
+					temp1->additional = temp2;
+				}
 			}
 		}
-	}
-	else {
-		head->additional = fst->additional;
-		if (head->additional != NULL)
-			(*(int *)(head->additional))++;
+		else {
+			head->additional = fst->additional;
+			if (head->additional != NULL)
+				(*(int *)(head->additional))++;
+		}
+	
 	}
 	
 	if (snd == NULL)
@@ -225,7 +263,8 @@ Iterable* concatenate(Iterable* fst, Iterable* snd){
 	second->additional = NULL;
 	second->next = snd->next;
 	second->concat = snd->concat;
-	
+	if (second->concat != NULL)
+		(*(int *)(second->concat))++;
 		
 	temp = second;
 	if(temp->next == NULL) {
@@ -238,11 +277,13 @@ Iterable* concatenate(Iterable* fst, Iterable* snd){
 				temp2->nrefs = 1;
 				temp2->isIter = 1;
 				temp2->value = temp->value;
-				if (temp1->value!= NULL)
-					(*(int *)(temp1->value))++;
+				if (temp2->value!= NULL)
+					(*(int *)(temp2->value))++;
 				temp2->additional = NULL;
 				temp2->next = temp->next;
 				temp2->concat = temp->concat;	
+				if (temp2->concat!= NULL)
+					(*(int *)(temp2->concat))++;
 				
 				temp1->additional = temp2;
 			}
@@ -253,19 +294,24 @@ Iterable* concatenate(Iterable* fst, Iterable* snd){
 		if (second->additional != NULL)
 			(*(int *)(second->additional))++;
 	}
-		
-	temp = head;
-	while(temp->concat!=NULL) {
-		temp=temp->concat;
-	}
 	
-	temp->concat = second;
-
-	if (temp->additional != NULL) {
-		while(temp) {
-			temp->concat = second;
-			temp = temp->additional;
+	if (fst == NULL)
+		head = second;	
+	else {
+		temp = head;
+		
+		while (temp->additional || temp->concat) {
+			while(temp->additional) {
+				temp = temp->additional;
+			}
+			
+			while(temp->concat) {
+				temp=temp->concat;
+			}
 		}
+		temp->concat = second;
+	
+		
 	}
 	return head;
 }
@@ -287,34 +333,6 @@ Iterable* Integer_onwards(void* head){
 	return this;
 }
 
-
-
-Iterable* input_onwards(void* head){
-	int len;
-	len = next_line_len();
-	Iterable* last;
-	Iterable* this;
-	this = NULL;
-	last = (Iterable*) head;
-	if (len != 0) {
-		this = x3malloc(sizeof(Iterable));
-		this->isIter=1;
-		this->nrefs=1; 
-		this->value = x3malloc(sizeof(String));
-		((String*) this->value)->isIter = 0;
-		((String*) this->value)->value = (char*) x3malloc(len* sizeof(char));
-		read_line(((String*) this->value)->value);
-		((String*) this->value)->nrefs = 1;
-		((String*) this->value)->len = len;
-		this->additional=NULL;
-		this->next=last->next;	
-		this->concat=last->concat;
-		last->additional = this;		
-		last->next = NULL;
-	}
-
-	return this;
-}
 
 int mystrcmp(const char *s1, const char *s2) 
 { 

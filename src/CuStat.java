@@ -10,6 +10,8 @@ import java.util.Set;
 public abstract class CuStat {
 	protected String text = "";
 	protected String ctext = "";
+	
+	protected boolean dead = false;
 	//added for project 4
 	protected List<String> newVars = new ArrayList<String>();
 	
@@ -105,6 +107,15 @@ public abstract class CuStat {
 			return successors.get(1);
 	}
 	
+	//only returns true for newly died assign statements
+	public boolean dies() {
+		return false;
+	}
+	
+	public void resetInOutSet() {
+		outV = new ArrayList<String>();
+		inV = new ArrayList<String>();
+	}
 }
 
 class AssignStat extends CuStat{
@@ -117,8 +128,27 @@ class AssignStat extends CuStat{
 	}
 	
 	@Override public String toString() {
+		//if dead, don't print anything, this is for debugging
+		if (dead) {
+			super.text = "";
+			return super.text;
+		}
 		super.text = var.toString() + " := " + ee.toString() + " ;";
 		return super.text;
+	}
+	
+	@Override public boolean dies() {
+		//if it is already dead, return false
+		if (dead)
+			return false;
+		//if this variable shows up in outV, then it is still alive
+		if (outV.contains(var.toString()))
+			return false;
+		//reset this node, no use, no def, just pass through
+	    useV = new ArrayList<String>();
+		defV = new ArrayList<String>();
+		dead = true;
+		return true;
 	}
 	
 	@Override public Set<String> getContainsVar(){
@@ -169,6 +199,11 @@ class AssignStat extends CuStat{
 	}
 	
 	@Override public String toC(ArrayList<String> localVars) {
+		//if dead, don't print anything
+		if (dead) {
+			super.ctext = "";
+			return super.ctext;
+		}
 		String exp_toC = ee.toC(localVars);
 		Helper.cVarType.put(var.toString(), ee.getCastType());
 		Helper.iterType.put(var.toString(), ee.getIterType());
@@ -201,6 +236,11 @@ class AssignStat extends CuStat{
 	}
 	
 	@Override public String toC_opt() {
+		//if dead, don't print anything
+		if (dead) {
+			super.ctext = "";
+			return super.ctext;
+		}
 		String exp_toC = ee.toC_opt();
 		Helper.cVarType.put(var.toString(), ee.getCastType());
 		Helper.iterType.put(var.toString(), ee.getIterType());

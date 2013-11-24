@@ -497,7 +497,12 @@ Helper.P("common parent of types is " + type.toString());
 		
 		
 		name +=  "Iterable* " + iter + ";\n" + iter + " = concatenate((Iterable*)" + iter_name1 + ", (Iterable*) " + iter_name2 + ");\n";
-		name += Helper.incrRefCount(iter);
+//		name += Helper.incrRefCount(iter);
+		name += Helper.decRefCount(iter_name1);
+		name += Helper.decRefCount(iter_name2);
+//		name += Helper.decRefCount("(((Iterable*)" + iter_name1 + ")->value)");
+//		name += Helper.decRefCount("(((Iterable*)" + iter_name2 + ")->value)");
+		
 		
 		cText = iter;
 		
@@ -3911,7 +3916,7 @@ Helper.P(" 1mapping is " + mapping.toString());
 			Pair<List<CuStat>, CuExpr> temp = new Pair<List<CuStat>, CuExpr>();
 			String name1 = Helper.getVarName();
 			List<CuStat> stats = new ArrayList<CuStat>();
-			CuExpr exp = new VvExp(val);
+			CuExpr exp = this;
 			
 			if(val.equals("input")) {
 				CuVvc vvc = new Vv(name1);			
@@ -3919,7 +3924,8 @@ Helper.P(" 1mapping is " + mapping.toString());
 				stats.add(a);
 				
 				CuExpr e = new VvExp(name1);
-				e.use.add(e.toString());
+				//e.use.add(val);
+				e.use.add(name1);
 				temp.setSecond(e);
 			}
 			else {
@@ -3933,7 +3939,7 @@ Helper.P(" 1mapping is " + mapping.toString());
 			//CuStat a = new AssignStat(vvc, exp);
 			//stats.add(a);
 			
-			exp.use.add(val);
+//			exp.use.add(val);
 			
 			temp.setFirst(stats);
 			
@@ -4004,6 +4010,7 @@ Helper.P(" 1mapping is " + mapping.toString());
 				//iter = "input";
 								
 				if(!initialized) {
+					iter = "input";
 				
 					name += "int " + len + ";\n"
 						+ "Iterable* " + iter + "= NULL;\n"
@@ -4016,11 +4023,11 @@ Helper.P(" 1mapping is " + mapping.toString());
 					name +=  temp + " = (String*) x3malloc(sizeof(String));\n\t"
 						+ temp + "->isIter = 0;\n\t"
 						+ temp + "->nrefs = 1;\n\t"
+						+ temp + "->isStr = 1;\n\t"
 						+ temp + "->value = (char*) x3malloc("+ len + " * sizeof(char));\n\t"
 						+ temp + "->len = " + len + ";\n\t"
 						+ "read_line(" + temp + "->value);\n\t";
 		
-					name += Helper.incrRefCount(temp);
 					
 					name += iter + " = (Iterable*) x3malloc(sizeof(Iterable));\n\t"
 						+ iter + "->isIter = 1;\n\t"
