@@ -664,7 +664,7 @@ class BrkExpr extends CuExpr {
 		}	
 			
 		if (!tempDataArr.isEmpty())
-			name += Helper.decRefCount(tempDataArr.get(0));
+			name += tempNameArr.get(0) + "->nrefs = 0;\n";
 		//def.add(tempNameArr.get(0));
 		
 		cText = tempNameArr.get(0);
@@ -2521,6 +2521,8 @@ class OnwardsExpr extends CuExpr{
 						+ iter + "->additional = NULL;\n"
 						+ iter + "->next = &" + val.getCastType() + "_onwards;\n"
 						+ iter + "->concat = NULL;\n";
+				
+				name += Helper.incrRefCount(valToC);
 		
 				cText = iter;
 				Helper.cVarType.put(iter, "Iterable");
@@ -2542,6 +2544,8 @@ class OnwardsExpr extends CuExpr{
 						+ iter + "->additional = NULL;\n"
 						+ iter + "->next = &" + val.getCastType() + "_onwards;\n"
 						+ iter + "->concat = NULL;\n";
+				
+				name += Helper.incrRefCount(temp);
 				
 				cText = iter;
 				Helper.cVarType.put(iter, "Iterable");
@@ -3021,7 +3025,7 @@ class ThroughExpr extends CuExpr{
 					name += String.format("Boolean* %s;\n%s = (Boolean*) x3malloc(sizeof(Boolean));\n"
 							+ "%s->value = 0;\n"
 							+ "%s->nrefs = 1;\n",
-							temp, temp, temp);
+							temp, temp, temp, temp);
 					
 					name +=  "Iterable* " + iter + ";\n" + iter +  " = (Iterable*) x3malloc(sizeof(Iterable));\n"
 							+ iter + "->isIter = 1;\n"
