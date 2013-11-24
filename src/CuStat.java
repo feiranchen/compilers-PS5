@@ -20,7 +20,7 @@ public abstract class CuStat {
 	protected List<String> defV = new ArrayList<String>();
 	
 	protected List<CuStat> successors = new ArrayList<CuStat>();
-	protected HashSet<IfStat> ifElseMergePoint=new HashSet<IfStat>();
+	
 	
 	//initially just created for assignstatements
 	protected boolean boxed = true;
@@ -1103,17 +1103,7 @@ class Stats extends CuStat{
 		for (CuStat cs : al) {
 			//note this will form each element into Stats because of the flattening
 			CuStat StatHIR=cs.toHIR();
-			if (divergePoint!=null){
-				StatHIR.ifElseMergePoint.add((IfStat) cs);
-			}
 			newAl.add(StatHIR);
-			
-			if (cs instanceof IfStat){
-				divergePoint=(IfStat) cs;
-			}else{
-				divergePoint=null;
-			}
-				
 		}
 		super.HIR = new Stats(newAl);
 		return super.HIR;

@@ -34,6 +34,7 @@ public abstract class CuExpr {
 	}
 	protected CuType calculateType(CuContext context) throws NoSuchTypeException { return null;};
 	@Override public String toString() {return text;}
+	
 	public CuExpr copyFieldsTo(CuExpr that){
 		that.text=text;
 		that.methodId=methodId;
@@ -43,6 +44,7 @@ public abstract class CuExpr {
 		that.iterType = iterType;
 		that.def = new ArrayList<String>(def);
 		that.use = new ArrayList<String>(use);
+		that.use.addAll(containsVar);
 		//ALARM: second field copying reference
 		if (hir!=null)
 			that.hir = new Pair<List<CuStat>, CuExpr>(new ArrayList(hir.getFirst()),hir.getSecond());

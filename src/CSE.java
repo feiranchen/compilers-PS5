@@ -80,8 +80,10 @@ public class CSE {
 			CuStat ifS=orgS.ifBranch();
 			Map<CuVvc,ArrayList<CuExpr>>  varMapIf = new HashMap<CuVvc,ArrayList<CuExpr>>(varMap);
 			Map<CuExpr,CuVvc> 			 exprMapIf = new HashMap<CuExpr, CuVvc>(exprMap);
+			/*
 			//finish evaluating everything in the scope before we say we can move on.
-			while (!ifS.ifElseMergePoint.contains(orgS)){
+			while (ifS.ifProperty.contains(orgS)&&
+					ifS.getNext().ifProperty.contains(orgS)){
 				doCSE(ifS,varMapIf,exprMapIf);
 				ifS=ifS.getNext();
 			}
@@ -91,7 +93,8 @@ public class CSE {
 			if (elseS!=null){
 				Map<CuVvc,ArrayList<CuExpr>>  varMapElse = new HashMap<CuVvc,ArrayList<CuExpr>>(varMap);
 				Map<CuExpr,CuVvc> 			 exprMapElse = new HashMap<CuExpr, CuVvc>(exprMap);
-				while (!elseS.ifElseMergePoint.contains(orgS)){
+				while (elseS.ifProperty.contains(orgS)&&
+						elseS.getNext().ifProperty.contains(orgS)){
 					doCSE(elseS,varMapElse,exprMapElse);
 					elseS=elseS.getNext();
 				}
@@ -116,7 +119,7 @@ public class CSE {
 						myPut(exprMap, (CuExpr)e1.getKey(), (CuVvc)e1.getValue());
 					}
 				}
-			}
+			}*/
 			return ifS;
 		}
 		else if (orgS instanceof ReturnStat){
