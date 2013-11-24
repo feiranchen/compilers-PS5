@@ -170,6 +170,16 @@ public abstract class CuExpr {
 			return this.boxed;
 		}
 	}
+	
+	public boolean isVariableExpression() {
+		return false;
+	}
+	
+	public String getVal() {
+		if (isVariableExpression())
+			return ((VvExp)this).val;
+		return null;
+	}
 }
 
 //verified and method is only for boolean and it returns boolean
@@ -187,7 +197,14 @@ class AndExpr extends CuExpr{
 		super.expType = "Boolean";
 		super.boxed = false;
 	}
-	
+	@Override public ArrayList<String> getUse(){
+		use = new ArrayList<String>();
+		if (left.isVariableExpression())
+			use.add(left.getVal());
+		if (right.isVariableExpression())
+			use.add(right.getVal());
+		return use;
+	}
 	@Override
 	public boolean equals(Object that){
 		if (that instanceof AndExpr &&
@@ -537,6 +554,15 @@ Helper.P("common parent of types is " + type.toString());
 		ArrayList<String> fake_localVars = new ArrayList<String>();
 		return this.toC(fake_localVars);
 	}
+	
+	@Override public ArrayList<String> getUse(){
+		use = new ArrayList<String>();
+		if (left.isVariableExpression())
+			use.add(left.getVal());
+		if (right.isVariableExpression())
+			use.add(right.getVal());
+		return use;
+	}
 }
 
 class BrkExpr extends CuExpr {
@@ -749,6 +775,15 @@ class BrkExpr extends CuExpr {
 		super.castType = "Iterable";
 		return super.toC_opt();
 	}
+	
+	@Override public ArrayList<String> getUse(){
+		use = new ArrayList<String>();
+		for (CuExpr ce : val) {
+			if (ce.isVariableExpression())
+				use.add(ce.getVal());
+		}
+		return use;
+	}
 
 }
 
@@ -823,6 +858,11 @@ class CBoolean extends CuExpr{
 		
 		return super.cText;
 	}
+	
+	@Override public ArrayList<String> getUse(){
+		use = new ArrayList<String>();
+		return use;
+	}
 }
 
 /*as an example, cinteger will always be assigned to a  variable in HIR,
@@ -883,6 +923,11 @@ class CInteger extends CuExpr {
 		super.castType = "Integer";
 		super.cText = val.toString();
 		return super.cText;
+	}
+	
+	@Override public ArrayList<String> getUse(){
+		use = new ArrayList<String>();
+		return use;
 	}
 }
 
@@ -984,6 +1029,11 @@ class CString extends CuExpr {
 	public String toC_opt() {
 		ArrayList<String> fake_localVars = new ArrayList<String>();
 		return this.toC(fake_localVars);
+	}
+	
+	@Override public ArrayList<String> getUse(){
+		use = new ArrayList<String>();
+		return use;
 	}
 }
 
@@ -1215,6 +1265,15 @@ class DivideExpr extends CuExpr{
 			name += "x3free(" + rightToC + ");\n";
 		
 		return super.toC_opt();
+	}
+	
+	@Override public ArrayList<String> getUse(){
+		use = new ArrayList<String>();
+		if (left.isVariableExpression())
+			use.add(left.getVal());
+		if (right.isVariableExpression())
+			use.add(right.getVal());
+		return use;
 	}
 }
 
@@ -1561,6 +1620,15 @@ class EqualExpr extends CuExpr{
 	
 		return super.toC_opt();
 	}
+	
+	@Override public ArrayList<String> getUse(){
+		use = new ArrayList<String>();
+		if (left.isVariableExpression())
+			use.add(left.getVal());
+		if (right.isVariableExpression())
+			use.add(right.getVal());
+		return use;
+	}
 }
 
 class GreaterThanExpr extends CuExpr{
@@ -1724,6 +1792,15 @@ class GreaterThanExpr extends CuExpr{
 			name += "x3free(" + rightToC + ");\n";	
 			
 		return super.toC_opt();
+	}
+	
+	@Override public ArrayList<String> getUse(){
+		use = new ArrayList<String>();
+		if (left.isVariableExpression())
+			use.add(left.getVal());
+		if (right.isVariableExpression())
+			use.add(right.getVal());
+		return use;
 	}
 }
 
@@ -1895,6 +1972,15 @@ class LessThanExpr extends CuExpr{
 		}*/
 		return super.toC(localVars);
 	}
+	
+	@Override public ArrayList<String> getUse(){
+		use = new ArrayList<String>();
+		if (left.isVariableExpression())
+			use.add(left.getVal());
+		if (right.isVariableExpression())
+			use.add(right.getVal());
+		return use;
+	}
 }
 
 class MinusExpr extends CuExpr{
@@ -2046,6 +2132,15 @@ class MinusExpr extends CuExpr{
 			super.name += String.format("%s.value - %s.value;\n", left.toC(), right.toC());
 		}*/
 		return super.toC(localVars);
+	}
+	
+	@Override public ArrayList<String> getUse(){
+		use = new ArrayList<String>();
+		if (left.isVariableExpression())
+			use.add(left.getVal());
+		if (right.isVariableExpression())
+			use.add(right.getVal());
+		return use;
 	}
 }
 
@@ -2209,6 +2304,15 @@ class ModuloExpr extends CuExpr{
 		}*/
 		return super.toC(localVars);
 	}
+	
+	@Override public ArrayList<String> getUse(){
+		use = new ArrayList<String>();
+		if (left.isVariableExpression())
+			use.add(left.getVal());
+		if (right.isVariableExpression())
+			use.add(right.getVal());
+		return use;
+	}
 }
 
 class NegateExpr extends CuExpr{
@@ -2316,6 +2420,14 @@ class NegateExpr extends CuExpr{
 		}*/
 
 		return super.toC(localVars);
+	}
+	
+	@Override public ArrayList<String> getUse(){
+		use = new ArrayList<String>();
+		if (val.isVariableExpression())
+			use.add(val.getVal());
+
+		return use;
 	}
 }
 
@@ -2429,6 +2541,13 @@ class NegativeExpr extends CuExpr{
 			name += String.format("-(%s.value);\n", e.toC());
 		}*/
 		return super.toC(localVars);
+	}
+	
+	@Override public ArrayList<String> getUse(){
+		use = new ArrayList<String>();
+		if (val.isVariableExpression())
+			use.add(val.getVal());
+		return use;
 	}
 }
 
@@ -2637,6 +2756,13 @@ class OnwardsExpr extends CuExpr{
 		}
 		return super.toC(localVars);
 	}
+	
+	@Override public ArrayList<String> getUse(){
+		use = new ArrayList<String>();
+		if (val.isVariableExpression())
+			use.add(val.getVal());
+		return use;
+	}
 }
 
 class OrExpr extends CuExpr{
@@ -2782,6 +2908,15 @@ class OrExpr extends CuExpr{
 			super.name += String.format("%s.value || %s.value;\n", left.toC(), right.toC());
 		}*/
 		return super.toC(localVars);
+	}
+	
+	@Override public ArrayList<String> getUse(){
+		use = new ArrayList<String>();
+		if (left.isVariableExpression())
+			use.add(left.getVal());
+		if (right.isVariableExpression())
+			use.add(right.getVal());
+		return use;
 	}
 }
 
@@ -2935,6 +3070,15 @@ class PlusExpr extends CuExpr{
 			super.name += String.format("%s.value + %s.value;\n", left.toC(), right.toC());
 		}*/
 		return super.toC(localVars);
+	}
+	
+	@Override public ArrayList<String> getUse(){
+		use = new ArrayList<String>();
+		if (left.isVariableExpression())
+			use.add(left.getVal());
+		if (right.isVariableExpression())
+			use.add(right.getVal());
+		return use;
 	}
 }
 
@@ -3302,6 +3446,15 @@ class ThroughExpr extends CuExpr{
 		}
 		return super.toC(localVars);
 	}
+	
+	@Override public ArrayList<String> getUse(){
+		use = new ArrayList<String>();
+		if (left.isVariableExpression())
+			use.add(left.getVal());
+		if (right.isVariableExpression())
+			use.add(right.getVal());
+		return use;
+	}
 }
 
 class TimesExpr extends CuExpr{
@@ -3445,6 +3598,15 @@ class TimesExpr extends CuExpr{
 			super.name += String.format("%s.value * %s.value;\n", left.toC(), right.toC());
 		}*/
 		return super.toC(localVars);
+	}
+	
+	@Override public ArrayList<String> getUse(){
+		use = new ArrayList<String>();
+		if (left.isVariableExpression())
+			use.add(left.getVal());
+		if (right.isVariableExpression())
+			use.add(right.getVal());
+		return use;
 	}
 }
 
@@ -3816,7 +3978,11 @@ class VvExp extends CuExpr{//varname or function call
 		es = e;
 		super.text += Helper.printList("<", pt, ">", ",")+Helper.printList("(", es, ")", ",");
 	}
-	
+	@Override public boolean isVariableExpression() {
+		if (es == null)
+			return true;
+		return false;
+	}
 	@Override public ArrayList<String> getUse(){
 		use = new ArrayList<String>();
 		if (es==null) {
