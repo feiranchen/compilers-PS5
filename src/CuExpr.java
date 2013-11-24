@@ -3814,8 +3814,14 @@ class VvExp extends CuExpr{//varname or function call
 		es = e;
 		super.text += Helper.printList("<", pt, ">", ",")+Helper.printList("(", es, ")", ",");
 	}
+	
+	/*@Override public ArrayList<String> getUse(){
+		if (es==null) {
+			
+		}
+	}*/
 
-	@Override
+	@Override 
 	public boolean equals(Object that){
 		if (that instanceof VvExp &&
 				val.equals(((VvExp)that).val)&&

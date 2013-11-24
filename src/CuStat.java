@@ -894,6 +894,8 @@ Helper.P("if end, e is " + e.toString());
 	
 	@Override public String toString() {
 		super.text = "if ( " + e.toString() + " ) " + s1.toString();
+		if (s2!=null)
+			super.text += " else " + s2.toString();
 		return super.text;
 	}
 
