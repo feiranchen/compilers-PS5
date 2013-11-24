@@ -1,8 +1,8 @@
-#include <stdio.h>
+/*#include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
 #include <string.h>
-
+*/
 #include "cubex_external_functions.h"
 #include "cubex_private.h"
 
