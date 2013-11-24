@@ -97,38 +97,25 @@ public class CSE {
 				}
 				//assert:elseS and ifS should be the same
 				//merging and updating old map
-					//HashMap<CuVvc,ArrayList<CuExpr>>  varMapMerged = new HashMap<CuVvc,ArrayList<CuExpr>>(varMap);
-					//HashMap<CuExpr,CuVvc> 			 exprMapMerged = new HashMap<CuExpr, CuVvc>(exprMap);
-				/*
+				
 				// We only care about: new variables(old, global ones are always immutable) 
 				// that exist in both branches and has the same value (otherwise value can't be exploited and thus no need to store)
 				for (Entry e :varMapElse.entrySet()){
-					if (varMapIf.containsKey(e.getKey())&&
-							(e.getKey().equals(varMapIf.get(e.getKey())){
-						
-						//both branches has the value, this assignment needs to be preserved
-						if (!varMap.containsKey(e.getKey())){
-							varMap.put(s.var, new ArrayList<CuExpr>());
-						} 
-						//variable already defined, now invalid all of them, update both maps
-						else {
-						for (Entry<CuVvc, ArrayList<CuExpr>> elem : varMap.entrySet()){
-							for(int i =elem.getValue().size()-1;i>=0;i--){
-								if (elem.getValue().get(i).containsVar.contains(s.var.text)){
-									if (exprMap.get(elem.getValue().get(i)).equals(elem.getKey())){
-										exprMap.remove(elem.getValue().get(i));
-									}
-									elem.getValue().remove(i);
-								}
-							}
+					if (myContainsKey(varMapIf,(CuVvc)e.getKey())){
+						ArrayList<CuExpr> lst=commonElemLst((ArrayList<CuExpr>)e.getValue(),
+								(ArrayList<CuExpr>)myGet(varMapIf, (CuVvc)e.getKey()));
+						if (!lst.isEmpty()){
+							myPut(varMap, (CuVvc)e.getKey(),lst);
 						}
-						for (Entry<CuVvc, ArrayList<CuExpr>> elem : varMap.entrySet()){
-							exprMap.put(elem.getValue().get(0),elem.getKey());
-						}
-						varMap.get(s.var).add(s.ee);
 					}
 				}
-				*/
+					
+				for (Entry e1 :exprMapElse.entrySet()){
+					if (myContainsKey(exprMapIf,(CuExpr)e1.getKey())&&
+							myGet(exprMapIf,(CuExpr)e1.getKey()).text.equals(((CuVvc)e1.getValue()).text)){
+						myPut(exprMap, (CuExpr)e1.getKey(), (CuVvc)e1.getValue());
+					}
+				}
 			}
 			return ifS;
 		}
@@ -594,6 +581,15 @@ public class CSE {
 			} 
 		}
 		return null;
+	}
+	private static <A> ArrayList<A> commonElemLst(ArrayList<A> l1, ArrayList<A> l2){
+		ArrayList<A> l=new ArrayList<A>();
+		for (A e : l1){
+			if (l2.contains(e)){
+				l.add(e);
+			}
+		}
+		return l;
 	}
 	
 }
