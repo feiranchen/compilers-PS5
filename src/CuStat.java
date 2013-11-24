@@ -22,8 +22,8 @@ public abstract class CuStat {
 	protected List<String> defV = new ArrayList<String>();
 	
 	protected List<CuStat> successors = new ArrayList<CuStat>();
-	protected HashSet<IfStat> ifElseMergePoint=new HashSet<IfStat>();
 	
+	protected Set<CuStat> lastInIfScope=new HashSet<CuStat>();
 	//initially just created for assignstatements
 	protected boolean boxed = true;
 	protected String statType = "";
@@ -708,6 +708,14 @@ class IfStat extends CuStat{
 		}
 		curHIR.add(temp);
 		super.HIR = new Stats(curHIR);
+		
+		//markForif()
+		if (s1!=null){
+			s1.getLast().lastInIfScope.add(temp);
+		}
+		if (s2!=null){
+			s2.getLast().lastInIfScope.add(temp);
+		}
 		return super.HIR;
     }
     
@@ -1145,17 +1153,7 @@ class Stats extends CuStat{
 		for (CuStat cs : al) {
 			//note this will form each element into Stats because of the flattening
 			CuStat StatHIR=cs.toHIR();
-			if (divergePoint!=null){
-				StatHIR.ifElseMergePoint.add((IfStat) cs);
-			}
 			newAl.add(StatHIR);
-			
-			if (cs instanceof IfStat){
-				divergePoint=(IfStat) cs;
-			}else{
-				divergePoint=null;
-			}
-				
 		}
 		super.HIR = new Stats(newAl);
 		return super.HIR;
