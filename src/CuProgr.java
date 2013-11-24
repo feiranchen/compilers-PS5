@@ -8,6 +8,7 @@ public abstract class CuProgr {
 	protected String ctext = "";
 	//the first node of CFG
 	protected CuStat entry = null;
+	protected ArrayList<CuStat> nodes = new ArrayList<CuStat>();
 	@Override public String toString() {
 		return text;
 	}
@@ -82,13 +83,32 @@ class FullPrg extends CuProgr {
 		temp.setUseDef();
 		
 		//next, iteratively build the in out sets
-		Helper.buildSet(entry);
+		nodes = Helper.buildSet(entry);
+		boolean nothingDies = false;
+		while (!nothingDies) {
+			nothingDies = true;
+			nodes = Helper.buildSet(entry);
+			for (CuStat cs : nodes) {
+				if (cs.dies())
+					nothingDies = false;
+			}
+		}
+		
 		for (CuProgr pr : elements) {
 			if (pr instanceof ClassPrg) {
 				//TO Do, probably never do
 			}
 			else if (pr instanceof FunPrg) {
-				Helper.buildSet(pr.entry);
+				pr.nodes = Helper.buildSet(pr.entry);
+				nothingDies = false;
+				while (!nothingDies) {
+					nothingDies = true;
+					pr.nodes = Helper.buildSet(pr.entry);
+					for (CuStat cs : pr.nodes) {
+						if (cs.dies())
+							nothingDies = false;
+					}
+				}
 			}
 		}
 	}
