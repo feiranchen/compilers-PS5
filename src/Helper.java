@@ -249,18 +249,13 @@ public class Helper {
 		}
 		
 		//check whether it is the last pointer pointing to the object, if yes, x3free memory
-		code +=    "\t" + "if ((*(int *)" + var + ") == 0)\n";
-		String type = cVarType.get(var);
-		if (type != null) {
-			if (type.equals("String"))
-				code += "\t\t" + "freeStr(" + var + ");\n";
-			else if (type.equals("Iterable"))
-				code += "\t\t" + "freeIter(" + var + ");\n";
-			else
-				code += "\t\t" + "x3free(" + var + ");\n";
-		}
-		else
-			code +=    "\t\t" + "x3free(" + var + ");\n";
+		code +=    "\t" + "if ((*(int *)" + var + ") == 0) {\n";
+		code += "\t\tif ((*((int*)" + var + "+2)) == 1)\n";
+		code += "\t\t\tfreeStr(" + var + ");\n";
+		code += "\t\telse if ((*((int*)" + var + "+1)) == 1)\n";
+		code += "\t\t\tfreeIter(" + var + ");\n";
+		code += "\t\telse\n";
+		code += "\t\t\tx3free(" + var + ");\n\t}\n";
 		
 		//newly added, we feel it should not cause memory bug
 		//make var pointing to null

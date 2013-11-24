@@ -176,25 +176,11 @@ Iterable* iterGetNext(Iterable* last){
 		this = (Iterable*) last->additional;
 	}
 	
-	if (this==NULL && last->concat==NULL && last->next != NULL){
-	  	if (last->nrefs==1) {
-		      freeIter(last);
-		 }
-		 else 
-		     (last->nrefs)--;
-		
-		return NULL;
+	if (this==NULL && last->concat==NULL){
+	  return NULL;
 	}
 	else if (this==NULL){
 		this=last->concat;
-	}
-	
-	if (last->next != NULL) {
-	if (last->nrefs==1) {
-		freeIter(last);
-	}
-	else 
-		(last->nrefs)--;
 	}
 	
 	return (this);
