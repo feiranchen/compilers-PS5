@@ -137,7 +137,7 @@ public class CSE {
 				}
 				
 			}
-			return ifS;
+			return ifS.getNext();
 		}
 		else if (orgS instanceof ReturnStat){
 			ReturnStat s=(ReturnStat)orgS;
