@@ -111,6 +111,11 @@ public abstract class CuStat {
 	public boolean dies() {
 		return false;
 	}
+	
+	public void resetInOutSet() {
+		outV = new ArrayList<String>();
+		inV = new ArrayList<String>();
+	}
 }
 
 class AssignStat extends CuStat{

@@ -77,6 +77,21 @@ class FullPrg extends CuProgr {
 	}
 	
 	@Override public void buildSets() {
+		//newly added after I find error in sets
+		statements = new ArrayList<CuStat>();
+		for (CuProgr pr : elements) {
+			if (pr instanceof ClassPrg) {
+				//TO Do, probably never do
+			}
+			else if (pr instanceof FunPrg) {
+				//pr.buildCFG();
+			}
+			else {
+				statements.add(((StatPrg)pr).stat);
+			}
+		}
+		statements.add(s);
+		
 		//first build the use def sets
 		//the same way as dealing with stats
 		CuStat temp = new Stats(statements);
@@ -84,15 +99,18 @@ class FullPrg extends CuProgr {
 		
 		//next, iteratively build the in out sets
 		nodes = Helper.buildSet(entry);
-		boolean nothingDies = false;
+		/*boolean nothingDies = false;
 		while (!nothingDies) {
 			nothingDies = true;
+			for (CuStat cs : nodes) {
+				cs.resetInOutSet();
+			}
 			nodes = Helper.buildSet(entry);
 			for (CuStat cs : nodes) {
 				if (cs.dies())
 					nothingDies = false;
 			}
-		}
+		}*/
 		
 		for (CuProgr pr : elements) {
 			if (pr instanceof ClassPrg) {
@@ -100,15 +118,18 @@ class FullPrg extends CuProgr {
 			}
 			else if (pr instanceof FunPrg) {
 				pr.nodes = Helper.buildSet(pr.entry);
-				nothingDies = false;
+				/*nothingDies = false;
 				while (!nothingDies) {
 					nothingDies = true;
+					for (CuStat cs : pr.nodes) {
+						cs.resetInOutSet();
+					}
 					pr.nodes = Helper.buildSet(pr.entry);
 					for (CuStat cs : pr.nodes) {
 						if (cs.dies())
 							nothingDies = false;
 					}
-				}
+				}*/
 			}
 		}
 	}
