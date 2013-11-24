@@ -1662,20 +1662,20 @@ class GreaterThanExpr extends CuExpr{
 		if(rightCastType.equals(""))
 			rightCastType = "(" + Helper.cVarType.get(rightToC) + "*)";
 		
-		String temp = Helper.getVarName();
-		
-		name += "Boolean* " + temp + " = (Boolean*) x3malloc(sizeof(Boolean));\n" +
-				temp + "->nrefs = 0;\n" +
-				temp + "->value = ";
-		
+//		String temp = Helper.getVarName();
+//		
+//		name += "Boolean* " + temp + " = (Boolean*) x3malloc(sizeof(Boolean));\n" +
+//				temp + "->nrefs = 0;\n" +
+//				temp + "->value = ";
+//		
 		if (b)
-			name += String.format("(%s %s)->value > (%s %s)->value", leftCastType, leftToC, rightCastType, rightToC);
+			cText += String.format("(%s %s)->value > (%s %s)->value", leftCastType, leftToC, rightCastType, rightToC);
 		else
-			name += String.format("(%s %s)->value >= (%s %s)->value", leftCastType, leftToC, rightCastType, rightToC);
+			cText += String.format("(%s %s)->value >= (%s %s)->value", leftCastType, leftToC, rightCastType, rightToC);
 		
-		name += ";\n";
+//		name += ";\n";
 		
-		super.cText = temp;
+//		super.cText = temp;
 
 		if (!leftC.equals(""))
 			name += "x3free(" + leftToC + ");\n";
@@ -1826,20 +1826,20 @@ class LessThanExpr extends CuExpr{
 		if(rightCastType.equals(""))
 			rightCastType = "(" + Helper.cVarType.get(rightToC) + "*)";
 		
-		String temp = Helper.getVarName();
-		
-		name += "Boolean* " + temp + " = (Boolean*) x3malloc(sizeof(Boolean));\n" +
-				temp + "->nrefs = 0;\n" +
-				temp + "->value = ";
-		
+//		String temp = Helper.getVarName();
+//		
+//		name += "Boolean* " + temp + " = (Boolean*) x3malloc(sizeof(Boolean));\n" +
+//				temp + "->nrefs = 0;\n" +
+//				temp + "->value = ";
+//		
 		if (b)
-			name += String.format("(%s %s)->value < (%s %s)->value", leftCastType, leftToC, rightCastType, rightToC);
+			cText += String.format("(%s %s)->value < (%s %s)->value", leftCastType, leftToC, rightCastType, rightToC);
 		else
-			name += String.format("(%s %s)->value <= (%s %s)->value", leftCastType, leftToC, rightCastType, rightToC);
+			cText += String.format("(%s %s)->value <= (%s %s)->value", leftCastType, leftToC, rightCastType, rightToC);
 		
-		name += ";\n";
+//		name += ";\n";
 		
-		super.cText = temp;
+//		super.cText = temp;
 
 		if (!leftC.equals(""))
 			name += "x3free(" + leftToC + ");\n";

@@ -234,41 +234,46 @@ public class Helper {
 		return nodes;
 	}
 	public static String incrRefCount(String var) {
-		String code = "if (" + var + "!= NULL) {\n";
-		//increase ref count
-		code +=    "\t" + "(*(int *)" + var + ")++;\n";
-		code +=     "}\n";
+//		String code = "if (" + var + "!= NULL) {\n";
+//		//increase ref count
+//		code +=    "\t" + "(*(int *)" + var + ")++;\n";
+//		code +=     "}\n";
+		String code = "incRef("+var+");\n";
 		return code;
 	}
 	
 	public static String decRefCount(String var) {
-		String code = "if (" + var + "!= NULL) {\n";
-		//decrement ref count
-		code +=    "\t" + "(*(int *)" + var + ")--;\n";
-		
-		if (debug) {
-			code +=    "\t" + "if ((*(int *)" + var + ") < 0)\n";
-			//need to include stdio for debugging
-			code +=    "\t\t" + "printf(\"" + var + " ref count is smaller than 0\\n\");\n";
-		}
-		
-		//check whether it is the last pointer pointing to the object, if yes, x3free memory
-		code +=    "\t" + "if ((*(int *)" + var + ") == 0) {\n";
-		code += "\t\tif ((*((int*)" + var + "+2)) == 1)\n";
-		code += "\t\t\tfreeStr(" + var + ");\n";
-		code += "\t\telse if ((*((int*)" + var + "+1)) == 1)\n";
-		code += "\t\t\tfreeIter(" + var + ");\n";
-		code += "\t\telse\n";
-		code += "\t\t\tx3free(" + var + ");\n\t}\n";
-		
-		//newly added, we feel it should not cause memory bug
-		//make var pointing to null
-				
-		//newly added, we feel it should not cause memory bug
-		//make var pointing to null
-		code +=    "\t" + var + " = NULL;\n";
-		
-		code +=     "}\n";
+//		String code = "if (" + var + "!= NULL) {\n";
+//		//decrement ref count
+//		code +=    "\t" + "(*(int *)" + var + ")--;\n";
+////		code += "\tif ((*((int*)" + var + "+1)) == 1){\n";
+////		code += "\t (*((int*)((Iterable*)" + var + ")->value))--;\n";
+////		code += "}";
+//		
+//		if (debug) {
+//			code +=    "\t" + "if ((*(int *)" + var + ") < 0)\n";
+//			//need to include stdio for debugging
+//			code +=    "\t\t" + "printf(\"" + var + " ref count is smaller than 0\\n\");\n";
+//		}
+//		
+//		//check whether it is the last pointer pointing to the object, if yes, x3free memory
+//		code +=    "\t" + "if ((*(int *)" + var + ") == 0) {\n";
+//		code += "\t\tif ((*((int*)" + var + "+2)) == 1)\n";
+//		code += "\t\t\tfreeStr(" + var + ");\n";
+//		code += "\t\telse if ((*((int*)" + var + "+1)) == 1)\n";
+//		code += "\t\t\tfreeIter(" + var + ");\n";
+//		code += "\t\telse\n";
+//		code += "\t\t\tx3free(" + var + ");\n\t}\n";
+//		
+//		//newly added, we feel it should not cause memory bug
+//		//make var pointing to null
+//				
+//		//newly added, we feel it should not cause memory bug
+//		//make var pointing to null
+//		code +=    "\t" + var + " = NULL;\n";
+//		
+//		code +=     "}\n";
+		String code = "decRef("+var+");\n";
 		return code;
 	}
 	
