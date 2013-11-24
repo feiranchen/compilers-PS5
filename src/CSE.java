@@ -210,7 +210,16 @@ public class CSE {
 			Map<CuExpr, CuVvc> exprMap,Map<CuVvc,ArrayList<CuExpr>> varMap) throws Exception{
 		CuExpr root=rootExpr(orgE,exprMap,varMap);
 		if(myContainsKey(exprMap,root)){
-			return new VvExp(myGet(exprMap,root).text);
+			CuVvc optVar=myGet(exprMap,root);
+			CuExpr replaceVar=new VvExp(myGet(exprMap,root).text);
+			while(myContainsKey(varMap,optVar)&&
+					(myGet(varMap, optVar).get(0) instanceof VvExp)&&
+					((VvExp)myGet(varMap, optVar).get(0)).es==null){
+				optVar=new Vv(((VvExp)replaceVar).val);
+				if(myContainsKey(varMap, optVar))
+					replaceVar=myGet(varMap, optVar).get(0);
+			}
+			return replaceVar;
 		}else{
 			CuExpr newE=null;
 			if (orgE instanceof AndExpr){
