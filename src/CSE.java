@@ -204,6 +204,8 @@ public class CSE {
 						optVar=new Vv(((VvExp)replaceVar).val);
 						if(myContainsKey(varMap, optVar))
 							replaceVar=myGet(varMap, optVar).get(0);
+						else
+							break;
 					}
 					myPut(exprMap,temp,optVar);
 				}

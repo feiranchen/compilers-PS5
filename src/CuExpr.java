@@ -3808,7 +3808,6 @@ class VvExp extends CuExpr{//varname or function call
 	public VvExp(String str){
 		val = str;
 		super.text=str;
-		containsVar.add(str);
 	}
 	
 	@Override public void add(List<CuType> pt, List<CuExpr> e){
