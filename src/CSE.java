@@ -4,6 +4,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 
 
 
@@ -18,84 +19,27 @@ public class CSE {
 			nextS=doCSE(nextS,varMap,exprMap);
 		}
 	}
-	static public void markCSE(){
-		
-	}
 	
 	static public CuStat doCSE(CuStat orgS,
 			Map<CuVvc,ArrayList<CuExpr>> varMap,
 			Map<CuExpr, CuVvc> exprMap) throws Exception{
+
 		if (orgS instanceof AssignStat){
-			AssignStat s=(AssignStat)orgS;
-			
-
-			//variable already defined, now invalid all of them, update both maps
-			if (myContainsKey(varMap,s.var)){
-
-				//update var table with root exp
-				for (Entry<CuVvc, ArrayList<CuExpr>> elem : varMap.entrySet()){
-					CuExpr temp=rootExpr(elem.getValue().get(0),exprMap,varMap);
-					ArrayList<CuExpr> lst=elem.getValue();
-					if (!(lst.get(lst.size()-1).equals(temp))){
-						lst.add(temp);
-					}
-				}
-				
-				//clear varMap
-				myRemove(varMap, s.var);
-				for (Entry<CuVvc, ArrayList<CuExpr>> elem : varMap.entrySet()){
-					for(int i =elem.getValue().size()-1;i>=0;i--){
-						if (elem.getValue().get(i).containsVar.contains(s.var.text)){
-							elem.getValue().remove(i);
-						}
-					}
-				}
-				
-				//delete all expr mapped to this var in exprMap
-				Iterator<Map.Entry<CuExpr, CuVvc>> iterExp = exprMap.entrySet().iterator();
-				while (iterExp.hasNext()) {
-				    Map.Entry<CuExpr, CuVvc> e = iterExp.next();
-				    if(e.getValue().text.equals(s.var.text)){
-				        iterExp.remove();
-				    }
-				}
-				
-				//delete all var that no more point to anything
-				Iterator<Map.Entry<CuVvc, ArrayList<CuExpr>>> iterVar = varMap.entrySet().iterator();
-				while (iterVar.hasNext()) {
-					Map.Entry<CuVvc, ArrayList<CuExpr>> e = iterVar.next();
-					if (e.getValue().isEmpty()){
-						iterVar.remove();
-					}
-				}
-				
-				//update expr table with new shortcuts
-				for (Entry<CuVvc, ArrayList<CuExpr>> elem : varMap.entrySet()){
-					CuExpr temp=rootExpr(elem.getValue().get(0),exprMap,varMap);
-					if (!myContainsKey(exprMap, temp)){
-						CuVvc optVar=elem.getKey();
-						CuExpr replaceVar=elem.getValue().get(0);
-						if ((replaceVar instanceof VvExp)&&
-								((VvExp)replaceVar).es==null){
-							optVar=new Vv(((VvExp)replaceVar).val);
-						}
-						myPut(exprMap,temp,optVar);
-					}
-				}
-			}
-
-			myPut(varMap,s.var, new ArrayList<CuExpr>());
-			myGet(varMap,s.var).add(s.ee);
-			
 			//simplify and update the expression map
-			((AssignStat) orgS).ee=updateExpr(s.var, s.ee,exprMap, varMap);
-			if (!((AssignStat) orgS).ee.equals(myGet(varMap,s.var).get(0))){
-				myGet(varMap,s.var).add(0,((AssignStat) orgS).ee);}
-			//if(exprMap.(((AssignStat) orgS).ee)){
-			//	exprMap.put(((AssignStat) orgS).ee, s.var);}
+			CuExpr newE=updateExpr(((AssignStat)orgS).var, ((AssignStat)orgS).ee,exprMap, varMap);
+			cleanAllVars(orgS.getContainsVar(),exprMap,varMap);
+			CuExpr temp=rootExpr(newE,exprMap,varMap);
+			if(!myContainsKey(exprMap, temp)){
+				myPut(exprMap,temp, ((AssignStat)orgS).var);
+			}
+			((AssignStat) orgS).ee=newE;
+			//maps are already cleaned
+			myPut(varMap,((AssignStat)orgS).var, new ArrayList<CuExpr>());
+			myGet(varMap,((AssignStat)orgS).var).add(newE);
 			return orgS.getNext();
 		}
 		else if (orgS instanceof WhileStat){
+			cleanAllVars(orgS.getContainsVar(),exprMap,varMap);
 			WhileStat s=(WhileStat)orgS;
 			//simplify. no need to maintain map as in Assign
 			((WhileStat) orgS).e=updateExpr(null, s.e,exprMap, varMap);
@@ -113,32 +57,11 @@ public class CSE {
 			return orgS.noBranch();
 		}
 		else if (orgS instanceof ForToWhileStat){
+			cleanAllVars(orgS.getContainsVar(),exprMap,varMap);
 			CuStat nextS=orgS.whileBranch();
 			
 			Map<CuVvc,ArrayList<CuExpr>>  varMap2 =new HashMap<CuVvc,ArrayList<CuExpr>>(varMap);
 			Map<CuExpr,CuVvc> exprMap2 = new HashMap<CuExpr, CuVvc>(exprMap);
-			
-			CuVvc iter =new Vv(((ForToWhileStat) orgS).var);
-			//clear reference to var in header
-			//clear varMap
-			myRemove(varMap2, iter);
-			for (Entry<CuVvc, ArrayList<CuExpr>> elem : varMap2.entrySet()){
-				for(int i =elem.getValue().size()-1;i>=0;i--){
-					if (elem.getValue().get(i).containsVar.contains(iter.text)){
-						elem.getValue().remove(i);
-					}
-				}
-			}
-			
-			//delete all expr mapped to this var in exprMap
-			Iterator<Map.Entry<CuExpr, CuVvc>> iterExp = exprMap2.entrySet().iterator();
-			while (iterExp.hasNext()) {
-			    Map.Entry<CuExpr, CuVvc> e = iterExp.next();
-			    if(e.getValue().text.equals(iter.text)){
-			        iterExp.remove();
-			    }
-			}
-			
 			
 			//finsh evaluating everything in the scope before we say we can move on.
 			while (nextS!=orgS){
@@ -174,38 +97,25 @@ public class CSE {
 				}
 				//assert:elseS and ifS should be the same
 				//merging and updating old map
-					//HashMap<CuVvc,ArrayList<CuExpr>>  varMapMerged = new HashMap<CuVvc,ArrayList<CuExpr>>(varMap);
-					//HashMap<CuExpr,CuVvc> 			 exprMapMerged = new HashMap<CuExpr, CuVvc>(exprMap);
-				/*
+				
 				// We only care about: new variables(old, global ones are always immutable) 
 				// that exist in both branches and has the same value (otherwise value can't be exploited and thus no need to store)
 				for (Entry e :varMapElse.entrySet()){
-					if (varMapIf.containsKey(e.getKey())&&
-							(e.getKey().equals(varMapIf.get(e.getKey())){
-						
-						//both branches has the value, this assignment needs to be preserved
-						if (!varMap.containsKey(e.getKey())){
-							varMap.put(s.var, new ArrayList<CuExpr>());
-						} 
-						//variable already defined, now invalid all of them, update both maps
-						else {
-						for (Entry<CuVvc, ArrayList<CuExpr>> elem : varMap.entrySet()){
-							for(int i =elem.getValue().size()-1;i>=0;i--){
-								if (elem.getValue().get(i).containsVar.contains(s.var.text)){
-									if (exprMap.get(elem.getValue().get(i)).equals(elem.getKey())){
-										exprMap.remove(elem.getValue().get(i));
-									}
-									elem.getValue().remove(i);
-								}
-							}
+					if (myContainsKey(varMapIf,(CuVvc)e.getKey())){
+						ArrayList<CuExpr> lst=commonElemLst((ArrayList<CuExpr>)e.getValue(),
+								(ArrayList<CuExpr>)myGet(varMapIf, (CuVvc)e.getKey()));
+						if (!lst.isEmpty()){
+							myPut(varMap, (CuVvc)e.getKey(),lst);
 						}
-						for (Entry<CuVvc, ArrayList<CuExpr>> elem : varMap.entrySet()){
-							exprMap.put(elem.getValue().get(0),elem.getKey());
-						}
-						varMap.get(s.var).add(s.ee);
 					}
 				}
-				*/
+					
+				for (Entry e1 :exprMapElse.entrySet()){
+					if (myContainsKey(exprMapIf,(CuExpr)e1.getKey())&&
+							myGet(exprMapIf,(CuExpr)e1.getKey()).text.equals(((CuVvc)e1.getValue()).text)){
+						myPut(exprMap, (CuExpr)e1.getKey(), (CuVvc)e1.getValue());
+					}
+				}
 			}
 			return ifS;
 		}
@@ -222,14 +132,81 @@ public class CSE {
 		}
 	}
 	
+	private static void cleanAllVars(Set<String> set, Map<CuExpr, CuVvc> exprMap,Map<CuVvc,ArrayList<CuExpr>> varMap){
+		for (String s :set){
+			//update var table with root exp
+			for (Entry<CuVvc, ArrayList<CuExpr>> elem : varMap.entrySet()){
+				if (elem.getValue().get(0).containsVar.contains(s)){
+					CuExpr temp=rootExpr(elem.getValue().get(0),exprMap,varMap);
+					ArrayList<CuExpr> lst=elem.getValue();
+					if (!(lst.get(lst.size()-1).equals(temp))){
+						lst.add(temp);
+					}
+				}
+			}
+			
+			//clear varMap
+			myRemove(varMap,new Vv(s));
+			for (Entry<CuVvc, ArrayList<CuExpr>> elem : varMap.entrySet()){
+				for(int i =elem.getValue().size()-1;i>=0;i--){
+					if (elem.getValue().get(i).containsVar.contains(s)){
+						elem.getValue().remove(i);
+					}
+				}
+			}
+			
+			//delete all expr mapped to this var in exprMap
+			Iterator<Map.Entry<CuExpr, CuVvc>> iterExp = exprMap.entrySet().iterator();
+			while (iterExp.hasNext()) {
+			    Map.Entry<CuExpr, CuVvc> e = iterExp.next();
+			    if(e.getValue().text.equals(s)){
+			        iterExp.remove();
+			    }
+			}
+			
+			//delete all var that no more point to anything
+			Iterator<Map.Entry<CuVvc, ArrayList<CuExpr>>> iterVar = varMap.entrySet().iterator();
+			while (iterVar.hasNext()) {
+				Map.Entry<CuVvc, ArrayList<CuExpr>> e = iterVar.next();
+				if (e.getValue().isEmpty()){
+					iterVar.remove();
+				}
+			}
+			
+			//update expr table with new shortcuts
+			for (Entry<CuVvc, ArrayList<CuExpr>> elem : varMap.entrySet()){
+				CuExpr temp=rootExpr(elem.getValue().get(0),exprMap,varMap);
+				if (!myContainsKey(exprMap, temp)){
+					CuVvc optVar=elem.getKey();
+					CuExpr replaceVar=elem.getValue().get(0);
+					while((replaceVar instanceof VvExp)&&
+							((VvExp)replaceVar).es==null){
+						optVar=new Vv(((VvExp)replaceVar).val);
+						if(myContainsKey(varMap, optVar))
+							replaceVar=myGet(varMap, optVar).get(0);
+					}
+					myPut(exprMap,temp,optVar);
+				}
+			}
+		}
+	}
 
+	//looking in ExprMap for substitution in subexpression or whole expression
 	//make sure this is returning a new copy except primitive types
 	static private CuExpr updateExpr(CuVvc name,CuExpr orgE,
 			Map<CuExpr, CuVvc> exprMap,Map<CuVvc,ArrayList<CuExpr>> varMap) throws Exception{
-		//debug
-		CuExpr temp=rootExpr(orgE,exprMap,varMap);
-		if(myContainsKey(exprMap,rootExpr(orgE,exprMap,varMap))){
-			return new VvExp(myGet(exprMap,rootExpr(orgE,exprMap,varMap)).text);
+		CuExpr root=rootExpr(orgE,exprMap,varMap);
+		if(myContainsKey(exprMap,root)){
+			CuVvc optVar=myGet(exprMap,root);
+			CuExpr replaceVar=new VvExp(myGet(exprMap,root).text);
+			while(myContainsKey(varMap,optVar)&&
+					(myGet(varMap, optVar).get(0) instanceof VvExp)&&
+					((VvExp)myGet(varMap, optVar).get(0)).es==null){
+				optVar=new Vv(((VvExp)replaceVar).val);
+				if(myContainsKey(varMap, optVar))
+					replaceVar=myGet(varMap, optVar).get(0);
+			}
+			return replaceVar;
 		}else{
 			CuExpr newE=null;
 			if (orgE instanceof AndExpr){
@@ -364,18 +341,12 @@ public class CSE {
 						updateInput.add(updateExpr(null, elem, exprMap, varMap));
 					}
 					((VvExp) newE).add(((VvExp) orgE).types, updateInput);
-				}else {
-					((VvExp) newE).add(((VvExp) orgE).types, null);
 				}
 				((VvExp) newE).retype=((VvExp) orgE).retype;
 				((VvExp) newE).oriReType=((VvExp) orgE).oriReType;
 				
 				return finalReturn(name,orgE,newE, exprMap, varMap);
 			}else {
-				CuExpr temp1=rootExpr(orgE,exprMap,varMap);
-				if(name!=null&&(!myContainsKey(exprMap, temp1))){
-					myPut(exprMap,temp1, name);
-				}
 				System.out.println("Did not update expr: "+orgE.toString());
 			}
 			
@@ -383,22 +354,13 @@ public class CSE {
 		}
 	}
 	
+
+	//we've looked at exprMap with it's root expr. No more need to look further
 	private static CuExpr finalReturn(CuVvc name,CuExpr orgE,CuExpr newE,
 			Map<CuExpr, CuVvc> exprMap,Map<CuVvc,ArrayList<CuExpr>> varMap){
-		CuVvc betterE=null;
 
 		orgE.copyFieldsTo(newE);
-		CuExpr temp=rootExpr(newE,exprMap,varMap);
-		if(myContainsKey(exprMap,temp)){
-			betterE=myGet(exprMap,temp);
-			return new VvExp(betterE.text);
-		}
-		else{
-			CuExpr temp2=rootExpr(newE,exprMap,varMap);
-			if(name!=null&&(!myContainsKey(exprMap, temp2))){
-				myPut(exprMap,temp2, name);}
-			return newE;
-		}
+		return newE;
 	}
 
 	//make sure this is returning a new copy except primitive types
@@ -431,8 +393,11 @@ public class CSE {
 			return newE;
 		}
 		else if (orgE instanceof DivideExpr){
-			newE=new DivideExpr(rootExpr(((DivideExpr) orgE).left,exprMap, varMap),
-					rootExpr(((DivideExpr) orgE).right,exprMap, varMap));
+			CuExpr newL=rootExpr(((DivideExpr) orgE).left,exprMap, varMap);
+			CuExpr newR=rootExpr(((DivideExpr) orgE).right,exprMap, varMap);
+			newE=new DivideExpr(newL,newR);
+					//rootExpr(((DivideExpr) orgE).left,exprMap, varMap),
+					//rootExpr(((DivideExpr) orgE).right,exprMap, varMap));
 
 			orgE.copyFieldsTo(newE);
 			return newE;
@@ -552,20 +517,34 @@ public class CSE {
 					updateInput.add(rootExpr(elem, exprMap, varMap));
 				}
 				((VvExp) newE).add(((VvExp) orgE).types, updateInput);
-			}
-			//this is just a variable name
-			else if(myContainsKey(varMap, new Vv(((VvExp) orgE).val))){
-				CuExpr root= myGet(varMap,new Vv(((VvExp) orgE).val)).get(0);
-				root=rootExpr(root, exprMap, varMap);
-				return root;
-			}else{
-				((VvExp) newE).add(((VvExp) orgE).types, null);
-			}
-			((VvExp) newE).retype=((VvExp) orgE).retype;
-			((VvExp) newE).oriReType=((VvExp) orgE).oriReType;
+				((VvExp) newE).retype=((VvExp) orgE).retype;
+				((VvExp) newE).oriReType=((VvExp) orgE).oriReType;
 
-			orgE.copyFieldsTo(newE);
-			return newE;
+				orgE.copyFieldsTo(newE);
+				return newE;
+			}else{
+				//this is just a variable name
+				((VvExp) newE).retype=((VvExp) orgE).retype;
+				((VvExp) newE).oriReType=((VvExp) orgE).oriReType;
+				orgE.copyFieldsTo(newE);
+			}
+			//catch dead loop
+			if (myContainsKey(exprMap, newE)&&
+					((VvExp)newE).val.equals(myGet(exprMap, newE))){
+				return new VvExp(((VvExp)newE).val);
+			}
+			
+			CuVvc valName=new Vv(((VvExp) newE).val);
+			if(myContainsKey(varMap, valName)){
+				List<CuExpr> lst=myGet(varMap, valName);
+				//catch dead loop like i=i/2;
+				if (lst.get(0).containsVar.contains(valName.text))
+					return lst.get(0);
+				else
+					return rootExpr(lst.get(0),exprMap,varMap);
+			}else{
+				return newE;
+			}
 		}
 		
 		return orgE;
@@ -602,6 +581,15 @@ public class CSE {
 			} 
 		}
 		return null;
+	}
+	private static <A> ArrayList<A> commonElemLst(ArrayList<A> l1, ArrayList<A> l2){
+		ArrayList<A> l=new ArrayList<A>();
+		for (A e : l1){
+			if (l2.contains(e)){
+				l.add(e);
+			}
+		}
+		return l;
 	}
 	
 }
