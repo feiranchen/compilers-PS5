@@ -271,7 +271,7 @@ Helper.P("assign stat end " + ee.toString());
 
 //added for PA5 to HIR
 class ForToWhileStat extends CuStat {
-	private String var, iter_name;
+	public String var, iter_name;
 	private CuStat s1;
 	private String iterType;
 	

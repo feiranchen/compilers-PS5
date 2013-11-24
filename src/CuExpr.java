@@ -25,7 +25,7 @@ public abstract class CuExpr {
 	protected CuType type = null;
 	//added for primitive optimization, default is boxed
 	protected boolean boxed = true;
-	protected  Set<CuVvc> containsVar= new HashSet<CuVvc>();
+	protected  Set<String> containsVar= new HashSet<String>();
 	public void add(List<CuType> pt, List<CuExpr> es) {}
 	public final CuType getType(CuContext context) throws NoSuchTypeException {
 		if(type == null) { type = calculateType(context); }
@@ -34,6 +34,25 @@ public abstract class CuExpr {
 	}
 	protected CuType calculateType(CuContext context) throws NoSuchTypeException { return null;};
 	@Override public String toString() {return text;}
+	public CuExpr copyFieldsTo(CuExpr that){
+		that.text=text;
+		that.methodId=methodId;
+		that.cText = cText;
+		that.name = name;
+		that.castType = castType; 
+		that.iterType = iterType;
+		that.def = new ArrayList<String>(def);
+		that.use = new ArrayList<String>(use);
+		//ALARM: second field copying reference
+		if (hir!=null)
+			that.hir = new Pair<List<CuStat>, CuExpr>(new ArrayList(hir.getFirst()),hir.getSecond());
+		that.expType = expType;
+		that.type = type;
+		that.boxed = boxed;
+		//that.containsVar=new HashSet<String>(containsVar);
+		
+		return that;
+	}
 	
 	public String toC(ArrayList<String> localVars) {
 		return cText;
@@ -1217,7 +1236,7 @@ class DivideExpr extends CuExpr{
 
 class EqualExpr extends CuExpr{
 	public CuExpr left, right;
-	private String method2= null;
+	public String method2= null;
 	Boolean bool;
 	
 	public EqualExpr(CuExpr e1, CuExpr e2, Boolean eq) {
@@ -3692,16 +3711,17 @@ class VvExp extends CuExpr{//varname or function call
 	public String val;
 	public List<CuType> types = new ArrayList<CuType>();
 	public List<CuExpr> es = null;
+	
+	public CuType retype = null;
+	public CuType oriReType = null;
+
 	static private boolean initialized = false;
 	static String  iter = Helper.getVarName(), temp = Helper.getVarName();
-	
-	private CuType retype = null;
-	private CuType oriReType = null;
 	
 	public VvExp(String str){
 		val = str;
 		super.text=str;
-		containsVar.add(new Vv(str));
+		containsVar.add(str);
 	}
 	
 	@Override public void add(List<CuType> pt, List<CuExpr> e){
@@ -4057,15 +4077,5 @@ Helper.P(" 1mapping is " + mapping.toString());
 			//use.add(val);
 		}
 		return super.toC(localVars);
-	}
-}
-
-class NullExp extends CuExpr{
-	public NullExp(){
-		text="";
-	}
-	
-	public boolean equals(Object that){
-		return true;
 	}
 }
