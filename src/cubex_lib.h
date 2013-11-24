@@ -75,6 +75,35 @@ Iterable* Integer_through(void* head){
 	}
 }
 
+Iterable* input_onwards(void* head){
+	int len;
+	len = next_line_len();
+	Iterable* last;
+	Iterable* this;
+	this = NULL;
+	last = (Iterable*) head;
+	if (len != 0) {
+		this = x3malloc(sizeof(Iterable));
+		this->isIter=1;
+		this->nrefs=1; 
+		this->value = x3malloc(sizeof(String));
+		((String*) this->value)->isIter = 0;
+		((String*) this->value)->isStr = 1;
+		((String*) this->value)->value = (char*) x3malloc(len* sizeof(char));
+		read_line(((String*) this->value)->value);
+		((String*) this->value)->nrefs = 1;
+		((String*) this->value)->len = len;
+		this->additional=NULL;
+		this->next=last->next;	
+		this->concat=last->concat;
+		last->additional = this;		
+		last->next = NULL;
+	}
+
+	return this;
+}
+
+
 void freeIter(void* iter) {
 	if (iter == NULL)
 		return;
@@ -90,15 +119,17 @@ void freeIter(void* iter) {
 				else
 					x3free(((Iterable*)iter)->value);
 			}
-			if (((Iterable*)iter)->next == &Integer_through) {
-				(*(int *)(((Iterable*)iter)->additional))--;
-				if ((*(int *)(((Iterable*)iter)->additional)) == 0) {
-					if ((*((int*)((Iterable*)iter)->additional+2)) == 1)
-						freeStr(((Iterable*)iter)->additional);
-					else if ((*((int*)((Iterable*)iter)->additional+1)) == 1)
-						freeIter(((Iterable*)iter)->additional);
-					else
-						x3free(((Iterable*)iter)->additional);
+			if (((Iterable*)iter)->next == &Integer_through || ((Iterable*)iter)->next == &input_onwards) {
+				if (((Iterable*)iter)->additional != NULL) {	
+					(*(int *)(((Iterable*)iter)->additional))--;
+					if ((*(int *)(((Iterable*)iter)->additional)) == 0) {
+						if ((*((int*)((Iterable*)iter)->additional+2)) == 1)
+							freeStr(((Iterable*)iter)->additional);
+						else if ((*((int*)((Iterable*)iter)->additional+1)) == 1)
+							freeIter(((Iterable*)iter)->additional);
+						else
+							x3free(((Iterable*)iter)->additional);
+					}
 				}
 			}
 				
@@ -302,35 +333,6 @@ Iterable* Integer_onwards(void* head){
 	return this;
 }
 
-
-
-Iterable* input_onwards(void* head){
-	int len;
-	len = next_line_len();
-	Iterable* last;
-	Iterable* this;
-	this = NULL;
-	last = (Iterable*) head;
-	if (len != 0) {
-		this = x3malloc(sizeof(Iterable));
-		this->isIter=1;
-		this->nrefs=1; 
-		this->value = x3malloc(sizeof(String));
-		((String*) this->value)->isIter = 0;
-		((String*) this->value)->isStr = 1;
-		((String*) this->value)->value = (char*) x3malloc(len* sizeof(char));
-		read_line(((String*) this->value)->value);
-		((String*) this->value)->nrefs = 1;
-		((String*) this->value)->len = len;
-		this->additional=NULL;
-		this->next=last->next;	
-		this->concat=last->concat;
-		last->additional = this;		
-		last->next = NULL;
-	}
-
-	return this;
-}
 
 int mystrcmp(const char *s1, const char *s2) 
 { 
