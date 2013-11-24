@@ -113,6 +113,7 @@ class AssignStat extends CuStat{
 	public AssignStat (CuVvc t, CuExpr e) {
 		var = t;
 		ee = e;
+		this.setUnboxType();
 	}
 	
 	@Override public String toString() {
@@ -127,13 +128,21 @@ class AssignStat extends CuStat{
 	}
 	
     @Override public void setUnboxType(){
-		if (ee.expType.equals("Integer")) {
-			super.boxed = false;
-			super.statType = "Integer";
+    	//if the expression return a primitive type
+		if (ee.expType.equals("Integer") || ee.expType.equals("Boolean")) {
+			//if it is already a boxed variable, simply update the type
+			if (Helper.boxedVar.containsKey(var.toString())) {
+				Helper.boxedVar.put(var.toString(), ee.expType);
+			}
+			else { //it is in unboxed var, or it is the first time appear, then update/insert
+				Helper.unboxedVar.put(var.toString(), ee.expType);
+			}
 		}
-		else if (ee.expType.equals("Boolean")) {
-			super.boxed = false;
-			super.statType = "Boolean";
+		else { //otherwise
+			if (Helper.unboxedVar.containsKey(var.toString())) {
+				Helper.unboxedVar.remove(var.toString());
+			}
+			Helper.boxedVar.put(var.toString(), ee.expType);
 		}
 	}
 	
@@ -217,14 +226,16 @@ class AssignStat extends CuStat{
 				super.ctext += var.toString() + " = " + exp_toC + ";\n";
 			else {
 				//if expression is unboxed, it must be boolean or integer
-				super.ctext += var.toString() + " = " + Helper.box(exp_toC, ee.expType) + ";\n";
+				String reName = Helper.getVarName();
+				super.ctext += Helper.box(exp_toC, ee.expType, reName);
+				super.ctext += var.toString() + " = " + reName + ";\n";
 			}
 				
 			//normal ref count
 			super.ctext += Helper.incrRefCount(var.toString());
 			super.ctext += Helper.decRefCount(temp_name);
 		}
-		else {
+		else { //if the variable is unboxed
 			if (ee.boxed) {
 				super.ctext += var.toString() + " = " + Helper.unbox(exp_toC, ee.expType) + ";\n";
 			}

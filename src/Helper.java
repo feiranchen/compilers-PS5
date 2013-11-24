@@ -251,18 +251,13 @@ public class Helper {
 		}
 		
 		//check whether it is the last pointer pointing to the object, if yes, x3free memory
-		code +=    "\t" + "if ((*(int *)" + var + ") == 0)\n";
-		String type = cVarType.get(var);
-		if (type != null) {
-			if (type.equals("String"))
-				code += "\t\t" + "freeStr(" + var + ");\n";
-			else if (type.equals("Iterable"))
-				code += "\t\t" + "freeIter(" + var + ");\n";
-			else
-				code += "\t\t" + "x3free(" + var + ");\n";
-		}
-		else
-			code +=    "\t\t" + "x3free(" + var + ");\n";
+		code +=    "\t" + "if ((*(int *)" + var + ") == 0) {\n";
+		code += "\t\tif ((*((int*)" + var + "+2)) == 1)\n";
+		code += "\t\t\tfreeStr(" + var + ");\n";
+		code += "\t\telse if ((*((int*)" + var + "+1)) == 1)\n";
+		code += "\t\t\tfreeIter(" + var + ");\n";
+		code += "\t\telse\n";
+		code += "\t\t\tx3free(" + var + ");\n\t}\n";
 		
 		//newly added, we feel it should not cause memory bug
 		//make var pointing to null
@@ -306,9 +301,12 @@ public class Helper {
 		return "((" + var_type +" *)" + var_name + ")->value";
 	}
 	
-	//havent done yet
-	public static String box(String exp_name, String exp_type) {
-		String a = "to do";
-		return a;
+	public static String box(String value, String exp_type, String reName) {
+		String name;		
+		name = exp_type + " * " + reName + "= NULL;\n";
+		name += reName + " = (" + exp_type + "*) x3malloc(sizeof(" + exp_type + "));\n";
+		name += "(" + reName + "->nrefs) = 0;\n";
+		name += reName + "->value = " + value + ";\n";
+		return name;
 	}
 }

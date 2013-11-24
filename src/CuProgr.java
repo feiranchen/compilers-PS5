@@ -134,7 +134,6 @@ class FullPrg extends CuProgr {
     			+ "void cubex_main() {\n"
 				+ "Iterable* ourMain, *temp;\n"
 				+ "ourMain = (Iterable*) our_main();\n"
-				+ "ourMain->nrefs++;\n"
 				+ "temp = ourMain;\n"
 				+ "while(ourMain != NULL) {\n\t"
 				+ "print_line(((String*)ourMain->value)->value, ((String*)ourMain->value)->len);\n\t"
