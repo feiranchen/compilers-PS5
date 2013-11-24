@@ -80,27 +80,27 @@ public class CSE {
 			CuStat ifS=orgS.ifBranch();
 			Map<CuVvc,ArrayList<CuExpr>>  varMapIf = new HashMap<CuVvc,ArrayList<CuExpr>>(varMap);
 			Map<CuExpr,CuVvc> 			 exprMapIf = new HashMap<CuExpr, CuVvc>(exprMap);
-			/*
+			
 			//finish evaluating everything in the scope before we say we can move on.
-			while (ifS.ifProperty.contains(orgS)&&
-					ifS.getNext().ifProperty.contains(orgS)){
+			while (!ifS.lastInIfScope.contains(orgS)){
 				doCSE(ifS,varMapIf,exprMapIf);
 				ifS=ifS.getNext();
 			}
+			doCSE(ifS,varMapIf,exprMapIf);
 
 			//only do else branch handling and merging if there is an else block
 			CuStat elseS=orgS.elseBranch();
 			if (elseS!=null){
 				Map<CuVvc,ArrayList<CuExpr>>  varMapElse = new HashMap<CuVvc,ArrayList<CuExpr>>(varMap);
 				Map<CuExpr,CuVvc> 			 exprMapElse = new HashMap<CuExpr, CuVvc>(exprMap);
-				while (elseS.ifProperty.contains(orgS)&&
-						elseS.getNext().ifProperty.contains(orgS)){
+				while (!elseS.lastInIfScope.contains(orgS)){
 					doCSE(elseS,varMapElse,exprMapElse);
 					elseS=elseS.getNext();
 				}
-				//assert:elseS and ifS should be the same
-				//merging and updating old map
+				doCSE(elseS,varMapElse,exprMapElse);
 				
+				varMap.clear();
+				exprMap.clear();
 				// We only care about: new variables(old, global ones are always immutable) 
 				// that exist in both branches and has the same value (otherwise value can't be exploited and thus no need to store)
 				for (Entry e :varMapElse.entrySet()){
@@ -119,7 +119,7 @@ public class CSE {
 						myPut(exprMap, (CuExpr)e1.getKey(), (CuVvc)e1.getValue());
 					}
 				}
-			}*/
+			}
 			return ifS;
 		}
 		else if (orgS instanceof ReturnStat){

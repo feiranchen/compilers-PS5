@@ -23,7 +23,7 @@ public abstract class CuStat {
 	
 	protected List<CuStat> successors = new ArrayList<CuStat>();
 	
-	
+	protected Set<CuStat> lastInIfScope=new HashSet<CuStat>();
 	//initially just created for assignstatements
 	protected boolean boxed = true;
 	protected String statType = "";
@@ -708,6 +708,14 @@ class IfStat extends CuStat{
 		}
 		curHIR.add(temp);
 		super.HIR = new Stats(curHIR);
+		
+		//markForif()
+		if (s1!=null){
+			s1.getLast().lastInIfScope.add(temp);
+		}
+		if (s2!=null){
+			s2.getLast().lastInIfScope.add(temp);
+		}
 		return super.HIR;
     }
     
