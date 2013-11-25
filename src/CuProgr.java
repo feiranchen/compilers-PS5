@@ -118,6 +118,13 @@ class FullPrg extends CuProgr {
 							nothingDies = false;
 					}
 				}
+				
+				//if the argument variable is not in the in set, put it in the in set
+				for (String str : ((FunPrg) pr).typeScheme.data_tc.keySet()) {
+					if (!pr.entry.inV.contains(str)) {
+						pr.entry.inV.add(str);
+					}
+				}
 			}
 		}
 	}
@@ -303,6 +310,9 @@ Helper.P("in func program " + name);
 		}
 		sb.append(inputs);
 		sb.append(") {\n");
+		for (String str : this.typeScheme.data_tc.keySet()) {
+			sb.append(Helper.incrRefCount(str));
+		}
 		sb.append(statement.toC(local));
 		sb.append("}\n");
 		//added by Yinglei, when we get out of function, should clear this because this is 

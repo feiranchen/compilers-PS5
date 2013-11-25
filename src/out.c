@@ -4,6 +4,9 @@
 #include "cubex_lib.h"
 
 void* safeDiv(void *l , void *r , void *d) {
+incRef(l);
+incRef(r);
+incRef(d);
 
 
 
@@ -141,6 +144,9 @@ if (d!= NULL) {
 return d;
 }
 void* safeModulo(void *l , void *r , void *d) {
+incRef(l);
+incRef(r);
+incRef(d);
 
 
 
@@ -278,6 +284,7 @@ if (d!= NULL) {
 return d;
 }
 void* intToStr(void *i) {
+incRef(i);
 
 
 
