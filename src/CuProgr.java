@@ -104,6 +104,7 @@ class FullPrg extends CuProgr {
 				//TO Do, probably never do
 			}
 			else if (pr instanceof FunPrg) {
+				((FunPrg) pr).statement.setUseDef();
 				pr.nodes = Helper.buildSet(pr.entry);
 				nothingDies = false;
 				while (!nothingDies) {
@@ -232,12 +233,16 @@ class FunPrg extends CuProgr {
 	@Override public void toHIR() {
 		this.statement = this.statement.toHIR();
 		if (Helper.debug) {
+			System.out.println("fun " + name + this.typeScheme.toString() + "{\n");
 			System.out.println(this.statement.toString());
+			System.out.println("}\n");
 		}
 	}
 	
 	@Override public void printHIR() {
+		System.out.println("fun " + name + this.typeScheme.toString() + "{\n");
 		System.out.println(this.statement.toString());
+		System.out.println("}\n");
 	}
 	
 	@Override public void buildCFG() {

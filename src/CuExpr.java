@@ -3967,6 +3967,8 @@ class VvExp extends CuExpr{//varname or function call
 
 	static private boolean initialized = false;
 	static String  iter = Helper.getVarName(), temp = Helper.getVarName();
+	String name1 = Helper.getVarName();
+	
 	
 	public VvExp(String str){
 		val = str;
@@ -3986,7 +3988,10 @@ class VvExp extends CuExpr{//varname or function call
 	@Override public ArrayList<String> getUse(){
 		use = new ArrayList<String>();
 		if (es==null) {
-			use.add(val);
+			if (val.equals("input"))
+				use.add(name1);
+			else
+				use.add(val);
 		}
 		else {
 			for (CuExpr ce : es) {
@@ -4096,7 +4101,6 @@ Helper.P(" 1mapping is " + mapping.toString());
 		if(es == null) 
 		{
 			Pair<List<CuStat>, CuExpr> temp = new Pair<List<CuStat>, CuExpr>();
-			String name1 = Helper.getVarName();
 			List<CuStat> stats = new ArrayList<CuStat>();
 			CuExpr exp = this;
 			
