@@ -21,11 +21,12 @@ public abstract class CuExpr {
 	//but for now, will just use castType for most cases
 	protected String expType = "";
 	
+	//protected Set<String>containsVar=new HashSet<String>();
+	
 	//castType, expType, type ideally should be the same thing, but for safety, we added them
 	protected CuType type = null;
 	//added for primitive optimization, default is boxed
 	protected boolean boxed = true;
-	protected  Set<String> containsVar= new HashSet<String>();
 	public void add(List<CuType> pt, List<CuExpr> es) {}
 	public final CuType getType(CuContext context) throws NoSuchTypeException {
 		if(type == null) { type = calculateType(context); }
@@ -44,7 +45,7 @@ public abstract class CuExpr {
 		that.iterType = iterType;
 		that.def = new ArrayList<String>(def);
 		that.use = new ArrayList<String>(use);
-		that.use.addAll(containsVar);
+		//that.use.addAll(containsVar);
 		//ALARM: second field copying reference
 		if (hir!=null)
 			that.hir = new Pair<List<CuStat>, CuExpr>(new ArrayList(hir.getFirst()),hir.getSecond());
@@ -188,8 +189,8 @@ class AndExpr extends CuExpr{
 	public AndExpr(CuExpr e1, CuExpr e2) {
 		left = e1;
 		right = e2;
-		containsVar.addAll(left.containsVar);
-		containsVar.addAll(right.containsVar);
+		//containsVar.addAll(left.containsVar);
+		//containsVar.addAll(right.containsVar);
 //		super.desiredType = CuType.bool;
 		super.methodId = "and";
 		
@@ -350,8 +351,8 @@ class AppExpr extends CuExpr {
 	public AppExpr(CuExpr e1, CuExpr e2) {
 		this.left = e1;
 		this.right = e2;
-		containsVar.addAll(left.containsVar);
-		containsVar.addAll(right.containsVar);
+		//containsVar.addAll(left.containsVar);
+		//containsVar.addAll(right.containsVar);
 		
 		super.expType = "Iterable";
 		super.boxed = true;
@@ -570,7 +571,7 @@ class BrkExpr extends CuExpr {
 	public BrkExpr(List<CuExpr> es){
 		this.val = es;
 		for (CuExpr e : es){
-			containsVar.addAll(e.containsVar);
+			//containsVar.addAll(e.containsVar);
 		}
 		super.boxed = true;
 		super.expType = "Iterable";
@@ -1042,8 +1043,8 @@ class DivideExpr extends CuExpr{
 	public DivideExpr(CuExpr e1, CuExpr e2) {
 		left = e1;
 		right = e2;
-		containsVar.addAll(left.containsVar);
-		containsVar.addAll(right.containsVar);
+		//containsVar.addAll(left.containsVar);
+		//containsVar.addAll(right.containsVar);
 		super.methodId = "divide";
 		super.boxed = true;
 		super.expType = "Iterable";
@@ -1286,8 +1287,8 @@ class EqualExpr extends CuExpr{
 		left = e1;
 		right = e2;
 		bool = eq;
-		containsVar.addAll(left.containsVar);
-		containsVar.addAll(right.containsVar);
+		//containsVar.addAll(left.containsVar);
+		//containsVar.addAll(right.containsVar);
 		super.methodId = "equals";
 		
 		if (eq) {
@@ -1637,8 +1638,8 @@ class GreaterThanExpr extends CuExpr{
 	public GreaterThanExpr(CuExpr e1, CuExpr e2, Boolean strict) {
 		left = e1;
 		right = e2;
-		containsVar.addAll(left.containsVar);
-		containsVar.addAll(right.containsVar);
+		//containsVar.addAll(left.containsVar);
+		//containsVar.addAll(right.containsVar);
 		b = strict;
 		super.methodId = "greaterThan";
 		Helper.ToDo("strict boolean??");
@@ -1810,8 +1811,8 @@ class LessThanExpr extends CuExpr{
 	public LessThanExpr(CuExpr e1, CuExpr e2, Boolean strict) {
 		left = e1;
 		right = e2;
-		containsVar.addAll(left.containsVar);
-		containsVar.addAll(right.containsVar);
+		//containsVar.addAll(left.containsVar);
+		//containsVar.addAll(right.containsVar);
 		b = strict;
 		super.methodId = "lessThan";
 		
@@ -1988,8 +1989,8 @@ class MinusExpr extends CuExpr{
 	public MinusExpr(CuExpr e1, CuExpr e2) {
 		left = e1;
 		right = e2;
-		containsVar.addAll(left.containsVar);
-		containsVar.addAll(right.containsVar);
+		//containsVar.addAll(left.containsVar);
+		//containsVar.addAll(right.containsVar);
 		super.methodId = "minus";
 		
 		super.boxed = false;
@@ -2149,8 +2150,8 @@ class ModuloExpr extends CuExpr{
 	public ModuloExpr(CuExpr e1, CuExpr e2) {
 		left = e1;
 		right = e2;
-		containsVar.addAll(left.containsVar);
-		containsVar.addAll(right.containsVar);
+		//containsVar.addAll(left.containsVar);
+		//containsVar.addAll(right.containsVar);
 		super.methodId = "modulo";
 		
 		super.boxed = true;
@@ -2319,7 +2320,7 @@ class NegateExpr extends CuExpr{
 	public CuExpr val;
 	public NegateExpr(CuExpr e) {
 		val = e;
-		containsVar.addAll(val.containsVar);
+		//containsVar.addAll(val.containsVar);
 		super.methodId = "negate";
 
 		super.boxed = false;
@@ -2435,7 +2436,7 @@ class NegativeExpr extends CuExpr{
 	public CuExpr val;
 	public NegativeExpr(CuExpr e) {
 		val = e;
-		containsVar.addAll(val.containsVar);
+		//containsVar.addAll(val.containsVar);
 		super.methodId = "negative";
 		
 		super.boxed = false;
@@ -2556,7 +2557,7 @@ class OnwardsExpr extends CuExpr{
 	boolean inclusive;
 	public OnwardsExpr(CuExpr e, Boolean inclusiveness) {
 		val = e;
-		containsVar.addAll(e.containsVar);
+		//containsVar.addAll(e.containsVar);
 		inclusive = inclusiveness;
 		super.methodId = "onwards";
 		
@@ -2770,8 +2771,8 @@ class OrExpr extends CuExpr{
 	public OrExpr(CuExpr e1, CuExpr e2) {
 		left = e1;
 		right = e2;
-		containsVar.addAll(left.containsVar);
-		containsVar.addAll(right.containsVar);
+		//containsVar.addAll(left.containsVar);
+		//containsVar.addAll(right.containsVar);
 		super.methodId = "or";
 		
 		super.boxed = false;
@@ -2929,8 +2930,8 @@ class PlusExpr extends CuExpr{
 	public PlusExpr(CuExpr e1, CuExpr e2) {
 		left = e1;
 		right = e2;
-		containsVar.addAll(left.containsVar);
-		containsVar.addAll(right.containsVar);
+		//containsVar.addAll(left.containsVar);
+		//containsVar.addAll(right.containsVar);
 		super.methodId = "plus";
 		
 		super.boxed = false;
@@ -3090,8 +3091,8 @@ class ThroughExpr extends CuExpr{
 		right = e2;
 		bLow = low;
 		bUp = up;
-		containsVar.addAll(left.containsVar);
-		containsVar.addAll(right.containsVar);
+		//containsVar.addAll(left.containsVar);
+		//containsVar.addAll(right.containsVar);
 		super.methodId = "through";
 		
 		super.boxed = true;
@@ -3462,8 +3463,8 @@ class TimesExpr extends CuExpr{
 	public TimesExpr(CuExpr e1, CuExpr e2) {
 		this.left = e1;
 		this.right = e2;
-		containsVar.addAll(left.containsVar);
-		containsVar.addAll(right.containsVar);
+		//containsVar.addAll(left.containsVar);
+		//containsVar.addAll(right.containsVar);
 		super.methodId = "times";
 		
 		super.boxed = false;
@@ -3620,9 +3621,9 @@ class VarExpr extends CuExpr{// e.vv<tao1...>(e1,...)
 		this.method = var;
 		this.types = pt;
 		this.es = es;
-		containsVar.addAll(e.containsVar);
+		//containsVar.addAll(e.containsVar);
 		for (CuExpr elem : es){
-			containsVar.addAll(elem.containsVar);
+			//containsVar.addAll(elem.containsVar);
 		}
 	}
 
@@ -3803,7 +3804,7 @@ class VcExp extends CuExpr {// vc<tao1...>(e1,...)
 		this.es=e;
 
 		for (CuExpr elem : es){
-			containsVar.addAll(elem.containsVar);
+			//containsVar.addAll(elem.containsVar);
 		}
 	}
 

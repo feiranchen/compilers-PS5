@@ -156,7 +156,7 @@ public class CSE {
 		for (String s :set){
 			//update var table with root exp
 			for (Entry<CuVvc, ArrayList<CuExpr>> elem : varMap.entrySet()){
-				if (elem.getValue().get(0).containsVar.contains(s)){
+				if (elem.getValue().get(0).getUse().contains(s)){
 					CuExpr temp=rootExpr(elem.getValue().get(0),exprMap,varMap);
 					ArrayList<CuExpr> lst=elem.getValue();
 					if (!(lst.get(lst.size()-1).equals(temp))){
@@ -169,7 +169,7 @@ public class CSE {
 			myRemove(varMap,new Vv(s));
 			for (Entry<CuVvc, ArrayList<CuExpr>> elem : varMap.entrySet()){
 				for(int i =elem.getValue().size()-1;i>=0;i--){
-					if (elem.getValue().get(i).containsVar.contains(s)){
+					if (elem.getValue().get(i).getUse().contains(s)){
 						elem.getValue().remove(i);
 					}
 				}
@@ -560,7 +560,7 @@ public class CSE {
 			if(myContainsKey(varMap, valName)){
 				List<CuExpr> lst=myGet(varMap, valName);
 				//catch dead loop like i=i/2;
-				if (lst.get(0).containsVar.contains(valName.text))
+				if (lst.get(0).getUse().contains(valName.text))
 					return lst.get(0);
 				else
 					return rootExpr(lst.get(0),exprMap,varMap);
