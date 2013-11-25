@@ -4238,8 +4238,11 @@ Helper.P(" 1mapping is " + mapping.toString());
 							+ iterNew + "->isIter = 1;\n"
 							+ iterNew + "->nrefs = 0;\n"
 							+ iterNew + "->value = " + temp + ";\n"
+							+ "if (((Iterable*)" + iter + ")->additional) {\n"  
 							+ iterNew + "->additional = ((Iterable*)" + iter + ")->additional;\n"
-							+ iterNew + "->next = NULL;\n"
+							+ iterNew + "->next = &input_onwards;\n"
+							+ "}\nelse {\n " + iterNew + "->additional = NULL;\n"
+							+ iterNew + "->next = NULL;\n}\n"
 							+ iterNew + "->concat = NULL;\n";
 								
 					name += Helper.incrRefCount(temp);
