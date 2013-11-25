@@ -72,7 +72,7 @@ public class CSE {
 			Map<CuExpr,CuVvc> exprMap2 = new HashMap<CuExpr, CuVvc>(exprMap);
 			
 			//finsh evaluating everything in the scope before we say we can move on.
-			while (nextS!=orgS){
+			while (nextS!=orgS&&nextS!=null){
 				doCSE(nextS,varMap2,exprMap2);
 				nextS=nextS.getNext();
 			}

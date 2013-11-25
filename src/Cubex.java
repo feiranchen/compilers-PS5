@@ -49,6 +49,7 @@ public class Cubex {
         if (Helper.debug){
         	System.out.println("PRINT HIR========================================");
         	ourProgram.printHIR();
+        	System.out.println("DONE HIR========================================");
         }
         //next, build the in out sets
         ourProgram.buildSets();
