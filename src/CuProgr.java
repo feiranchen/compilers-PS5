@@ -104,6 +104,7 @@ class FullPrg extends CuProgr {
 				//TO Do, probably never do
 			}
 			else if (pr instanceof FunPrg) {
+				((FunPrg) pr).statement.setUseDef();
 				pr.nodes = Helper.buildSet(pr.entry);
 				nothingDies = false;
 				while (!nothingDies) {
