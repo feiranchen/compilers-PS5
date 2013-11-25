@@ -9,8 +9,15 @@ import java.util.Set;
 
 
 public class CSE {
-
-	static public void startCSE(CuStat orgS) throws Exception{
+	static public void startCSE(FullPrg prog) throws Exception{
+		startCSEprog(prog.entry);
+		for (CuProgr p : prog.elements){
+			if (p instanceof FunPrg)
+				startCSEprog(p.entry);
+		}
+	}
+	
+	static public void startCSEprog(CuStat orgS) throws Exception{
 	//delete keys with empty list
 		Map<CuVvc,ArrayList<CuExpr>> varMap= new HashMap<CuVvc,ArrayList<CuExpr>>();
 		Map<CuExpr, CuVvc> exprMap= new HashMap<CuExpr, CuVvc>();
@@ -168,9 +175,10 @@ public class CSE {
 			//clear varMap
 			myRemove(varMap,new Vv(s));
 			for (Entry<CuVvc, ArrayList<CuExpr>> elem : varMap.entrySet()){
-				for(int i =elem.getValue().size()-1;i>=0;i--){
-					if (elem.getValue().get(i).getUse().contains(s)){
-						elem.getValue().remove(i);
+				for(CuExpr e : elem.getValue()){
+					ArrayList<CuExpr> lst=new ArrayList<CuExpr>();
+					if (!e.getUse().contains(s)){
+						lst.add(e);
 					}
 				}
 			}

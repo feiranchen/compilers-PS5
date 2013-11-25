@@ -42,7 +42,7 @@ public class Cubex {
         //next, build CFG, use and def sets are built here
         ourProgram.buildCFG();
 
-        CSE.startCSE(((FullPrg)ourProgram).entry);
+        CSE.startCSE((FullPrg)ourProgram);
         // *********for the first optimization, put your method here***************
         
         //after cse, print out the HIR four debugging
