@@ -920,6 +920,17 @@ class WhileStat extends CuStat{
 		Pair<List<CuStat>, CuExpr> pa =  e.toHIR();
 		List<CuStat> curHIR = pa.getFirst();
 		s1 = s1.toHIR();
+		if (s1 instanceof Stats) {
+			((Stats) s1).al.addAll(curHIR);
+		}
+		else {
+			ArrayList<CuStat> arg_stats = new ArrayList<CuStat>();
+			//we add the object pointed by s1 into the array list
+			//another way to say it is we make a copy of s1, and add the reference copy into the list
+			arg_stats.add(s1);
+			arg_stats.addAll(curHIR);
+			s1 = new Stats(arg_stats);
+		}
 		curHIR.add(new WhileStat(pa.getSecond(), s1));
 		super.HIR = new Stats(curHIR);
 		return super.HIR;
