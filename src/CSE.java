@@ -1,5 +1,6 @@
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -97,7 +98,7 @@ public class CSE {
 
 			//only do else branch handling and merging if there is an else block
 			CuStat elseS=orgS.elseBranch();
-			if (elseS!=null){
+			if (elseS!=null){//generate new map by merging identical 
 				Map<CuVvc,ArrayList<CuExpr>>  varMapElse = new HashMap<CuVvc,ArrayList<CuExpr>>(varMap);
 				Map<CuExpr,CuVvc> 			 exprMapElse = new HashMap<CuExpr, CuVvc>(exprMap);
 				while (!elseS.lastInIfScope.contains(orgS)){
@@ -113,13 +114,14 @@ public class CSE {
 				for (Entry e :varMapElse.entrySet()){
 					if (myContainsKey(varMapIf,(CuVvc)e.getKey())){
 						ArrayList<CuExpr> lst=commonElemLst((ArrayList<CuExpr>)e.getValue(),
-								(ArrayList<CuExpr>)myGet(varMapIf, (CuVvc)e.getKey()));
+								(ArrayList<CuExpr>)myGet(varMapIf, (CuVvc)e.getKey()),
+								exprMap,varMap);
 						if (!lst.isEmpty()){
 							myPut(varMap, (CuVvc)e.getKey(),lst);
 						}
 					}
 				}
-					
+				
 				for (Entry e1 :exprMapElse.entrySet()){
 					if (myContainsKey(exprMapIf,(CuExpr)e1.getKey())&&
 							myGet(exprMapIf,(CuExpr)e1.getKey()).text.equals(((CuVvc)e1.getValue()).text)){
@@ -142,7 +144,17 @@ public class CSE {
 						myPut(exprMap,temp,optVar);
 					}
 				}
-				
+			}else{
+				Set<String> varToClean=new HashSet<String>();
+				for (Entry<CuVvc, ArrayList<CuExpr>> e :varMapIf.entrySet()){
+					if ((!myContainsKey(varMap,(CuVvc)e.getKey()))||
+							(!(rootExpr(e.getValue().get(0), exprMapIf, varMapIf)
+									.equals(rootExpr(myGet(varMap,e.getKey()).get(0), exprMap, varMap))))){
+						varToClean.add(e.getKey().text);
+					}
+				}
+
+				cleanAllVars(varToClean,exprMap,varMap);
 			}
 			return ifS.getNext();
 		}
@@ -612,9 +624,14 @@ public class CSE {
 		}
 		return null;
 	}
-	private static <A> ArrayList<A> commonElemLst(ArrayList<A> l1, ArrayList<A> l2){
-		ArrayList<A> l=new ArrayList<A>();
-		for (A e : l1){
+	private static ArrayList<CuExpr> commonElemLst(ArrayList<CuExpr> l1, ArrayList<CuExpr> l2,
+			Map<CuExpr, CuVvc> exprMap,Map<CuVvc,ArrayList<CuExpr>> varMap){
+
+		ArrayList<CuExpr> l=new ArrayList<CuExpr>();
+		if (!rootExpr(l1.get(0), exprMap, varMap).equals(rootExpr(l1.get(0), exprMap, varMap))){
+			return l;
+		}
+		for (CuExpr e : l1){
 			if (l2.contains(e)){
 				l.add(e);
 			}
