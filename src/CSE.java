@@ -187,12 +187,13 @@ public class CSE {
 			//clear varMap
 			myRemove(varMap,new Vv(s));
 			for (Entry<CuVvc, ArrayList<CuExpr>> elem : varMap.entrySet()){
+				ArrayList<CuExpr> lst=new ArrayList<CuExpr>();
 				for(CuExpr e : elem.getValue()){
-					ArrayList<CuExpr> lst=new ArrayList<CuExpr>();
 					if (!e.getUse().contains(s)){
 						lst.add(e);
 					}
 				}
+				myPut(varMap,elem.getKey(),lst);
 			}
 			
 			//delete all expr mapped to this var in exprMap
