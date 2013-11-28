@@ -700,8 +700,12 @@ class IfStat extends CuStat{
     @Override public CuStat toHIR() {
 		Pair<List<CuStat>, CuExpr> pa =  e.toHIR();
 		List<CuStat> curHIR = pa.getFirst();
+		//make an assign statement to guarentee that each expression is assigned to a variable
+		String varName = Helper.getVarName();
+		CuStat nassign = new AssignStat(new Vv(varName), pa.getSecond());
+		curHIR.add(nassign);
 		s1 = s1.toHIR();
-		CuStat temp = new IfStat(pa.getSecond(), s1);
+		CuStat temp = new IfStat(new VvExp(varName), s1);
 		if (s2 != null) {
 			s2 = s2.toHIR();
 			temp.add(s2);
@@ -919,6 +923,12 @@ class WhileStat extends CuStat{
 	@Override public CuStat toHIR() {
 		Pair<List<CuStat>, CuExpr> pa =  e.toHIR();
 		List<CuStat> curHIR = pa.getFirst();
+		
+		//make all the expressions assigned to a variable
+		String varName = Helper.getVarName();
+		CuStat nassign = new AssignStat(new Vv(varName), pa.getSecond());
+		curHIR.add(nassign);
+
 		s1 = s1.toHIR();
 		if (s1 instanceof Stats) {
 			((Stats) s1).al.addAll(curHIR);
@@ -931,7 +941,7 @@ class WhileStat extends CuStat{
 			arg_stats.addAll(curHIR);
 			s1 = new Stats(arg_stats);
 		}
-		curHIR.add(new WhileStat(pa.getSecond(), s1));
+		curHIR.add(new WhileStat(new VvExp(varName), s1));
 		super.HIR = new Stats(curHIR);
 		return super.HIR;
 	}
@@ -1036,6 +1046,7 @@ class ReturnStat extends CuStat{
 		return new HashSet<String>();
 	}
 	@Override public CuStat toHIR() {
+		//this is the only place I didn't assign an expression to a variable, I think this is OK
 		Pair<List<CuStat>, CuExpr> pa =  e.toHIR();
 		List<CuStat> curHIR = pa.getFirst();
 		curHIR.add(new ReturnStat(pa.getSecond()));
