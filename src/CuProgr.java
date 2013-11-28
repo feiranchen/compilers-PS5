@@ -57,7 +57,8 @@ class FullPrg extends CuProgr {
 		System.out.println(s.toString());
 	}
 	
-	@Override public void buildCFG()  {		
+	@Override public void buildCFG()  {	
+		//HashMap<CuStat, CuProgr> stFun = new 
 		for (CuProgr pr : elements) {
 			if (pr instanceof ClassPrg) {
 				//TO Do, probably never do
@@ -130,9 +131,19 @@ class FullPrg extends CuProgr {
 	}
 	
 	@Override public String toC(ArrayList<String> localVars) {
+		ArrayList<String> gVars = new ArrayList<String>();
+		
 		String fnClass_str = "", temp_str = "";
 		for (CuProgr cp : elements) {
 			if (cp instanceof ClassPrg || cp instanceof FunPrg) {
+				//whenever we meet this, the previous ones becomes global variables
+				for (String str : super.newVars) {
+					if (!gVars.contains(str)) {
+						gVars.add(str);
+					}
+				}
+				//emtpy super.newVars
+				super.newVars = new ArrayList<String>();
 				fnClass_str += cp.toC(localVars);
 			} 
 			else {				
@@ -155,8 +166,14 @@ class FullPrg extends CuProgr {
 		super.ctext = 
 				  "#include \"cubex_main.h\"\n"
 				+ "#include \"cubex_external_functions.h\"\n"
-				+ "#include \"cubex_lib.h\"\n\n"
-				+  fnClass_str + "\n\n"
+				+ "#include \"cubex_lib.h\"\n\n";
+		
+    	for (String str : gVars) {
+    		super.ctext += "void * " + str + " = NULL;\n";
+    		temp_str = temp_str.replaceAll("void \\* " + str + " = NULL;\n", "");
+    	}	
+    	
+		super.ctext +=  fnClass_str + "\n\n"
 				+ "void* our_main()\n{\n";
 		
     	for (String str : super.newVars) {

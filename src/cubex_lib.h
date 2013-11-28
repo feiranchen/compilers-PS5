@@ -55,24 +55,6 @@ void freeStr(void* str)
 	}
 }
 
-#define decRef(VAR) \
-if (VAR!= NULL) {\
-	(*(int *)(VAR))--;\
-	if ((*(int *)(VAR)) == 0) {\
-		if ((*((int*)(VAR)+2)) == 1)\
-			freeStr(VAR);\
-		else if ((*((int*)(VAR)+1)) == 1)\
-			freeIter((VAR));\
-		else\
-			x3free((VAR));\
-	}\
-}
-
-#define incRef(VAR) \
-if (VAR != NULL) {\
-	(*(int *)(VAR))++;\
-}
-
 Iterable* Integer_through(void* head){
 	Iterable* last;
 	last = (Iterable*) head;
@@ -103,7 +85,7 @@ Iterable* input_onwards(void* head){
 	if (len != 0) {
 		this = x3malloc(sizeof(Iterable));
 		this->isIter=1;
-		this->nrefs=0; 
+		this->nrefs=1; 
 		this->value = x3malloc(sizeof(String));
 		((String*) this->value)->isIter = 0;
 		((String*) this->value)->isStr = 1;
@@ -114,12 +96,7 @@ Iterable* input_onwards(void* head){
 		this->additional=NULL;
 		this->next=last->next;	
 		this->concat=last->concat;
-		if(this->concat) {
-			incRef(this->concat);
-			last->concat = NULL;
-		}
-		last->additional = this;
-		incRef(this);		
+		last->additional = this;		
 		last->next = NULL;
 	}
 
@@ -224,7 +201,6 @@ Iterable* iterGetNext(Iterable* last){
 	
 	return (this);
 }
-
 
 Iterable* concatenate(Iterable* fst, Iterable* snd){
 	Iterable* head = NULL;
@@ -418,6 +394,24 @@ String* concatChars(Iterable *charIter){
 	return new;
 }
 
+#define decRef(VAR) \
+if (VAR!= NULL) {\
+	(*(int *)(VAR))--;\
+	if ((*(int *)(VAR)) == 0) {\
+		if ((*((int*)(VAR)+2)) == 1)\
+			freeStr(VAR);\
+		else if ((*((int*)(VAR)+1)) == 1)\
+			freeIter((VAR));\
+		else\
+			x3free((VAR));\
+	}\
+	VAR = NULL;\
+}
+
+#define incRef(VAR) \
+if (VAR != NULL) {\
+	(*(int *)(VAR))++;\
+}
 
 Iterable* strToIter (char* input, int length){
   if(length==0)

@@ -1,8 +1,4 @@
-/*#include <stdio.h>
-#include <stdlib.h>
-#include <stdbool.h>
-#include <string.h>
-*/
+
 #include "cubex_external_functions.h"
 #include "cubex_private.h"
 
@@ -11,8 +7,6 @@ static int curr_input = 1;
 static int input_len;
 static char** input;
 
-extern int nmalloc;
-extern int nfree;
 
 void initialize(int argc, char** argv) {
   input_len = argc;
@@ -48,12 +42,12 @@ void read_line(char* buffer) {
 }
 
 void* x3malloc(int size) {
-  nmalloc++;
+
   return malloc(size);
 }
 
 void x3free(void* ptr) {
-  nfree++;
+
   free(ptr);
 }
 

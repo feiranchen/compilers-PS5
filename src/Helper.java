@@ -11,7 +11,7 @@ import java.util.regex.*;
 
 public class Helper {
 	//change this to false when submit
-	protected static boolean debug = true;
+	protected static boolean debug = false;
 	//switch for primitive optimization
 	protected static boolean opt_primitive = true;
 	//added for primitive optimization, unboxed variables, from name to type
@@ -95,10 +95,10 @@ public class Helper {
 	}
 	
 	protected static void P(Object s) {
-		System.out.println(s.toString());
+		//System.out.println(s.toString());
 	}
 	protected static void P(String s, Object...args) {
-		System.out.println(String.format(s, args));
+		//System.out.println(String.format(s, args));
 	}
 	/* thoughts coming, to implement later on */
 	protected static void ToDo(String comment){
