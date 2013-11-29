@@ -3967,7 +3967,7 @@ class VvExp extends CuExpr{//varname or function call
 
 	static private boolean initialized = false;
 	static String  iter = Helper.getVarName(), temp = Helper.getVarName();
-	String name1 = Helper.getVarName();
+	//String name1 = Helper.getVarName();
 	
 	
 	public VvExp(String str){
@@ -3988,10 +3988,7 @@ class VvExp extends CuExpr{//varname or function call
 	@Override public ArrayList<String> getUse(){
 		use = new ArrayList<String>();
 		if (es==null) {
-			if (val.equals("input"))
-				use.add(name1);
-			else
-				use.add(val);
+			use.add(val);
 		}
 		else {
 			for (CuExpr ce : es) {
@@ -4104,7 +4101,7 @@ Helper.P(" 1mapping is " + mapping.toString());
 			List<CuStat> stats = new ArrayList<CuStat>();
 			CuExpr exp = this;
 			
-			if(val.equals("input")) {
+			/*if(val.equals("input")) {
 				CuVvc vvc = new Vv(name1);			
 				CuStat a = new AssignStat(vvc, exp);
 				stats.add(a);
@@ -4115,17 +4112,11 @@ Helper.P(" 1mapping is " + mapping.toString());
 				temp.setSecond(e);
 			}
 			else {
-				exp.use.add(val);
+			*/	exp.use.add(val);
 				temp.setSecond(exp);				
-			}
+			//}
 			exp.boxed = this.boxed;
 			exp.expType = this.expType;
-			
-			//CuVvc vvc = new Vv(name1);			
-			//CuStat a = new AssignStat(vvc, exp);
-			//stats.add(a);
-			
-//			exp.use.add(val);
 			
 			temp.setFirst(stats);
 			
@@ -4192,8 +4183,8 @@ Helper.P(" 1mapping is " + mapping.toString());
 				iterType = "String";				
 				castType = "Iterable";
 				String len = Helper.getVarName();
-				String iterNew = Helper.getVarName();
-				//iter = "input";
+				//String iterNew = Helper.getVarName();
+				iter = "input";
 								
 				if(!initialized) {
 					iter = "input";
@@ -4217,7 +4208,7 @@ Helper.P(" 1mapping is " + mapping.toString());
 					
 					name += iter + " = (Iterable*) x3malloc(sizeof(Iterable));\n\t"
 						+ iter + "->isIter = 1;\n\t"
-						+ iter + "->nrefs = 0;\n\t"
+						+ iter + "->nrefs = 1;\n\t"
 						+ iter + "->value = " + temp + ";\n\t"
 						+ iter + "->additional = NULL;\n\t"
 						+ iter + "->next = &input_onwards;\n\t"
@@ -4233,7 +4224,7 @@ Helper.P(" 1mapping is " + mapping.toString());
 					//def.add(temp);
 				}
 				else {
-					name += "Iterable* " + iterNew + ";\n"
+					/*name += "Iterable* " + iterNew + ";\n"
 							+ iterNew + " = (Iterable*) x3malloc(sizeof(Iterable));\n"
 							+ iterNew + "->isIter = 1;\n"
 							+ iterNew + "->nrefs = 0;\n"
@@ -4243,7 +4234,8 @@ Helper.P(" 1mapping is " + mapping.toString());
 							+ iterNew + "->concat = NULL;\n";
 								
 					name += Helper.incrRefCount(temp);
-					cText = iterNew;
+					*/
+					cText = iter;//iterNew;
 				}
 				
 				//use.add(val);

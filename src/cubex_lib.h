@@ -132,6 +132,20 @@ void freeIter(void* iter) {
 					}
 				}
 			}
+			
+			if (((Iterable*)iter)->next == &input_onwards) {
+				if (((Iterable*)iter)->concat != NULL) {	
+					(*(int *)(((Iterable*)iter)->concat))--;
+					if ((*(int *)(((Iterable*)iter)->concat)) == 0) {
+						if ((*((int*)((Iterable*)iter)->concat+2)) == 1)
+							freeStr(((Iterable*)iter)->concat);
+						else if ((*((int*)((Iterable*)iter)->concat+1)) == 1)
+							freeIter(((Iterable*)iter)->concat);
+						else
+							x3free(((Iterable*)iter)->concat);
+					}
+				}
+			}
 				
 		}
 			
