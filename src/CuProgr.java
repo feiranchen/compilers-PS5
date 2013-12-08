@@ -88,6 +88,7 @@ class FullPrg extends CuProgr {
 			else if (pr instanceof FunPrg) {
 				((FunPrg) pr).statement.setUseDef();
 				pr.nodes = Helper.buildSet(pr.entry);
+				
 				nothingDies = false;
 				while (!nothingDies) {
 					nothingDies = true;
@@ -109,6 +110,28 @@ class FullPrg extends CuProgr {
 					}
 				}
 				Helper.fun_gvars.put(((FunPrg) pr).name, gvars_used);
+				
+				//global variables should all go out
+				CuStat lastnode = ((FunPrg) pr).statement.getLast();
+				if (Helper.debug) {
+					System.out.println("last node of the function is " + lastnode.toString());
+				}
+				for(String str : gvars_used) {
+					if (!lastnode.useV.contains(str)) {
+						lastnode.useV.add(str);
+					}
+					//if (!lastnode.outV.contains(str)) {
+					//	lastnode.outV.add(str);
+					//}
+				}
+				//needs to build set again
+				pr.nodes = Helper.buildSet(pr.entry);
+				//added it to outV so that they won't get deallocated
+				for(String str : gvars_used) {
+					if (!lastnode.outV.contains(str)) {
+						lastnode.outV.add(str);
+					}
+				} 
 				
 				
 				//if the argument variable is not in the in set, put it in the in set
@@ -180,6 +203,9 @@ class FullPrg extends CuProgr {
 				  "#include \"cubex_main.h\"\n"
 				+ "#include \"cubex_external_functions.h\"\n"
 				+ "#include \"cubex_lib.h\"\n\n";
+		
+		//input is a global variable
+		super.ctext += "Iterable* " + "input" + "= NULL;\n";
 		
     	for (String str : gVars) {
     		super.ctext += "void * " + str + " = NULL;\n";

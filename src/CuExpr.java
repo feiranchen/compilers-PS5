@@ -4214,7 +4214,8 @@ Helper.P(" 1mapping is " + mapping.toString());
 					iter = "input";
 				
 					name += "int " + len + ";\n"
-						+ "Iterable* " + iter + "= NULL;\n"
+					    //commented out by Yinglei because input is a global variable
+						//+ "Iterable* " + iter + "= NULL;\n"
 						+ "String* " + temp + "= NULL;\n" 
 						+ len + " = next_line_len();\n"
 						+ "if(" + len + " == 0) {\n\t"
