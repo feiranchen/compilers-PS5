@@ -738,11 +738,13 @@ class IfStat extends CuStat{
 	
     
 	@Override public void buildCFG() {
-		s1.getLast().successors = super.successors;
+		s1.getLast().successors = new ArrayList<CuStat>();
+		s1.getLast().successors.addAll(super.successors);
 		//recursively buildCFG
 		s1.buildCFG();
 		if (s2!=null) {
-			s2.getLast().successors = super.successors;
+			s2.getLast().successors = new ArrayList<CuStat>();
+			s2.getLast().successors.addAll(super.successors);
 			super.successors = new ArrayList<CuStat>();
 			super.successors.add(s2.getFirst());
 			//s1 is always the second successor

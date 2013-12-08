@@ -2735,9 +2735,12 @@ class OnwardsExpr extends CuExpr{
 				String temp = Helper.getVarName();
 				String iter = Helper.getVarName();
 												
-				int i = (Integer.parseInt(val.toString())) + 1;
+				//int i = (Integer.parseInt(val.toString())) + 1;
 				name += "Integer* " + temp + ";\n" +temp + " = (Integer*) x3malloc(sizeof(Integer));\n"
-						+ temp + "->value = " + i + ";\n"
+						+ temp + "->value = " 
+						//+ i 
+						+ "((Integer *)" + val.toString() + ")->value + 1"
+						+ ";\n"
 						+ temp + "->nrefs = 1;\n";					
 					
 				
@@ -2847,7 +2850,7 @@ class OrExpr extends CuExpr{
 
 		String temp = Helper.getVarName();
 		
-		super.cText = temp+".value";
+		super.cText = temp;
 		super.castType = "Boolean";
 		String leftToC = left.toC(localVars);
 		String rightToC = right.toC(localVars);
@@ -3330,9 +3333,12 @@ class ThroughExpr extends CuExpr{
 			
 			else {
 				String temp = Helper.getVarName();
-				int i = (Integer.parseInt(left.toString())) + 1;
+				//int i = (Integer.parseInt(left.toString())) + 1;
 				name += "Integer* " + temp + ";\n" + temp +  " = (Integer*) x3malloc(sizeof(Integer));\n"
-						+ temp + "->value = " + i + ";\n"
+						+ temp + "->value = " 
+						//+ i 
+						+ "((Integer *)" + left.toString() + ")->value + 1"
+						+ ";\n"
 						+ temp + "->nrefs = 1;\n";							
 					
 				name += right.construct();
@@ -3387,9 +3393,12 @@ class ThroughExpr extends CuExpr{
 				String temp = Helper.getVarName();
 				name += left.construct();
 								
-				int i = (Integer.parseInt(left.toString())) - 1;
+				//int i = (Integer.parseInt(right.toString())) - 1;
 				name += "Integer* " + temp + ";\n" + temp +  " = (Integer*) x3malloc(sizeof(Integer));\n"
-						+ temp + "->value = " + i + ";\n"
+						+ temp + "->value = " 
+						//+ i 
+						+ "((Integer *)" + right.toString() + ")->value - 1"
+						+ ";\n"
 						+ temp + "->nrefs = 1;\n";							
 					
 				
@@ -3417,14 +3426,22 @@ class ThroughExpr extends CuExpr{
 				String temp1 = Helper.getVarName(), temp2 = Helper.getVarName(), iterTemp = Helper.getVarName();
 				//name += left.construct();
 								
-				int i = (Integer.parseInt(left.toString())) + 1;
+				//int i = (Integer.parseInt(left.toString())) + 1;
 				name += "Integer* " + temp1 + ";\n" + temp1 +  " = (Integer*) x3malloc(sizeof(Integer));\n"
-						+ temp1 + "->value = " + i + ";\n"
+						+ temp1 + "->value = " 
+						//+ i 
+						+ "((Integer *)" + left.toString() + ")->value + 1"
+						+ ";\n"
 						+ temp1 + "->nrefs = 1;\n";							
 				
-				i = (Integer.parseInt(left.toString())) - 1;
+				//commented out by Yinglei
+				//i = (Integer.parseInt(right.toString())) - 1;
 				name += "Integer* " + temp2 + ";\n" + temp2 +  " = (Integer*) x3malloc(sizeof(Integer));\n"
-						+ temp2 + "->value = " + i + ";\n"
+						+ temp2 + "->value = "
+						//+ i 
+						//added by Yinglei
+						+ "((Integer *)" + right.toString() + ")->value - 1"
+						+ ";\n"
 						+ temp2 + "->nrefs = 1;\n";							
 					
 				name +=  "Iterable* " + iterTemp + ";\n" + iterTemp +  " = (Iterable*) x3malloc(sizeof(Iterable));\n"

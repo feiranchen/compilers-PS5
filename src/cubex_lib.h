@@ -1,6 +1,25 @@
 #include "cubex_external_functions.h"
 #define NULL ((void*)0)
 
+#define decRef(VAR) \
+if (VAR!= NULL) {\
+	(*(int *)(VAR))--;\
+	if ((*(int *)(VAR)) == 0) {\
+		if ((*((int*)(VAR)+2)) == 1)\
+			freeStr(VAR);\
+		else if ((*((int*)(VAR)+1)) == 1)\
+			freeIter((VAR));\
+		else\
+			x3free((VAR));\
+	}\
+	VAR = NULL;\
+}
+
+#define incRef(VAR) \
+if (VAR != NULL) {\
+	(*(int *)(VAR))++;\
+}
+
 typedef struct top {
 	int value;
 } Thing;
@@ -69,6 +88,7 @@ Iterable* Integer_through(void* head){
 		this->value = last->value; 
 		(((Integer*)(last->value))->nrefs)++;
 		this->additional = last->additional;
+		incRef(this->additional);
 		this->next = last->next;	
 		this->concat = last->concat;
 		return this;
@@ -406,25 +426,6 @@ String* concatChars(Iterable *charIter){
 	x3free(combined);
 	new->len = count;
 	return new;
-}
-
-#define decRef(VAR) \
-if (VAR!= NULL) {\
-	(*(int *)(VAR))--;\
-	if ((*(int *)(VAR)) == 0) {\
-		if ((*((int*)(VAR)+2)) == 1)\
-			freeStr(VAR);\
-		else if ((*((int*)(VAR)+1)) == 1)\
-			freeIter((VAR));\
-		else\
-			x3free((VAR));\
-	}\
-	VAR = NULL;\
-}
-
-#define incRef(VAR) \
-if (VAR != NULL) {\
-	(*(int *)(VAR))++;\
 }
 
 Iterable* strToIter (char* input, int length){
