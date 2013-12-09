@@ -3,4 +3,4 @@
 	return ["Print this one before reading, too."]++input;
 }
 
-return ["Print this line before reading the input."]++getinput() ++ input;
+return ["Print this line before reading the input."]++getinput();

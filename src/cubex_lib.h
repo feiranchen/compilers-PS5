@@ -289,7 +289,7 @@ Iterable* concatenate(Iterable* fst, Iterable* snd){
 		return head;
 		
 	Iterable* second = (Iterable*) x3malloc(sizeof(Iterable)); 
-	second->nrefs = 1;
+	second->nrefs = 0;
 	second->isIter = 1;
 	second->value = snd->value;
 	if (second->value != NULL)
@@ -345,7 +345,8 @@ Iterable* concatenate(Iterable* fst, Iterable* snd){
 		}
 		temp->concat = second;
 	
-		
+		if (temp->concat != NULL)
+			(*(int *)(temp->concat))++;
 	}
 	return head;
 }
