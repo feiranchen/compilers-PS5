@@ -84,13 +84,18 @@ Iterable* Integer_through(void* head){
 		Iterable* this=x3malloc(sizeof(Iterable));
 		this->isIter = 1;
 		this->nrefs=0;
-		(((Integer*)(last->value))->value)++; 
-		this->value = last->value; 
-		(((Integer*)(last->value))->nrefs)++;
+		 
+		this->value = (Integer*)x3malloc(sizeof(Integer));
+		((Integer*)this->value)->nrefs = 1;
+		((Integer*)this->value)->isIter = 0;
+		((Integer*)this->value)->isStr = 0;
+		((Integer*)this->value)->value = (((Integer*)(last->value))->value) + 1;
+		
 		this->additional = last->additional;
 		incRef(this->additional);
 		this->next = last->next;	
 		this->concat = last->concat;
+		incRef(this->concat);
 		return this;
 	}
 }

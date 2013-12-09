@@ -20,73 +20,73 @@ void * x = NULL;
 
 
 
-void * aaaacg = NULL;
-aaaacg = out;
+void * aaaacx = NULL;
+aaaacx = out;
 out = NULL;
 incRef(out);
-decRef(aaaacg);
+decRef(aaaacx);
 
 
 
 
 
 
-Integer* aaaach;
-aaaach = (Integer*) x3malloc(sizeof(Integer));
-(aaaach->nrefs) = 0;
-aaaach->value = 1;
-void * aaaaci = NULL;
-aaaaci = aaaaac;
-aaaaac = aaaach;
+Integer* aaaacy;
+aaaacy = (Integer*) x3malloc(sizeof(Integer));
+(aaaacy->nrefs) = 0;
+aaaacy->value = 1;
+void * aaaacz = NULL;
+aaaacz = aaaaac;
+aaaaac = aaaacy;
 incRef(aaaaac);
-decRef(aaaaci);
+decRef(aaaacz);
 
 
 
-void * aaaacj = NULL;
-aaaacj = aaaaad;
+void * aaaada = NULL;
+aaaada = aaaaad;
 aaaaad = i;
 incRef(aaaaad);
-decRef(aaaacj);
+decRef(aaaada);
 decRef(i);
 
 
 
-Iterable* aaaack;
-aaaack = (Iterable*) x3malloc(sizeof(Iterable));
-aaaack->isIter = 1;
-aaaack->nrefs = 0;
-aaaack->value = aaaaac;
-aaaack->additional = aaaaad;
-aaaack->next = &Integer_through;
-aaaack->concat = NULL;
+Iterable* aaaadb;
+aaaadb = (Iterable*) x3malloc(sizeof(Iterable));
+aaaadb->isIter = 1;
+aaaadb->nrefs = 0;
+aaaadb->value = aaaaac;
+aaaadb->additional = aaaaad;
+aaaadb->next = &Integer_through;
+aaaadb->concat = NULL;
 incRef(aaaaac);
 incRef(aaaaad);
-void * aaaacl = NULL;
-aaaacl = x;
-x = checkIter(aaaack);
+void * aaaadc = NULL;
+aaaadc = x;
+x = checkIter(aaaadb);
 incRef(x);
-decRef(aaaacl);
+decRef(aaaadc);
 decRef(aaaaac);
 decRef(aaaaad);
 	if (x!=NULL) {
 		if ((*((int *)(x+1))) == 0) {
-void * aaaacm = NULL;
-aaaacm = x;
+void * aaaadd = NULL;
+aaaadd = x;
 			x = strToIter( ((String *)x)->value, ((String *)x)->len);
 incRef(x);
-decRef(aaaacm);
+decRef(aaaadd);
 		}
 	}
 	while (x!=NULL) {
 Iterable * aaaaae = NULL;
 		aaaaae = (Iterable *)x;
 		incRef(aaaaae);
-void * aaaacn = NULL;
-aaaacn = x;
+void * aaaade = NULL;
+aaaade = x;
 		x = aaaaae->value;
 		incRef(x);
-		decRef(aaaacn);
+		decRef(aaaade);
 decRef(x);
 		
 
@@ -100,74 +100,74 @@ void * aaaaaf = NULL;
 
 
 
-void * aaaaco = NULL;
-aaaaco = aaaaag;
+void * aaaadf = NULL;
+aaaadf = aaaaag;
 aaaaag = out;
 incRef(aaaaag);
-decRef(aaaaco);
+decRef(aaaadf);
 decRef(out);
 
 
 
-void * aaaacp = NULL;
-aaaacp = aaaaah;
+void * aaaadg = NULL;
+aaaadg = aaaaah;
 aaaaah = its;
 incRef(aaaaah);
-decRef(aaaacp);
+decRef(aaaadg);
 
 
 
-void *aaaacr;
-aaaacr = aaaaag;
-if (aaaacr!=NULL) {
-(*((int *)aaaacr))++;
+void *aaaadi;
+aaaadi = aaaaag;
+if (aaaadi!=NULL) {
+(*((int *)aaaadi))++;
 if ((*((int *)aaaaag+1)) == 0) {
-decRef(aaaacr);
-aaaacr = strToIter( ((String *)aaaaag)->value, ((String *)aaaaag)->len);
-incRef(aaaacr);
+decRef(aaaadi);
+aaaadi = strToIter( ((String *)aaaaag)->value, ((String *)aaaaag)->len);
+incRef(aaaadi);
 }
 }
-void *aaaacs;
-aaaacs = aaaaah;
-if (aaaacs!=NULL) {
-(*((int *)aaaacs))++;
+void *aaaadj;
+aaaadj = aaaaah;
+if (aaaadj!=NULL) {
+(*((int *)aaaadj))++;
 if ((*((int *)aaaaah+1)) == 0) {
-decRef(aaaacs);
-aaaacs = strToIter( ((String *)aaaaah)->value, ((String *)aaaaah)->len);
-incRef(aaaacs);
+decRef(aaaadj);
+aaaadj = strToIter( ((String *)aaaaah)->value, ((String *)aaaaah)->len);
+incRef(aaaadj);
 }
 }
-Iterable* aaaacq;
-aaaacq = concatenate((Iterable*)aaaacr, (Iterable*) aaaacs);
-decRef(aaaacr);
-decRef(aaaacs);
-void * aaaact = NULL;
-aaaact = out;
-out = aaaacq;
+Iterable* aaaadh;
+aaaadh = concatenate((Iterable*)aaaadi, (Iterable*) aaaadj);
+decRef(aaaadi);
+decRef(aaaadj);
+void * aaaadk = NULL;
+aaaadk = out;
+out = aaaadh;
 incRef(out);
-decRef(aaaact);
+decRef(aaaadk);
 decRef(aaaaag);
 decRef(aaaaah);
 
 
 
-void * aaaacu = NULL;
-aaaacu = aaaaaf;
+void * aaaadl = NULL;
+aaaadl = aaaaaf;
 aaaaaf = aaaaae;
 incRef(aaaaaf);
-decRef(aaaacu);
+decRef(aaaadl);
 decRef(aaaaae);
 
 
 
 
-void* aaaacv;
-aaaacv = iterGetNext((void*) aaaaaf);
-void * aaaacw = NULL;
-aaaacw = x;
-x = aaaacv;
+void* aaaadm;
+aaaadm = iterGetNext((void*) aaaaaf);
+void * aaaadn = NULL;
+aaaadn = x;
+x = aaaadm;
 incRef(x);
-decRef(aaaacw);
+decRef(aaaadn);
 decRef(aaaaaf);
 	}
 decRef(its);
@@ -207,35 +207,35 @@ void * aaaabj = NULL;
 
 
 
-void * aaaacx = NULL;
-aaaacx = aaaaai;
+void * aaaado = NULL;
+aaaado = aaaaai;
 aaaaai = i;
 incRef(aaaaai);
-decRef(aaaacx);
+decRef(aaaado);
 
 
 
-Integer* aaaacy;
-aaaacy = (Integer*) x3malloc(sizeof(Integer));
-(aaaacy->nrefs) = 0;
-aaaacy->value = 0;
-void * aaaacz = NULL;
-aaaacz = aaaaaj;
-aaaaaj = aaaacy;
+Integer* aaaadp;
+aaaadp = (Integer*) x3malloc(sizeof(Integer));
+(aaaadp->nrefs) = 0;
+aaaadp->value = 0;
+void * aaaadq = NULL;
+aaaadq = aaaaaj;
+aaaaaj = aaaadp;
 incRef(aaaaaj);
-decRef(aaaacz);
+decRef(aaaadq);
 
 
 
 
-Boolean* aaaada = (Boolean*) x3malloc(sizeof(Boolean));
-aaaada->nrefs = 0;
-aaaada->value = ((Integer*) aaaaai)->value == ((Integer*) aaaaaj)->value;
-void * aaaadb = NULL;
-aaaadb = aaaaak;
-aaaaak = aaaada;
+Boolean* aaaadr = (Boolean*) x3malloc(sizeof(Boolean));
+aaaadr->nrefs = 0;
+aaaadr->value = ((Integer*) aaaaai)->value == ((Integer*) aaaaaj)->value;
+void * aaaads = NULL;
+aaaads = aaaaak;
+aaaaak = aaaadr;
 incRef(aaaaak);
-decRef(aaaadb);
+decRef(aaaads);
 decRef(aaaaai);
 decRef(aaaaaj);
 
@@ -253,15 +253,15 @@ decRef(aaaaak);
 
 
 
-String* aaaadc;
-aaaadc = (String *) x3malloc(sizeof(String));
-(aaaadc->isIter) = 0;
-aaaadc->value = (char*) x3malloc(sizeof("0"));
-(aaaadc->nrefs) = 0;
-(aaaadc->isStr) = 1;
-aaaadc->len = sizeof("0") - 1;
-mystrcpy(aaaadc->value, "0");
-return aaaadc;
+String* aaaadt;
+aaaadt = (String *) x3malloc(sizeof(String));
+(aaaadt->isIter) = 0;
+aaaadt->value = (char*) x3malloc(sizeof("0"));
+(aaaadt->nrefs) = 0;
+(aaaadt->isStr) = 1;
+aaaadt->len = sizeof("0") - 1;
+mystrcpy(aaaadt->value, "0");
+return aaaadt;
 }
 decRef(aaaaak);
 
@@ -270,50 +270,50 @@ decRef(aaaaak);
 
 
 
-Boolean* aaaadd;
-aaaadd = (Boolean *) x3malloc(sizeof(Boolean));
-(aaaadd->nrefs) = 0;
-aaaadd->value = 0;
-void * aaaade = NULL;
-aaaade = neg;
-neg = aaaadd;
+Boolean* aaaadu;
+aaaadu = (Boolean *) x3malloc(sizeof(Boolean));
+(aaaadu->nrefs) = 0;
+aaaadu->value = 0;
+void * aaaadv = NULL;
+aaaadv = neg;
+neg = aaaadu;
 incRef(neg);
-decRef(aaaade);
+decRef(aaaadv);
 
 
 
 
 
 
-void * aaaadf = NULL;
-aaaadf = aaaaal;
+void * aaaadw = NULL;
+aaaadw = aaaaal;
 aaaaal = i;
 incRef(aaaaal);
-decRef(aaaadf);
+decRef(aaaadw);
 
 
 
-Integer* aaaadg;
-aaaadg = (Integer*) x3malloc(sizeof(Integer));
-(aaaadg->nrefs) = 0;
-aaaadg->value = 0;
-void * aaaadh = NULL;
-aaaadh = aaaaam;
-aaaaam = aaaadg;
+Integer* aaaadx;
+aaaadx = (Integer*) x3malloc(sizeof(Integer));
+(aaaadx->nrefs) = 0;
+aaaadx->value = 0;
+void * aaaady = NULL;
+aaaady = aaaaam;
+aaaaam = aaaadx;
 incRef(aaaaam);
-decRef(aaaadh);
+decRef(aaaady);
 
 
 
 
-Boolean* aaaadi = (Boolean*) x3malloc(sizeof(Boolean));
-aaaadi->nrefs = 0;
-aaaadi->value = ((Integer*) aaaaal)->value < ((Integer*) aaaaam)->value;
-void * aaaadj = NULL;
-aaaadj = aaaaan;
-aaaaan = aaaadi;
+Boolean* aaaadz = (Boolean*) x3malloc(sizeof(Boolean));
+aaaadz->nrefs = 0;
+aaaadz->value = ((Integer*) aaaaal)->value < ((Integer*) aaaaam)->value;
+void * aaaaea = NULL;
+aaaaea = aaaaan;
+aaaaan = aaaadz;
 incRef(aaaaan);
-decRef(aaaadj);
+decRef(aaaaea);
 decRef(aaaaal);
 decRef(aaaaam);
 
@@ -332,40 +332,40 @@ void * aaaaao = NULL;
 
 
 
-Boolean* aaaadk;
-aaaadk = (Boolean *) x3malloc(sizeof(Boolean));
-(aaaadk->nrefs) = 0;
-aaaadk->value = 1;
-void * aaaadl = NULL;
-aaaadl = neg;
-neg = aaaadk;
+Boolean* aaaaeb;
+aaaaeb = (Boolean *) x3malloc(sizeof(Boolean));
+(aaaaeb->nrefs) = 0;
+aaaaeb->value = 1;
+void * aaaaec = NULL;
+aaaaec = neg;
+neg = aaaaeb;
 incRef(neg);
-decRef(aaaadl);
+decRef(aaaaec);
 
 
 
 
 
 
-void * aaaadm = NULL;
-aaaadm = aaaaao;
+void * aaaaed = NULL;
+aaaaed = aaaaao;
 aaaaao = i;
 incRef(aaaaao);
-decRef(aaaadm);
+decRef(aaaaed);
 decRef(i);
 
 
 
 
-Integer* aaaadn;
-aaaadn  = (Integer*) x3malloc(sizeof(Integer));
-aaaadn->nrefs = 0;
-aaaadn->value=-(((Integer*)aaaaao)->value);
-void * aaaado = NULL;
-aaaado = i;
-i = aaaadn;
+Integer* aaaaee;
+aaaaee  = (Integer*) x3malloc(sizeof(Integer));
+aaaaee->nrefs = 0;
+aaaaee->value=-(((Integer*)aaaaao)->value);
+void * aaaaef = NULL;
+aaaaef = i;
+i = aaaaee;
 incRef(i);
-decRef(aaaado);
+decRef(aaaaef);
 decRef(aaaaao);
 }
 decRef(aaaaan);
@@ -375,54 +375,54 @@ decRef(aaaaan);
 
 
 
-String* aaaadp;
-aaaadp = (String *) x3malloc(sizeof(String));
-(aaaadp->isIter) = 0;
-aaaadp->value = (char*) x3malloc(sizeof(""));
-(aaaadp->nrefs) = 0;
-(aaaadp->isStr) = 1;
-aaaadp->len = sizeof("") - 1;
-mystrcpy(aaaadp->value, "");
-void * aaaadq = NULL;
-aaaadq = retval;
-retval = aaaadp;
+String* aaaaeg;
+aaaaeg = (String *) x3malloc(sizeof(String));
+(aaaaeg->isIter) = 0;
+aaaaeg->value = (char*) x3malloc(sizeof(""));
+(aaaaeg->nrefs) = 0;
+(aaaaeg->isStr) = 1;
+aaaaeg->len = sizeof("") - 1;
+mystrcpy(aaaaeg->value, "");
+void * aaaaeh = NULL;
+aaaaeh = retval;
+retval = aaaaeg;
 incRef(retval);
-decRef(aaaadq);
+decRef(aaaaeh);
 
 
 
 
 
 
-void * aaaadr = NULL;
-aaaadr = aaaaap;
+void * aaaaei = NULL;
+aaaaei = aaaaap;
 aaaaap = i;
 incRef(aaaaap);
-decRef(aaaadr);
+decRef(aaaaei);
 
 
 
-Integer* aaaads;
-aaaads = (Integer*) x3malloc(sizeof(Integer));
-(aaaads->nrefs) = 0;
-aaaads->value = 0;
-void * aaaadt = NULL;
-aaaadt = aaaaaq;
-aaaaaq = aaaads;
+Integer* aaaaej;
+aaaaej = (Integer*) x3malloc(sizeof(Integer));
+(aaaaej->nrefs) = 0;
+aaaaej->value = 0;
+void * aaaaek = NULL;
+aaaaek = aaaaaq;
+aaaaaq = aaaaej;
 incRef(aaaaaq);
-decRef(aaaadt);
+decRef(aaaaek);
 
 
 
 
-Boolean* aaaadu = (Boolean*) x3malloc(sizeof(Boolean));
-aaaadu->nrefs = 0;
-aaaadu->value = ((Integer*) aaaaap)->value > ((Integer*) aaaaaq)->value;
-void * aaaadv = NULL;
-aaaadv = aaaaar;
-aaaaar = aaaadu;
+Boolean* aaaael = (Boolean*) x3malloc(sizeof(Boolean));
+aaaael->nrefs = 0;
+aaaael->value = ((Integer*) aaaaap)->value > ((Integer*) aaaaaq)->value;
+void * aaaaem = NULL;
+aaaaem = aaaaar;
+aaaaar = aaaael;
 incRef(aaaaar);
-decRef(aaaadv);
+decRef(aaaaem);
 decRef(aaaaap);
 decRef(aaaaaq);
 
@@ -447,49 +447,49 @@ void * t = NULL;
 
 
 
-void * aaaadw = NULL;
-aaaadw = aaaaas;
+void * aaaaen = NULL;
+aaaaen = aaaaas;
 aaaaas = i;
 incRef(aaaaas);
-decRef(aaaadw);
+decRef(aaaaen);
 
 
 
-Integer* aaaadx;
-aaaadx = (Integer*) x3malloc(sizeof(Integer));
-(aaaadx->nrefs) = 0;
-aaaadx->value = 10;
-void * aaaady = NULL;
-aaaady = aaaaat;
-aaaaat = aaaadx;
+Integer* aaaaeo;
+aaaaeo = (Integer*) x3malloc(sizeof(Integer));
+(aaaaeo->nrefs) = 0;
+aaaaeo->value = 10;
+void * aaaaep = NULL;
+aaaaep = aaaaat;
+aaaaat = aaaaeo;
 incRef(aaaaat);
-decRef(aaaady);
+decRef(aaaaep);
 
 
 
 
-Iterable* aaaadz = NULL;
-Integer* aaaaea = NULL;
+Iterable* aaaaeq = NULL;
+Integer* aaaaer = NULL;
 if(((Integer*)aaaaat)->value == 0) 
-	aaaadz = NULL;
+	aaaaeq = NULL;
 else {
-	aaaaea  = (Integer*) x3malloc(sizeof(Integer));
-	aaaaea->nrefs = 0;
-	aaaaea->value=((Integer*)aaaaas)->value % ((Integer*)aaaaat)->value;
-	aaaadz = (Iterable*) x3malloc(sizeof(Iterable));
-	aaaadz->isIter = 1;
-aaaadz->nrefs = 0;
-	aaaadz->value = aaaaea;
-	aaaadz->additional = NULL;
-	aaaadz->next = NULL;
-	aaaadz->concat = NULL;
-incRef(aaaaea);
+	aaaaer  = (Integer*) x3malloc(sizeof(Integer));
+	aaaaer->nrefs = 0;
+	aaaaer->value=((Integer*)aaaaas)->value % ((Integer*)aaaaat)->value;
+	aaaaeq = (Iterable*) x3malloc(sizeof(Iterable));
+	aaaaeq->isIter = 1;
+aaaaeq->nrefs = 0;
+	aaaaeq->value = aaaaer;
+	aaaaeq->additional = NULL;
+	aaaaeq->next = NULL;
+	aaaaeq->concat = NULL;
+incRef(aaaaer);
 }
-void * aaaaeb = NULL;
-aaaaeb = mod;
-mod = aaaadz;
+void * aaaaes = NULL;
+aaaaes = mod;
+mod = aaaaeq;
 incRef(mod);
-decRef(aaaaeb);
+decRef(aaaaes);
 decRef(aaaaas);
 decRef(aaaaat);
 
@@ -498,30 +498,30 @@ decRef(aaaaat);
 
 
 
-void * aaaaec = NULL;
-aaaaec = m;
+void * aaaaet = NULL;
+aaaaet = m;
 m = mod;
 incRef(m);
-decRef(aaaaec);
+decRef(aaaaet);
 decRef(mod);
 	if (m!=NULL) {
 		if ((*((int *)(m+1))) == 0) {
-void * aaaaed = NULL;
-aaaaed = m;
+void * aaaaeu = NULL;
+aaaaeu = m;
 			m = strToIter( ((String *)m)->value, ((String *)m)->len);
 incRef(m);
-decRef(aaaaed);
+decRef(aaaaeu);
 		}
 	}
 	while (m!=NULL) {
 Iterable * aaaaau = NULL;
 		aaaaau = (Iterable *)m;
 		incRef(aaaaau);
-void * aaaaee = NULL;
-aaaaee = m;
+void * aaaaev = NULL;
+aaaaev = m;
 		m = aaaaau->value;
 		incRef(m);
-		decRef(aaaaee);
+		decRef(aaaaev);
 		
 
 
@@ -538,134 +538,134 @@ void * aaaaav = NULL;
 
 
 
-void * aaaaef = NULL;
-aaaaef = aaaaay;
+void * aaaaew = NULL;
+aaaaew = aaaaay;
 aaaaay = m;
 incRef(aaaaay);
-decRef(aaaaef);
+decRef(aaaaew);
 decRef(m);
 
 
 
-Integer* aaaaeg;
-aaaaeg = (Integer*) x3malloc(sizeof(Integer));
-(aaaaeg->nrefs) = 0;
-aaaaeg->value = 48;
-void * aaaaeh = NULL;
-aaaaeh = aaaaaz;
-aaaaaz = aaaaeg;
+Integer* aaaaex;
+aaaaex = (Integer*) x3malloc(sizeof(Integer));
+(aaaaex->nrefs) = 0;
+aaaaex->value = 48;
+void * aaaaey = NULL;
+aaaaey = aaaaaz;
+aaaaaz = aaaaex;
 incRef(aaaaaz);
-decRef(aaaaeh);
+decRef(aaaaey);
 
 
 
 
-Integer* aaaaei;
-aaaaei  = (Integer*) x3malloc(sizeof(Integer));
-aaaaei->nrefs = 0;
-aaaaei->value=((Integer*)aaaaay)->value + ((Integer*)aaaaaz)->value;
-void * aaaaej = NULL;
-aaaaej = aaaaba;
-aaaaba = aaaaei;
+Integer* aaaaez;
+aaaaez  = (Integer*) x3malloc(sizeof(Integer));
+aaaaez->nrefs = 0;
+aaaaez->value=((Integer*)aaaaay)->value + ((Integer*)aaaaaz)->value;
+void * aaaafa = NULL;
+aaaafa = aaaaba;
+aaaaba = aaaaez;
 incRef(aaaaba);
-decRef(aaaaej);
+decRef(aaaafa);
 decRef(aaaaay);
 decRef(aaaaaz);
 
 
 
 
-Character* aaaaek;
-aaaaek = (Character*) x3malloc(sizeof(Character));
-aaaaek->value = unichar (((Integer*)aaaaba)->value);
-void * aaaael = NULL;
-aaaael = aaaabb;
-aaaabb = aaaaek;
+Character* aaaafb;
+aaaafb = (Character*) x3malloc(sizeof(Character));
+aaaafb->value = unichar (((Integer*)aaaaba)->value);
+void * aaaafc = NULL;
+aaaafc = aaaabb;
+aaaabb = aaaafb;
 incRef(aaaabb);
-decRef(aaaael);
+decRef(aaaafc);
 decRef(aaaaba);
 
 
 
-Iterable* aaaaem;
-aaaaem = (Iterable*) x3malloc(sizeof(Iterable));
-aaaaem->isIter = 1;
-aaaaem->nrefs = 1;
-aaaaem->value = aaaabb;
-aaaaem->additional = NULL;
-aaaaem->next = NULL;
-aaaaem->concat = NULL;
+Iterable* aaaafd;
+aaaafd = (Iterable*) x3malloc(sizeof(Iterable));
+aaaafd->isIter = 1;
+aaaafd->nrefs = 1;
+aaaafd->value = aaaabb;
+aaaafd->additional = NULL;
+aaaafd->next = NULL;
+aaaafd->concat = NULL;
 incRef(aaaabb);
-aaaaem->nrefs = 0;
-void * aaaaen = NULL;
-aaaaen = aaaaaw;
-aaaaaw = aaaaem;
+aaaafd->nrefs = 0;
+void * aaaafe = NULL;
+aaaafe = aaaaaw;
+aaaaaw = aaaafd;
 incRef(aaaaaw);
-decRef(aaaaen);
+decRef(aaaafe);
 decRef(aaaabb);
 
 
 
-void * aaaaeo = NULL;
-aaaaeo = aaaaax;
+void * aaaaff = NULL;
+aaaaff = aaaaax;
 aaaaax = retval;
 incRef(aaaaax);
-decRef(aaaaeo);
+decRef(aaaaff);
 decRef(retval);
 
 
 
-void *aaaaeq;
-aaaaeq = aaaaaw;
-if (aaaaeq!=NULL) {
-(*((int *)aaaaeq))++;
+void *aaaafh;
+aaaafh = aaaaaw;
+if (aaaafh!=NULL) {
+(*((int *)aaaafh))++;
 if ((*((int *)aaaaaw+1)) == 0) {
-decRef(aaaaeq);
-aaaaeq = strToIter( ((String *)aaaaaw)->value, ((String *)aaaaaw)->len);
-incRef(aaaaeq);
+decRef(aaaafh);
+aaaafh = strToIter( ((String *)aaaaaw)->value, ((String *)aaaaaw)->len);
+incRef(aaaafh);
 }
 }
-void *aaaaer;
-aaaaer = aaaaax;
-if (aaaaer!=NULL) {
-(*((int *)aaaaer))++;
+void *aaaafi;
+aaaafi = aaaaax;
+if (aaaafi!=NULL) {
+(*((int *)aaaafi))++;
 if ((*((int *)aaaaax+1)) == 0) {
-decRef(aaaaer);
-aaaaer = strToIter( ((String *)aaaaax)->value, ((String *)aaaaax)->len);
-incRef(aaaaer);
+decRef(aaaafi);
+aaaafi = strToIter( ((String *)aaaaax)->value, ((String *)aaaaax)->len);
+incRef(aaaafi);
 }
 }
-Iterable* aaaaep;
-aaaaep = concatenate((Iterable*)aaaaeq, (Iterable*) aaaaer);
-decRef(aaaaeq);
-decRef(aaaaer);
-void * aaaaes = NULL;
-aaaaes = retval;
-retval = aaaaep;
+Iterable* aaaafg;
+aaaafg = concatenate((Iterable*)aaaafh, (Iterable*) aaaafi);
+decRef(aaaafh);
+decRef(aaaafi);
+void * aaaafj = NULL;
+aaaafj = retval;
+retval = aaaafg;
 incRef(retval);
-decRef(aaaaes);
+decRef(aaaafj);
 decRef(aaaaaw);
 decRef(aaaaax);
 
 
 
-void * aaaaet = NULL;
-aaaaet = aaaaav;
+void * aaaafk = NULL;
+aaaafk = aaaaav;
 aaaaav = aaaaau;
 incRef(aaaaav);
-decRef(aaaaet);
+decRef(aaaafk);
 decRef(aaaaau);
 
 
 
 
-void* aaaaeu;
-aaaaeu = iterGetNext((void*) aaaaav);
-void * aaaaev = NULL;
-aaaaev = m;
-m = aaaaeu;
+void* aaaafl;
+aaaafl = iterGetNext((void*) aaaaav);
+void * aaaafm = NULL;
+aaaafm = m;
+m = aaaafl;
 incRef(m);
-decRef(aaaaev);
+decRef(aaaafm);
 decRef(aaaaav);
 	}
 decRef(m);
@@ -675,49 +675,49 @@ decRef(m);
 
 
 
-void * aaaaew = NULL;
-aaaaew = aaaabc;
+void * aaaafn = NULL;
+aaaafn = aaaabc;
 aaaabc = i;
 incRef(aaaabc);
-decRef(aaaaew);
+decRef(aaaafn);
 
 
 
-Integer* aaaaex;
-aaaaex = (Integer*) x3malloc(sizeof(Integer));
-(aaaaex->nrefs) = 0;
-aaaaex->value = 10;
-void * aaaaey = NULL;
-aaaaey = aaaabd;
-aaaabd = aaaaex;
+Integer* aaaafo;
+aaaafo = (Integer*) x3malloc(sizeof(Integer));
+(aaaafo->nrefs) = 0;
+aaaafo->value = 10;
+void * aaaafp = NULL;
+aaaafp = aaaabd;
+aaaabd = aaaafo;
 incRef(aaaabd);
-decRef(aaaaey);
+decRef(aaaafp);
 
 
 
 
-Iterable* aaaaez;
-Integer* aaaafa;
+Iterable* aaaafq;
+Integer* aaaafr;
 if(((Integer*)aaaabd)->value == 0) 
-	aaaaez = NULL;
+	aaaafq = NULL;
 else {
-	aaaafa  = (Integer*) x3malloc(sizeof(Integer));
-	aaaafa->nrefs = 0;
-	aaaafa->value=((Integer*)aaaabc)->value / ((Integer*)aaaabd)->value;
-	aaaaez = (Iterable*) x3malloc(sizeof(Iterable));
-	aaaaez->isIter = 1;
-aaaaez->nrefs = 0;
-	aaaaez->value = aaaafa;
-	aaaaez->additional = NULL;
-	aaaaez->next = NULL;
-	aaaaez->concat = NULL;
-incRef(aaaafa);
+	aaaafr  = (Integer*) x3malloc(sizeof(Integer));
+	aaaafr->nrefs = 0;
+	aaaafr->value=((Integer*)aaaabc)->value / ((Integer*)aaaabd)->value;
+	aaaafq = (Iterable*) x3malloc(sizeof(Iterable));
+	aaaafq->isIter = 1;
+aaaafq->nrefs = 0;
+	aaaafq->value = aaaafr;
+	aaaafq->additional = NULL;
+	aaaafq->next = NULL;
+	aaaafq->concat = NULL;
+incRef(aaaafr);
 }
-void * aaaafb = NULL;
-aaaafb = div;
-div = aaaaez;
+void * aaaafs = NULL;
+aaaafs = div;
+div = aaaafq;
 incRef(div);
-decRef(aaaafb);
+decRef(aaaafs);
 decRef(aaaabc);
 decRef(aaaabd);
 
@@ -726,30 +726,30 @@ decRef(aaaabd);
 
 
 
-void * aaaafc = NULL;
-aaaafc = t;
+void * aaaaft = NULL;
+aaaaft = t;
 t = div;
 incRef(t);
-decRef(aaaafc);
+decRef(aaaaft);
 decRef(div);
 	if (t!=NULL) {
 		if ((*((int *)(t+1))) == 0) {
-void * aaaafd = NULL;
-aaaafd = t;
+void * aaaafu = NULL;
+aaaafu = t;
 			t = strToIter( ((String *)t)->value, ((String *)t)->len);
 incRef(t);
-decRef(aaaafd);
+decRef(aaaafu);
 		}
 	}
 	while (t!=NULL) {
 Iterable * aaaabe = NULL;
 		aaaabe = (Iterable *)t;
 		incRef(aaaabe);
-void * aaaafe = NULL;
-aaaafe = t;
+void * aaaafv = NULL;
+aaaafv = t;
 		t = aaaabe->value;
 		incRef(t);
-		decRef(aaaafe);
+		decRef(aaaafv);
 decRef(i);
 		
 
@@ -761,71 +761,71 @@ void * aaaabf = NULL;
 
 
 
-void * aaaaff = NULL;
-aaaaff = i;
+void * aaaafw = NULL;
+aaaafw = i;
 i = t;
 incRef(i);
-decRef(aaaaff);
+decRef(aaaafw);
 decRef(t);
 
 
 
-void * aaaafg = NULL;
-aaaafg = aaaabf;
+void * aaaafx = NULL;
+aaaafx = aaaabf;
 aaaabf = aaaabe;
 incRef(aaaabf);
-decRef(aaaafg);
+decRef(aaaafx);
 decRef(aaaabe);
 
 
 
 
-void* aaaafh;
-aaaafh = iterGetNext((void*) aaaabf);
-void * aaaafi = NULL;
-aaaafi = t;
-t = aaaafh;
+void* aaaafy;
+aaaafy = iterGetNext((void*) aaaabf);
+void * aaaafz = NULL;
+aaaafz = t;
+t = aaaafy;
 incRef(t);
-decRef(aaaafi);
+decRef(aaaafz);
 decRef(aaaabf);
 	}
 decRef(t);
 
 
 
-void * aaaafj = NULL;
-aaaafj = aaaaap;
+void * aaaaga = NULL;
+aaaaga = aaaaap;
 aaaaap = i;
 incRef(aaaaap);
-decRef(aaaafj);
+decRef(aaaaga);
 
 
 
-Integer* aaaafk;
-aaaafk = (Integer*) x3malloc(sizeof(Integer));
-(aaaafk->nrefs) = 0;
-aaaafk->value = 0;
-void * aaaafl = NULL;
-aaaafl = aaaaaq;
-aaaaaq = aaaafk;
+Integer* aaaagb;
+aaaagb = (Integer*) x3malloc(sizeof(Integer));
+(aaaagb->nrefs) = 0;
+aaaagb->value = 0;
+void * aaaagc = NULL;
+aaaagc = aaaaaq;
+aaaaaq = aaaagb;
 incRef(aaaaaq);
-decRef(aaaafl);
+decRef(aaaagc);
 
 
 
 
-Boolean* aaaadu = (Boolean*) x3malloc(sizeof(Boolean));
-aaaadu->nrefs = 0;
-aaaadu->value = ((Integer*) aaaaap)->value > ((Integer*) aaaaaq)->value;
+Boolean* aaaael = (Boolean*) x3malloc(sizeof(Boolean));
+aaaael->nrefs = 0;
+aaaael->value = ((Integer*) aaaaap)->value > ((Integer*) aaaaaq)->value;
 
-Boolean* aaaafm = (Boolean*) x3malloc(sizeof(Boolean));
-aaaafm->nrefs = 0;
-aaaafm->value = ((Integer*) aaaaap)->value > ((Integer*) aaaaaq)->value;
-void * aaaafn = NULL;
-aaaafn = aaaaar;
-aaaaar = aaaafm;
+Boolean* aaaagd = (Boolean*) x3malloc(sizeof(Boolean));
+aaaagd->nrefs = 0;
+aaaagd->value = ((Integer*) aaaaap)->value > ((Integer*) aaaaaq)->value;
+void * aaaage = NULL;
+aaaage = aaaaar;
+aaaaar = aaaagd;
 incRef(aaaaar);
-decRef(aaaafn);
+decRef(aaaage);
 decRef(aaaaap);
 decRef(aaaaaq);
 }
@@ -837,11 +837,11 @@ decRef(aaaaar);
 
 
 
-void * aaaafo = NULL;
-aaaafo = aaaabg;
+void * aaaagf = NULL;
+aaaagf = aaaabg;
 aaaabg = neg;
 incRef(aaaabg);
-decRef(aaaafo);
+decRef(aaaagf);
 decRef(neg);
 
 
@@ -859,60 +859,60 @@ void * aaaabi = NULL;
 
 
 
-String* aaaafp;
-aaaafp = (String *) x3malloc(sizeof(String));
-(aaaafp->isIter) = 0;
-aaaafp->value = (char*) x3malloc(sizeof("-"));
-(aaaafp->nrefs) = 0;
-(aaaafp->isStr) = 1;
-aaaafp->len = sizeof("-") - 1;
-mystrcpy(aaaafp->value, "-");
-void * aaaafq = NULL;
-aaaafq = aaaabh;
-aaaabh = aaaafp;
+String* aaaagg;
+aaaagg = (String *) x3malloc(sizeof(String));
+(aaaagg->isIter) = 0;
+aaaagg->value = (char*) x3malloc(sizeof("-"));
+(aaaagg->nrefs) = 0;
+(aaaagg->isStr) = 1;
+aaaagg->len = sizeof("-") - 1;
+mystrcpy(aaaagg->value, "-");
+void * aaaagh = NULL;
+aaaagh = aaaabh;
+aaaabh = aaaagg;
 incRef(aaaabh);
-decRef(aaaafq);
+decRef(aaaagh);
 
 
 
-void * aaaafr = NULL;
-aaaafr = aaaabi;
+void * aaaagi = NULL;
+aaaagi = aaaabi;
 aaaabi = retval;
 incRef(aaaabi);
-decRef(aaaafr);
+decRef(aaaagi);
 decRef(retval);
 
 
 
-void *aaaaft;
-aaaaft = aaaabh;
-if (aaaaft!=NULL) {
-(*((int *)aaaaft))++;
+void *aaaagk;
+aaaagk = aaaabh;
+if (aaaagk!=NULL) {
+(*((int *)aaaagk))++;
 if ((*((int *)aaaabh+1)) == 0) {
-decRef(aaaaft);
-aaaaft = strToIter( ((String *)aaaabh)->value, ((String *)aaaabh)->len);
-incRef(aaaaft);
+decRef(aaaagk);
+aaaagk = strToIter( ((String *)aaaabh)->value, ((String *)aaaabh)->len);
+incRef(aaaagk);
 }
 }
-void *aaaafu;
-aaaafu = aaaabi;
-if (aaaafu!=NULL) {
-(*((int *)aaaafu))++;
+void *aaaagl;
+aaaagl = aaaabi;
+if (aaaagl!=NULL) {
+(*((int *)aaaagl))++;
 if ((*((int *)aaaabi+1)) == 0) {
-decRef(aaaafu);
-aaaafu = strToIter( ((String *)aaaabi)->value, ((String *)aaaabi)->len);
-incRef(aaaafu);
+decRef(aaaagl);
+aaaagl = strToIter( ((String *)aaaabi)->value, ((String *)aaaabi)->len);
+incRef(aaaagl);
 }
 }
-Iterable* aaaafs;
-aaaafs = concatenate((Iterable*)aaaaft, (Iterable*) aaaafu);
-decRef(aaaaft);
-decRef(aaaafu);
-void * aaaafv = NULL;
-aaaafv = retval;
-retval = aaaafs;
+Iterable* aaaagj;
+aaaagj = concatenate((Iterable*)aaaagk, (Iterable*) aaaagl);
+decRef(aaaagk);
+decRef(aaaagl);
+void * aaaagm = NULL;
+aaaagm = retval;
+retval = aaaagj;
 incRef(retval);
-decRef(aaaafv);
+decRef(aaaagm);
 decRef(aaaabh);
 decRef(aaaabi);
 }
@@ -923,11 +923,11 @@ decRef(aaaabg);
 
 
 
-void * aaaafw = NULL;
-aaaafw = aaaabj;
+void * aaaagn = NULL;
+aaaagn = aaaabj;
 aaaabj = retval;
 incRef(aaaabj);
-decRef(aaaafw);
+decRef(aaaagn);
 decRef(retval);
 
 
@@ -935,17 +935,17 @@ decRef(retval);
 
 	if (aaaabj!=NULL) {
 		if ((*((int *)(aaaabj+1))) == 0) {
-void * aaaafy = NULL;
-aaaafy = aaaabj;
+void * aaaagp = NULL;
+aaaagp = aaaabj;
 			aaaabj = strToIter( ((String *)aaaabj)->value, ((String *)aaaabj)->len);
 incRef(aaaabj);
-decRef(aaaafy);
+decRef(aaaagp);
 		}
 	}
-void* aaaafx;
-aaaafx = concatChars((Iterable*)aaaabj);
+void* aaaago;
+aaaago = concatChars((Iterable*)aaaabj);
 decRef(aaaabj);
-return aaaafx;
+return aaaago;
 }
 void* intstostring(void *ints) {
 incRef(ints);
@@ -961,49 +961,49 @@ void * aaaabr = NULL;
 
 
 
-String* aaaafz;
-aaaafz = (String *) x3malloc(sizeof(String));
-(aaaafz->isIter) = 0;
-aaaafz->value = (char*) x3malloc(sizeof(""));
-(aaaafz->nrefs) = 0;
-(aaaafz->isStr) = 1;
-aaaafz->len = sizeof("") - 1;
-mystrcpy(aaaafz->value, "");
-void * aaaaga = NULL;
-aaaaga = retval;
-retval = aaaafz;
+String* aaaagq;
+aaaagq = (String *) x3malloc(sizeof(String));
+(aaaagq->isIter) = 0;
+aaaagq->value = (char*) x3malloc(sizeof(""));
+(aaaagq->nrefs) = 0;
+(aaaagq->isStr) = 1;
+aaaagq->len = sizeof("") - 1;
+mystrcpy(aaaagq->value, "");
+void * aaaagr = NULL;
+aaaagr = retval;
+retval = aaaagq;
 incRef(retval);
-decRef(aaaaga);
+decRef(aaaagr);
 
 
 
 
 
 
-void * aaaagb = NULL;
-aaaagb = i;
+void * aaaags = NULL;
+aaaags = i;
 i = ints;
 incRef(i);
-decRef(aaaagb);
+decRef(aaaags);
 decRef(ints);
 	if (i!=NULL) {
 		if ((*((int *)(i+1))) == 0) {
-void * aaaagc = NULL;
-aaaagc = i;
+void * aaaagt = NULL;
+aaaagt = i;
 			i = strToIter( ((String *)i)->value, ((String *)i)->len);
 incRef(i);
-decRef(aaaagc);
+decRef(aaaagt);
 		}
 	}
 	while (i!=NULL) {
 Iterable * aaaabk = NULL;
 		aaaabk = (Iterable *)i;
 		incRef(aaaabk);
-void * aaaagd = NULL;
-aaaagd = i;
+void * aaaagu = NULL;
+aaaagu = i;
 		i = aaaabk->value;
 		incRef(i);
-		decRef(aaaagd);
+		decRef(aaaagu);
 		
 
 
@@ -1019,137 +1019,137 @@ void * aaaabl = NULL;
 
 
 
-void * aaaage = NULL;
-aaaage = aaaabq;
+void * aaaagv = NULL;
+aaaagv = aaaabq;
 aaaabq = i;
 incRef(aaaabq);
-decRef(aaaage);
+decRef(aaaagv);
 decRef(i);
 
 
 
-void * aaaagf = NULL;
-aaaagf = aaaabo;
+void * aaaagw = NULL;
+aaaagw = aaaabo;
 aaaabo = retval;
 incRef(aaaabo);
-decRef(aaaagf);
+decRef(aaaagw);
 decRef(retval);
 
 
 
 
-void* aaaagg;
-aaaagg = inttostring((void*) aaaabq);
-void * aaaagh = NULL;
-aaaagh = aaaabp;
-aaaabp = aaaagg;
+void* aaaagx;
+aaaagx = inttostring((void*) aaaabq);
+void * aaaagy = NULL;
+aaaagy = aaaabp;
+aaaabp = aaaagx;
 incRef(aaaabp);
-decRef(aaaagh);
+decRef(aaaagy);
 decRef(aaaabq);
 
 
 
-void *aaaagj;
-aaaagj = aaaabo;
-if (aaaagj!=NULL) {
-(*((int *)aaaagj))++;
+void *aaaaha;
+aaaaha = aaaabo;
+if (aaaaha!=NULL) {
+(*((int *)aaaaha))++;
 if ((*((int *)aaaabo+1)) == 0) {
-decRef(aaaagj);
-aaaagj = strToIter( ((String *)aaaabo)->value, ((String *)aaaabo)->len);
-incRef(aaaagj);
+decRef(aaaaha);
+aaaaha = strToIter( ((String *)aaaabo)->value, ((String *)aaaabo)->len);
+incRef(aaaaha);
 }
 }
-void *aaaagk;
-aaaagk = aaaabp;
-if (aaaagk!=NULL) {
-(*((int *)aaaagk))++;
+void *aaaahb;
+aaaahb = aaaabp;
+if (aaaahb!=NULL) {
+(*((int *)aaaahb))++;
 if ((*((int *)aaaabp+1)) == 0) {
-decRef(aaaagk);
-aaaagk = strToIter( ((String *)aaaabp)->value, ((String *)aaaabp)->len);
-incRef(aaaagk);
+decRef(aaaahb);
+aaaahb = strToIter( ((String *)aaaabp)->value, ((String *)aaaabp)->len);
+incRef(aaaahb);
 }
 }
-Iterable* aaaagi;
-aaaagi = concatenate((Iterable*)aaaagj, (Iterable*) aaaagk);
-decRef(aaaagj);
-decRef(aaaagk);
-void * aaaagl = NULL;
-aaaagl = aaaabm;
-aaaabm = aaaagi;
+Iterable* aaaagz;
+aaaagz = concatenate((Iterable*)aaaaha, (Iterable*) aaaahb);
+decRef(aaaaha);
+decRef(aaaahb);
+void * aaaahc = NULL;
+aaaahc = aaaabm;
+aaaabm = aaaagz;
 incRef(aaaabm);
-decRef(aaaagl);
+decRef(aaaahc);
 decRef(aaaabo);
 decRef(aaaabp);
 
 
 
-String* aaaagm;
-aaaagm = (String *) x3malloc(sizeof(String));
-(aaaagm->isIter) = 0;
-aaaagm->value = (char*) x3malloc(sizeof(", "));
-(aaaagm->nrefs) = 0;
-(aaaagm->isStr) = 1;
-aaaagm->len = sizeof(", ") - 1;
-mystrcpy(aaaagm->value, ", ");
-void * aaaagn = NULL;
-aaaagn = aaaabn;
-aaaabn = aaaagm;
+String* aaaahd;
+aaaahd = (String *) x3malloc(sizeof(String));
+(aaaahd->isIter) = 0;
+aaaahd->value = (char*) x3malloc(sizeof(", "));
+(aaaahd->nrefs) = 0;
+(aaaahd->isStr) = 1;
+aaaahd->len = sizeof(", ") - 1;
+mystrcpy(aaaahd->value, ", ");
+void * aaaahe = NULL;
+aaaahe = aaaabn;
+aaaabn = aaaahd;
 incRef(aaaabn);
-decRef(aaaagn);
+decRef(aaaahe);
 
 
 
-void *aaaagp;
-aaaagp = aaaabm;
-if (aaaagp!=NULL) {
-(*((int *)aaaagp))++;
+void *aaaahg;
+aaaahg = aaaabm;
+if (aaaahg!=NULL) {
+(*((int *)aaaahg))++;
 if ((*((int *)aaaabm+1)) == 0) {
-decRef(aaaagp);
-aaaagp = strToIter( ((String *)aaaabm)->value, ((String *)aaaabm)->len);
-incRef(aaaagp);
+decRef(aaaahg);
+aaaahg = strToIter( ((String *)aaaabm)->value, ((String *)aaaabm)->len);
+incRef(aaaahg);
 }
 }
-void *aaaagq;
-aaaagq = aaaabn;
-if (aaaagq!=NULL) {
-(*((int *)aaaagq))++;
+void *aaaahh;
+aaaahh = aaaabn;
+if (aaaahh!=NULL) {
+(*((int *)aaaahh))++;
 if ((*((int *)aaaabn+1)) == 0) {
-decRef(aaaagq);
-aaaagq = strToIter( ((String *)aaaabn)->value, ((String *)aaaabn)->len);
-incRef(aaaagq);
+decRef(aaaahh);
+aaaahh = strToIter( ((String *)aaaabn)->value, ((String *)aaaabn)->len);
+incRef(aaaahh);
 }
 }
-Iterable* aaaago;
-aaaago = concatenate((Iterable*)aaaagp, (Iterable*) aaaagq);
-decRef(aaaagp);
-decRef(aaaagq);
-void * aaaagr = NULL;
-aaaagr = retval;
-retval = aaaago;
+Iterable* aaaahf;
+aaaahf = concatenate((Iterable*)aaaahg, (Iterable*) aaaahh);
+decRef(aaaahg);
+decRef(aaaahh);
+void * aaaahi = NULL;
+aaaahi = retval;
+retval = aaaahf;
 incRef(retval);
-decRef(aaaagr);
+decRef(aaaahi);
 decRef(aaaabm);
 decRef(aaaabn);
 
 
 
-void * aaaags = NULL;
-aaaags = aaaabl;
+void * aaaahj = NULL;
+aaaahj = aaaabl;
 aaaabl = aaaabk;
 incRef(aaaabl);
-decRef(aaaags);
+decRef(aaaahj);
 decRef(aaaabk);
 
 
 
 
-void* aaaagt;
-aaaagt = iterGetNext((void*) aaaabl);
-void * aaaagu = NULL;
-aaaagu = i;
-i = aaaagt;
+void* aaaahk;
+aaaahk = iterGetNext((void*) aaaabl);
+void * aaaahl = NULL;
+aaaahl = i;
+i = aaaahk;
 incRef(i);
-decRef(aaaagu);
+decRef(aaaahl);
 decRef(aaaabl);
 	}
 decRef(i);
@@ -1159,11 +1159,11 @@ decRef(i);
 
 
 
-void * aaaagv = NULL;
-aaaagv = aaaabr;
+void * aaaahm = NULL;
+aaaahm = aaaabr;
 aaaabr = retval;
 incRef(aaaabr);
-decRef(aaaagv);
+decRef(aaaahm);
 decRef(retval);
 
 
@@ -1171,28 +1171,45 @@ decRef(retval);
 
 	if (aaaabr!=NULL) {
 		if ((*((int *)(aaaabr+1))) == 0) {
-void * aaaagx = NULL;
-aaaagx = aaaabr;
+void * aaaaho = NULL;
+aaaaho = aaaabr;
 			aaaabr = strToIter( ((String *)aaaabr)->value, ((String *)aaaabr)->len);
 incRef(aaaabr);
-decRef(aaaagx);
+decRef(aaaaho);
 		}
 	}
-void* aaaagw;
-aaaagw = concatChars((Iterable*)aaaabr);
+void* aaaahn;
+aaaahn = concatChars((Iterable*)aaaabr);
 decRef(aaaabr);
-return aaaagw;
+return aaaahn;
 }
 
 
 void* our_main()
 {
-void * aaaabs = NULL;
-void * aaaabt = NULL;
 void * aaaabu = NULL;
 void * aaaabv = NULL;
 void * aaaabw = NULL;
 void * aaaabx = NULL;
+void * aaaaby = NULL;
+void * aaaabz = NULL;
+void * aaaaca = NULL;
+void * aaaacb = NULL;
+void * aaaacc = NULL;
+void * aaaacd = NULL;
+void * aaaace = NULL;
+void * aaaacf = NULL;
+void * aaaacg = NULL;
+void * aaaach = NULL;
+void * aaaaci = NULL;
+void * aaaacj = NULL;
+void * aaaack = NULL;
+void * aaaacl = NULL;
+void * aaaacm = NULL;
+void * aaaacn = NULL;
+void * aaaaco = NULL;
+void * aaaabs = NULL;
+void * aaaabt = NULL;
 void * retval = NULL;
 void * i = NULL;
 
@@ -1201,116 +1218,433 @@ void * i = NULL;
 
 
 
-Integer* aaaagy;
-aaaagy = (Integer*) x3malloc(sizeof(Integer));
-(aaaagy->nrefs) = 0;
-aaaagy->value = 2;
-void * aaaagz = NULL;
-aaaagz = aaaabs;
-aaaabs = aaaagy;
-incRef(aaaabs);
-decRef(aaaagz);
-
-
-
-Integer* aaaaha;
-aaaaha = (Integer*) x3malloc(sizeof(Integer));
-(aaaaha->nrefs) = 0;
-aaaaha->value = 38;
-void * aaaahb = NULL;
-aaaahb = aaaabt;
-aaaabt = aaaaha;
-incRef(aaaabt);
-decRef(aaaahb);
-
-
-
-Integer* aaaahc;
-aaaahc = (Integer*) x3malloc(sizeof(Integer));
-(aaaahc->nrefs) = 0;
-aaaahc->value = 40;
-void * aaaahd = NULL;
-aaaahd = aaaabu;
-aaaabu = aaaahc;
+Integer* aaaahp;
+aaaahp = (Integer*) x3malloc(sizeof(Integer));
+(aaaahp->nrefs) = 0;
+aaaahp->value = 5;
+void * aaaahq = NULL;
+aaaahq = aaaabu;
+aaaabu = aaaahp;
 incRef(aaaabu);
-decRef(aaaahd);
+decRef(aaaahq);
 
 
 
-Integer* aaaahf;
-aaaahf = (Integer*) x3malloc(sizeof(Integer));
-aaaahf->value = ((Integer *)aaaabt)->value + 1;
-aaaahf->nrefs = 1;
-Iterable* aaaahe;
-aaaahe = (Iterable*) x3malloc(sizeof(Iterable));
-aaaahe->isIter = 1;
-aaaahe->nrefs = 0;
-aaaahe->value = aaaahf;
-aaaahe->additional = aaaabu;
-aaaahe->next = &Integer_through;
-aaaahe->concat = NULL;
-incRef(aaaabu);
-void * aaaahg = NULL;
-aaaahg = aaaabv;
-aaaabv = checkIter(aaaahe);
+
+Integer* aaaahr;
+aaaahr  = (Integer*) x3malloc(sizeof(Integer));
+aaaahr->nrefs = 0;
+aaaahr->value=-(((Integer*)aaaabu)->value);
+void * aaaahs = NULL;
+aaaahs = aaaabv;
+aaaabv = aaaahr;
 incRef(aaaabv);
-decRef(aaaahg);
-decRef(aaaabt);
+decRef(aaaahs);
 decRef(aaaabu);
 
 
 
-
-void* aaaahh;
-aaaahh = copy((void*) aaaabs, (void*) aaaabv);
-void * aaaahi = NULL;
-aaaahi = aaaabw;
-aaaabw = aaaahh;
+Integer* aaaaht;
+aaaaht = (Integer*) x3malloc(sizeof(Integer));
+(aaaaht->nrefs) = 0;
+aaaaht->value = 54;
+void * aaaahu = NULL;
+aaaahu = aaaabw;
+aaaabw = aaaaht;
 incRef(aaaabw);
-decRef(aaaahi);
-decRef(aaaabs);
-decRef(aaaabv);
+decRef(aaaahu);
 
 
 
-
-void* aaaahj;
-aaaahj = intstostring((void*) aaaabw);
-void * aaaahk = NULL;
-aaaahk = aaaabx;
-aaaabx = aaaahj;
+Integer* aaaahv;
+aaaahv = (Integer*) x3malloc(sizeof(Integer));
+(aaaahv->nrefs) = 0;
+aaaahv->value = 9;
+void * aaaahw = NULL;
+aaaahw = aaaabx;
+aaaabx = aaaahv;
 incRef(aaaabx);
-decRef(aaaahk);
+decRef(aaaahw);
+
+
+
+Integer* aaaahx;
+aaaahx = (Integer*) x3malloc(sizeof(Integer));
+(aaaahx->nrefs) = 0;
+aaaahx->value = 23;
+void * aaaahy = NULL;
+aaaahy = aaaaby;
+aaaaby = aaaahx;
+incRef(aaaaby);
+decRef(aaaahy);
+
+
+
+Integer* aaaahz;
+aaaahz = (Integer*) x3malloc(sizeof(Integer));
+(aaaahz->nrefs) = 0;
+aaaahz->value = 87;
+void * aaaaia = NULL;
+aaaaia = aaaabz;
+aaaabz = aaaahz;
+incRef(aaaabz);
+decRef(aaaaia);
+
+
+
+Integer* aaaaib;
+aaaaib = (Integer*) x3malloc(sizeof(Integer));
+(aaaaib->nrefs) = 0;
+aaaaib->value = 5;
+void * aaaaic = NULL;
+aaaaic = aaaaca;
+aaaaca = aaaaib;
+incRef(aaaaca);
+decRef(aaaaic);
+
+
+
+Integer* aaaaid;
+aaaaid = (Integer*) x3malloc(sizeof(Integer));
+(aaaaid->nrefs) = 0;
+aaaaid->value = 587;
+void * aaaaie = NULL;
+aaaaie = aaaacb;
+aaaacb = aaaaid;
+incRef(aaaacb);
+decRef(aaaaie);
+
+
+
+
+Integer* aaaaif;
+aaaaif  = (Integer*) x3malloc(sizeof(Integer));
+aaaaif->nrefs = 0;
+aaaaif->value=-(((Integer*)aaaacb)->value);
+void * aaaaig = NULL;
+aaaaig = aaaacc;
+aaaacc = aaaaif;
+incRef(aaaacc);
+decRef(aaaaig);
+decRef(aaaacb);
+
+
+
+Integer* aaaaih;
+aaaaih = (Integer*) x3malloc(sizeof(Integer));
+(aaaaih->nrefs) = 0;
+aaaaih->value = 432;
+void * aaaaii = NULL;
+aaaaii = aaaacd;
+aaaacd = aaaaih;
+incRef(aaaacd);
+decRef(aaaaii);
+
+
+
+
+Integer* aaaaij;
+aaaaij  = (Integer*) x3malloc(sizeof(Integer));
+aaaaij->nrefs = 0;
+aaaaij->value=-(((Integer*)aaaacd)->value);
+void * aaaaik = NULL;
+aaaaik = aaaace;
+aaaace = aaaaij;
+incRef(aaaace);
+decRef(aaaaik);
+decRef(aaaacd);
+
+
+
+Integer* aaaail;
+aaaail = (Integer*) x3malloc(sizeof(Integer));
+(aaaail->nrefs) = 0;
+aaaail->value = 0;
+void * aaaaim = NULL;
+aaaaim = aaaacf;
+aaaacf = aaaail;
+incRef(aaaacf);
+decRef(aaaaim);
+
+
+
+Iterable* aaaaiu;
+aaaaiu = (Iterable*) x3malloc(sizeof(Iterable));
+aaaaiu->isIter = 1;
+aaaaiu->nrefs = 1;
+aaaaiu->value = aaaacf;
+aaaaiu->additional = NULL;
+aaaaiu->next = NULL;
+aaaaiu->concat = NULL;
+incRef(aaaacf);
+Iterable* aaaait;
+aaaait = (Iterable*) x3malloc(sizeof(Iterable));
+aaaait->isIter = 1;
+aaaait->nrefs = 1;
+aaaait->value = aaaace;
+aaaait->additional = aaaaiu;
+aaaait->next = NULL;
+aaaait->concat = NULL;
+incRef(aaaace);
+Iterable* aaaais;
+aaaais = (Iterable*) x3malloc(sizeof(Iterable));
+aaaais->isIter = 1;
+aaaais->nrefs = 1;
+aaaais->value = aaaacc;
+aaaais->additional = aaaait;
+aaaais->next = NULL;
+aaaais->concat = NULL;
+incRef(aaaacc);
+Iterable* aaaair;
+aaaair = (Iterable*) x3malloc(sizeof(Iterable));
+aaaair->isIter = 1;
+aaaair->nrefs = 1;
+aaaair->value = aaaaca;
+aaaair->additional = aaaais;
+aaaair->next = NULL;
+aaaair->concat = NULL;
+incRef(aaaaca);
+Iterable* aaaaiq;
+aaaaiq = (Iterable*) x3malloc(sizeof(Iterable));
+aaaaiq->isIter = 1;
+aaaaiq->nrefs = 1;
+aaaaiq->value = aaaabz;
+aaaaiq->additional = aaaair;
+aaaaiq->next = NULL;
+aaaaiq->concat = NULL;
+incRef(aaaabz);
+Iterable* aaaaip;
+aaaaip = (Iterable*) x3malloc(sizeof(Iterable));
+aaaaip->isIter = 1;
+aaaaip->nrefs = 1;
+aaaaip->value = aaaaby;
+aaaaip->additional = aaaaiq;
+aaaaip->next = NULL;
+aaaaip->concat = NULL;
+incRef(aaaaby);
+Iterable* aaaaio;
+aaaaio = (Iterable*) x3malloc(sizeof(Iterable));
+aaaaio->isIter = 1;
+aaaaio->nrefs = 1;
+aaaaio->value = aaaabx;
+aaaaio->additional = aaaaip;
+aaaaio->next = NULL;
+aaaaio->concat = NULL;
+incRef(aaaabx);
+Iterable* aaaain;
+aaaain = (Iterable*) x3malloc(sizeof(Iterable));
+aaaain->isIter = 1;
+aaaain->nrefs = 1;
+aaaain->value = aaaabw;
+aaaain->additional = aaaaio;
+aaaain->next = NULL;
+aaaain->concat = NULL;
+incRef(aaaabw);
+aaaain->nrefs = 0;
+void * aaaaiv = NULL;
+aaaaiv = aaaacg;
+aaaacg = aaaain;
+incRef(aaaacg);
+decRef(aaaaiv);
 decRef(aaaabw);
-
-
-
-Iterable* aaaahl;
-aaaahl = (Iterable*) x3malloc(sizeof(Iterable));
-aaaahl->isIter = 1;
-aaaahl->nrefs = 1;
-aaaahl->value = aaaabx;
-aaaahl->additional = NULL;
-aaaahl->next = NULL;
-aaaahl->concat = NULL;
-incRef(aaaabx);
-aaaahl->nrefs = 0;
-void * aaaahm = NULL;
-aaaahm = retval;
-retval = aaaahl;
-incRef(retval);
-decRef(aaaahm);
 decRef(aaaabx);
+decRef(aaaaby);
+decRef(aaaabz);
+decRef(aaaaca);
+decRef(aaaacc);
+decRef(aaaace);
+decRef(aaaacf);
+
+
+
+
+void* aaaaiw;
+aaaaiw = copy((void*) aaaabv, (void*) aaaacg);
+void * aaaaix = NULL;
+aaaaix = aaaach;
+aaaach = aaaaiw;
+incRef(aaaach);
+decRef(aaaaix);
+decRef(aaaabv);
+decRef(aaaacg);
+
+
+
+
+void* aaaaiy;
+aaaaiy = intstostring((void*) aaaach);
+void * aaaaiz = NULL;
+aaaaiz = aaaaci;
+aaaaci = aaaaiy;
+incRef(aaaaci);
+decRef(aaaaiz);
+decRef(aaaach);
+
+
+
+Integer* aaaaja;
+aaaaja = (Integer*) x3malloc(sizeof(Integer));
+(aaaaja->nrefs) = 0;
+aaaaja->value = 3;
+void * aaaajb = NULL;
+aaaajb = aaaacj;
+aaaacj = aaaaja;
+incRef(aaaacj);
+decRef(aaaajb);
+
+
+
+Integer* aaaajc;
+aaaajc = (Integer*) x3malloc(sizeof(Integer));
+(aaaajc->nrefs) = 0;
+aaaajc->value = 35;
+void * aaaajd = NULL;
+aaaajd = aaaack;
+aaaack = aaaajc;
+incRef(aaaack);
+decRef(aaaajd);
+
+
+
+Integer* aaaaje;
+aaaaje = (Integer*) x3malloc(sizeof(Integer));
+(aaaaje->nrefs) = 0;
+aaaaje->value = 40;
+void * aaaajf = NULL;
+aaaajf = aaaacl;
+aaaacl = aaaaje;
+incRef(aaaacl);
+decRef(aaaajf);
+
+
+
+Integer* aaaajh;
+aaaajh = (Integer*) x3malloc(sizeof(Integer));
+aaaajh->value = ((Integer *)aaaack)->value + 1;
+aaaajh->nrefs = 1;
+Iterable* aaaajg;
+aaaajg = (Iterable*) x3malloc(sizeof(Iterable));
+aaaajg->isIter = 1;
+aaaajg->nrefs = 0;
+aaaajg->value = aaaajh;
+aaaajg->additional = aaaacl;
+aaaajg->next = &Integer_through;
+aaaajg->concat = NULL;
+incRef(aaaacl);
+void * aaaaji = NULL;
+aaaaji = aaaacm;
+aaaacm = checkIter(aaaajg);
+incRef(aaaacm);
+decRef(aaaaji);
+decRef(aaaack);
+decRef(aaaacl);
+
+
+
+
+void* aaaajj;
+aaaajj = copy((void*) aaaacj, (void*) aaaacm);
+void * aaaajk = NULL;
+aaaajk = aaaacn;
+aaaacn = aaaajj;
+incRef(aaaacn);
+decRef(aaaajk);
+decRef(aaaacj);
+decRef(aaaacm);
+
+
+
+
+void* aaaajl;
+aaaajl = intstostring((void*) aaaacn);
+void * aaaajm = NULL;
+aaaajm = aaaaco;
+aaaaco = aaaajl;
+incRef(aaaaco);
+decRef(aaaajm);
+decRef(aaaacn);
+
+
+
+Iterable* aaaajn;
+aaaajn = (Iterable*) x3malloc(sizeof(Iterable));
+aaaajn->isIter = 1;
+aaaajn->nrefs = 1;
+aaaajn->value = aaaaci;
+aaaajn->additional = NULL;
+aaaajn->next = NULL;
+aaaajn->concat = NULL;
+incRef(aaaaci);
+aaaajn->nrefs = 0;
+void * aaaajo = NULL;
+aaaajo = aaaabs;
+aaaabs = aaaajn;
+incRef(aaaabs);
+decRef(aaaajo);
+decRef(aaaaci);
+
+
+
+Iterable* aaaajp;
+aaaajp = (Iterable*) x3malloc(sizeof(Iterable));
+aaaajp->isIter = 1;
+aaaajp->nrefs = 1;
+aaaajp->value = aaaaco;
+aaaajp->additional = NULL;
+aaaajp->next = NULL;
+aaaajp->concat = NULL;
+incRef(aaaaco);
+aaaajp->nrefs = 0;
+void * aaaajq = NULL;
+aaaajq = aaaabt;
+aaaabt = aaaajp;
+incRef(aaaabt);
+decRef(aaaajq);
+decRef(aaaaco);
+
+
+
+void *aaaajs;
+aaaajs = aaaabs;
+if (aaaajs!=NULL) {
+(*((int *)aaaajs))++;
+if ((*((int *)aaaabs+1)) == 0) {
+decRef(aaaajs);
+aaaajs = strToIter( ((String *)aaaabs)->value, ((String *)aaaabs)->len);
+incRef(aaaajs);
+}
+}
+void *aaaajt;
+aaaajt = aaaabt;
+if (aaaajt!=NULL) {
+(*((int *)aaaajt))++;
+if ((*((int *)aaaabt+1)) == 0) {
+decRef(aaaajt);
+aaaajt = strToIter( ((String *)aaaabt)->value, ((String *)aaaabt)->len);
+incRef(aaaajt);
+}
+}
+Iterable* aaaajr;
+aaaajr = concatenate((Iterable*)aaaajs, (Iterable*) aaaajt);
+decRef(aaaajs);
+decRef(aaaajt);
+void * aaaaju = NULL;
+aaaaju = retval;
+retval = aaaajr;
+incRef(retval);
+decRef(aaaaju);
+decRef(aaaabs);
+decRef(aaaabt);
 
 
 
 
 
 
-int aaaahn;
+int aaaajv;
 String* aaaaab= NULL;
-aaaahn = next_line_len();
-if(aaaahn == 0) {
+aaaajv = next_line_len();
+if(aaaajv == 0) {
 	input = NULL;
 }
 else {
@@ -1318,8 +1652,8 @@ else {
 	aaaaab->isIter = 0;
 	aaaaab->nrefs = 1;
 	aaaaab->isStr = 1;
-	aaaaab->value = (char*) x3malloc(aaaahn * sizeof(char));
-	aaaaab->len = aaaahn;
+	aaaaab->value = (char*) x3malloc(aaaajv * sizeof(char));
+	aaaaab->len = aaaajv;
 	read_line(aaaaab->value);
 	input = (Iterable*) x3malloc(sizeof(Iterable));
 	input->isIter = 1;
@@ -1329,181 +1663,181 @@ else {
 	input->next = &input_onwards;
 	input->concat = NULL;
 }
-void * aaaaho = NULL;
-aaaaho = i;
+void * aaaajw = NULL;
+aaaajw = i;
 i = input;
 incRef(i);
-decRef(aaaaho);
+decRef(aaaajw);
 decRef(input);
 	if (i!=NULL) {
 		if ((*((int *)(i+1))) == 0) {
-void * aaaahp = NULL;
-aaaahp = i;
+void * aaaajx = NULL;
+aaaajx = i;
 			i = strToIter( ((String *)i)->value, ((String *)i)->len);
 incRef(i);
-decRef(aaaahp);
+decRef(aaaajx);
 		}
 	}
 	while (i!=NULL) {
-Iterable * aaaaby = NULL;
-		aaaaby = (Iterable *)i;
-		incRef(aaaaby);
-void * aaaahq = NULL;
-aaaahq = i;
-		i = aaaaby->value;
+Iterable * aaaacp = NULL;
+		aaaacp = (Iterable *)i;
+		incRef(aaaacp);
+void * aaaajy = NULL;
+aaaajy = i;
+		i = aaaacp->value;
 		incRef(i);
-		decRef(aaaahq);
+		decRef(aaaajy);
 		
 
 
-void * aaaacc = NULL;
-void * aaaacd = NULL;
-void * aaaace = NULL;
-void * aaaacf = NULL;
-void * aaaaca = NULL;
-void * aaaacb = NULL;
-void * aaaabz = NULL;
+void * aaaact = NULL;
+void * aaaacu = NULL;
+void * aaaacv = NULL;
+void * aaaacw = NULL;
+void * aaaacr = NULL;
+void * aaaacs = NULL;
+void * aaaacq = NULL;
 
 
 
 
 
 
-Integer* aaaahr;
-aaaahr = (Integer*) x3malloc(sizeof(Integer));
-(aaaahr->nrefs) = 0;
-aaaahr->value = 10;
-void * aaaahs = NULL;
-aaaahs = aaaacc;
-aaaacc = aaaahr;
-incRef(aaaacc);
-decRef(aaaahs);
+Integer* aaaajz;
+aaaajz = (Integer*) x3malloc(sizeof(Integer));
+(aaaajz->nrefs) = 0;
+aaaajz->value = 10;
+void * aaaaka = NULL;
+aaaaka = aaaact;
+aaaact = aaaajz;
+incRef(aaaact);
+decRef(aaaaka);
 
 
 
-void * aaaaht = NULL;
-aaaaht = aaaacd;
-aaaacd = i;
-incRef(aaaacd);
-decRef(aaaaht);
+void * aaaakb = NULL;
+aaaakb = aaaacu;
+aaaacu = i;
+incRef(aaaacu);
+decRef(aaaakb);
 decRef(i);
 
 
 
 
-void* aaaahu;
-aaaahu = copy((void*) aaaacc, (void*) aaaacd);
-void * aaaahv = NULL;
-aaaahv = aaaace;
-aaaace = aaaahu;
-incRef(aaaace);
-decRef(aaaahv);
-decRef(aaaacc);
-decRef(aaaacd);
+void* aaaakc;
+aaaakc = copy((void*) aaaact, (void*) aaaacu);
+void * aaaakd = NULL;
+aaaakd = aaaacv;
+aaaacv = aaaakc;
+incRef(aaaacv);
+decRef(aaaakd);
+decRef(aaaact);
+decRef(aaaacu);
 
 
 
 
-	if (aaaace!=NULL) {
-		if ((*((int *)(aaaace+1))) == 0) {
-void * aaaahx = NULL;
-aaaahx = aaaace;
-			aaaace = strToIter( ((String *)aaaace)->value, ((String *)aaaace)->len);
-incRef(aaaace);
-decRef(aaaahx);
+	if (aaaacv!=NULL) {
+		if ((*((int *)(aaaacv+1))) == 0) {
+void * aaaakf = NULL;
+aaaakf = aaaacv;
+			aaaacv = strToIter( ((String *)aaaacv)->value, ((String *)aaaacv)->len);
+incRef(aaaacv);
+decRef(aaaakf);
 		}
 	}
-void* aaaahw;
-aaaahw = concatChars((Iterable*)aaaace);
-void * aaaahy = NULL;
-aaaahy = aaaacf;
-aaaacf = aaaahw;
-incRef(aaaacf);
-decRef(aaaahy);
-decRef(aaaace);
+void* aaaake;
+aaaake = concatChars((Iterable*)aaaacv);
+void * aaaakg = NULL;
+aaaakg = aaaacw;
+aaaacw = aaaake;
+incRef(aaaacw);
+decRef(aaaakg);
+decRef(aaaacv);
 
 
 
-void * aaaahz = NULL;
-aaaahz = aaaaca;
-aaaaca = retval;
-incRef(aaaaca);
-decRef(aaaahz);
+void * aaaakh = NULL;
+aaaakh = aaaacr;
+aaaacr = retval;
+incRef(aaaacr);
+decRef(aaaakh);
 decRef(retval);
 
 
 
-Iterable* aaaaia;
-aaaaia = (Iterable*) x3malloc(sizeof(Iterable));
-aaaaia->isIter = 1;
-aaaaia->nrefs = 1;
-aaaaia->value = aaaacf;
-aaaaia->additional = NULL;
-aaaaia->next = NULL;
-aaaaia->concat = NULL;
-incRef(aaaacf);
-aaaaia->nrefs = 0;
-void * aaaaib = NULL;
-aaaaib = aaaacb;
-aaaacb = aaaaia;
-incRef(aaaacb);
-decRef(aaaaib);
-decRef(aaaacf);
+Iterable* aaaaki;
+aaaaki = (Iterable*) x3malloc(sizeof(Iterable));
+aaaaki->isIter = 1;
+aaaaki->nrefs = 1;
+aaaaki->value = aaaacw;
+aaaaki->additional = NULL;
+aaaaki->next = NULL;
+aaaaki->concat = NULL;
+incRef(aaaacw);
+aaaaki->nrefs = 0;
+void * aaaakj = NULL;
+aaaakj = aaaacs;
+aaaacs = aaaaki;
+incRef(aaaacs);
+decRef(aaaakj);
+decRef(aaaacw);
 
 
 
-void *aaaaid;
-aaaaid = aaaaca;
-if (aaaaid!=NULL) {
-(*((int *)aaaaid))++;
-if ((*((int *)aaaaca+1)) == 0) {
-decRef(aaaaid);
-aaaaid = strToIter( ((String *)aaaaca)->value, ((String *)aaaaca)->len);
-incRef(aaaaid);
+void *aaaakl;
+aaaakl = aaaacr;
+if (aaaakl!=NULL) {
+(*((int *)aaaakl))++;
+if ((*((int *)aaaacr+1)) == 0) {
+decRef(aaaakl);
+aaaakl = strToIter( ((String *)aaaacr)->value, ((String *)aaaacr)->len);
+incRef(aaaakl);
 }
 }
-void *aaaaie;
-aaaaie = aaaacb;
-if (aaaaie!=NULL) {
-(*((int *)aaaaie))++;
-if ((*((int *)aaaacb+1)) == 0) {
-decRef(aaaaie);
-aaaaie = strToIter( ((String *)aaaacb)->value, ((String *)aaaacb)->len);
-incRef(aaaaie);
+void *aaaakm;
+aaaakm = aaaacs;
+if (aaaakm!=NULL) {
+(*((int *)aaaakm))++;
+if ((*((int *)aaaacs+1)) == 0) {
+decRef(aaaakm);
+aaaakm = strToIter( ((String *)aaaacs)->value, ((String *)aaaacs)->len);
+incRef(aaaakm);
 }
 }
-Iterable* aaaaic;
-aaaaic = concatenate((Iterable*)aaaaid, (Iterable*) aaaaie);
-decRef(aaaaid);
-decRef(aaaaie);
-void * aaaaif = NULL;
-aaaaif = retval;
-retval = aaaaic;
+Iterable* aaaakk;
+aaaakk = concatenate((Iterable*)aaaakl, (Iterable*) aaaakm);
+decRef(aaaakl);
+decRef(aaaakm);
+void * aaaakn = NULL;
+aaaakn = retval;
+retval = aaaakk;
 incRef(retval);
-decRef(aaaaif);
-decRef(aaaaca);
-decRef(aaaacb);
+decRef(aaaakn);
+decRef(aaaacr);
+decRef(aaaacs);
 
 
 
-void * aaaaig = NULL;
-aaaaig = aaaabz;
-aaaabz = aaaaby;
-incRef(aaaabz);
-decRef(aaaaig);
-decRef(aaaaby);
+void * aaaako = NULL;
+aaaako = aaaacq;
+aaaacq = aaaacp;
+incRef(aaaacq);
+decRef(aaaako);
+decRef(aaaacp);
 
 
 
 
-void* aaaaih;
-aaaaih = iterGetNext((void*) aaaabz);
-void * aaaaii = NULL;
-aaaaii = i;
-i = aaaaih;
+void* aaaakp;
+aaaakp = iterGetNext((void*) aaaacq);
+void * aaaakq = NULL;
+aaaakq = i;
+i = aaaakp;
 incRef(i);
-decRef(aaaaii);
-decRef(aaaabz);
+decRef(aaaakq);
+decRef(aaaacq);
 	}
 decRef(i);
 
