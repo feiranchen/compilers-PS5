@@ -199,9 +199,9 @@ class AssignStat extends CuStat{
 	}
 	
 	@Override public String toC(ArrayList<String> localVars) {
-		//if dead, don't print anything
+		//if dead, we still need to print the definition
 		if (dead) {
-			super.ctext = "";
+			super.ctext = "void * " + var.toString() +" = NULL;\n";;
 			return super.ctext;
 		}
 		String exp_toC = ee.toC(localVars);

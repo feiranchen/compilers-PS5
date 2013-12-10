@@ -4194,6 +4194,9 @@ Helper.P(" 1mapping is " + mapping.toString());
 			exp.add(types, newEs);
 			exp.use = use;
 			
+			//should have a clone mythod,for now, simply copying -- Yinglei
+			((VvExp)exp).retype = this.retype;
+			
 			exp.boxed = this.boxed;
 			exp.expType = this.expType;
 			
@@ -4362,8 +4365,17 @@ Helper.P(" 1mapping is " + mapping.toString());
 			}
 			
 				
+			//commented out by Yinglei
+			//super.castType = Helper.cFunType.get(val);
+			//added by Yinglei
+			if (this.retype!=null){
+				super.castType = this.retype.id;
+				super.iterType = this.retype.type.id;
+			}
+			else
+				super.castType = Helper.cFunType.get(val);
 			
-			super.castType = Helper.cFunType.get(val);
+			
 			super.name += "\n";
 			
 			if (es == null)
@@ -4394,6 +4406,34 @@ Helper.P(" 1mapping is " + mapping.toString());
 			temp += ")";
 			name += "void* " + varName + ";\n"
 					+ varName + " = " + val.toString() + temp + ";\n"; 
+			
+			//if(val.toString().equals("test")) {
+			//	System.out.println("vv is test func call");
+			//}
+			
+			//added by Yinglei, should also set isIter isString field
+			if (this.retype!=null) {
+				if (this.retype.id.equals("String")) {
+					name += "((String*)" + varName + ")->isIter=0;\n";
+					name += "((String*)" + varName + ")->isStr=1;\n";
+				}
+				if (this.retype.id.equals("Iterable")) {
+					name += "((Iterable*)" + varName + ")->isIter=1;\n";
+					name += "((Iterable*)" + varName + ")->isStr=0;\n";
+				}
+				if (this.retype.id.equals("Integer")) {
+					name += "((Integer*)" + varName + ")->isIter=0;\n";
+					name += "((Integer*)" + varName + ")->isStr=0;\n";
+				}
+				if (this.retype.id.equals("Boolean")) {
+					name += "((Boolean*)" + varName + ")->isIter=0;\n";
+					name += "((Boolean*)" + varName + ")->isStr=0;\n";
+				}
+				if (this.retype.id.equals("Character")) {
+					name += "((Character*)" + varName + ")->isIter=0;\n";
+					name += "((Character*)" + varName + ")->isStr=0;\n";
+				}
+			}
 			super.cText= varName;
 			
 			//def.add(varName);
