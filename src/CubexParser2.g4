@@ -13,7 +13,7 @@ vc returns [CuVvc v]
 	: vvv = CLSINTF {$v = new Vc($vvv.text);};
 	
 vv returns [CuVvc v]
-	: vvv = VAR {$v = new Vv($vvv.text);};	
+	: vvv = VAR {$v = new Vv($vvv.text + "_");};	
 
 kindcontext returns [List<String> kc]
 : {$kc = new ArrayList<String>();}
@@ -23,8 +23,8 @@ kindcontext returns [List<String> kc]
 
 typecontext returns [Map<String,CuType> tc]
 : {$tc = new LinkedHashMap<String,CuType>(); }
-  LPAREN (VAR COLON t=type { $tc.put($VAR.text, $t.t); } 
-  (COMMA VAR COLON t=type { $tc.put($VAR.text, $t.t); })*)? 
+  LPAREN (VAR COLON t=type { $tc.put($VAR.text + "_", $t.t); } 
+  (COMMA VAR COLON t=type { $tc.put($VAR.text + "_", $t.t); })*)? 
   RPAREN;
 
 paratype returns [List<CuType> pt]
@@ -47,7 +47,7 @@ typescheme returns [CuTypeScheme ts]
 
 expr returns [CuExpr e]
 : LPAREN ex=expr RPAREN {$e = $ex.e;}
-| VAR {$e = new VvExp($VAR.text);}
+| VAR {$e = new VvExp($VAR.text + "_");}
   (pt=paratype LPAREN es=exprs RPAREN {$e.add($pt.pt, $es.cu);})?
 | CLSINTF pt=paratype LPAREN es=exprs RPAREN {$e = new VcExp($CLSINTF.text, $pt.pt, $es.cu);}
 | ex=expr DOT VAR pt=paratype LPAREN es=exprs RPAREN {$e = new VarExpr($ex.e, $VAR.text, $pt.pt, $es.cu);} 
