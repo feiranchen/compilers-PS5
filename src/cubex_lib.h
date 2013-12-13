@@ -83,6 +83,7 @@ Iterable* Integer_through(void* head){
 	else {
 		Iterable* this=x3malloc(sizeof(Iterable));
 		this->isIter = 1;
+		this->isStr = 0;
 		this->nrefs=0;
 		 
 		this->value = (Integer*)x3malloc(sizeof(Integer));
@@ -110,6 +111,7 @@ Iterable* input_onwards(void* head){
 	if (len != 0) {
 		this = x3malloc(sizeof(Iterable));
 		this->isIter=1;
+		this->isStr=0;
 		this->nrefs=1; 
 		this->value = x3malloc(sizeof(String));
 		((String*) this->value)->isIter = 0;
@@ -117,6 +119,8 @@ Iterable* input_onwards(void* head){
 		((String*) this->value)->value = (char*) x3malloc(len* sizeof(char));
 		read_line(((String*) this->value)->value);
 		((String*) this->value)->nrefs = 1;
+		((String*) this->value)->isIter = 0;
+		((String*) this->value)->isStr = 0;
 		((String*) this->value)->len = len;
 		this->additional=NULL;
 		this->next=last->next;	
@@ -258,6 +262,7 @@ Iterable* concatenate(Iterable* fst, Iterable* snd){
 		head = (Iterable*) x3malloc(sizeof(Iterable)); 
 		head->nrefs = 0;
 		head->isIter = 1;
+		head->isStr = 0;
 		head->value = fst->value;
 		if (head->value != NULL)
 			(*(int *)(head->value))++;
@@ -281,6 +286,7 @@ Iterable* concatenate(Iterable* fst, Iterable* snd){
 				if (temp != NULL) {
 					temp2 = (Iterable*) x3malloc(sizeof(Iterable)); 
 					temp2->nrefs = 1;
+					temp2->isStr = 0;
 					temp2->isIter = 1;
 					temp2->value = temp->value;
 					if (temp2->value!= NULL)
@@ -305,6 +311,7 @@ Iterable* concatenate(Iterable* fst, Iterable* snd){
 				
 				temp2 = (Iterable*) x3malloc(sizeof(Iterable)); 
 				temp2->nrefs = 1;
+				temp2->isStr = 0;
 				temp2->isIter = 1;
 				temp2->value = temp->value;
 				if (temp2->value!= NULL)
@@ -333,6 +340,7 @@ Iterable* concatenate(Iterable* fst, Iterable* snd){
 	Iterable* second = (Iterable*) x3malloc(sizeof(Iterable)); 
 	second->nrefs = 0;
 	second->isIter = 1;
+	second->isStr = 0;
 	second->value = snd->value;
 	if (second->value != NULL)
 		(*(int *)(second->value))++;
@@ -356,6 +364,7 @@ Iterable* concatenate(Iterable* fst, Iterable* snd){
 			if (temp != NULL) {
 				temp2 = (Iterable*) x3malloc(sizeof(Iterable)); 
 				temp2->nrefs = 1;
+				temp2->isStr = 0;
 				temp2->isIter = 1;
 				temp2->value = temp->value;
 				if (temp2->value!= NULL)
@@ -381,6 +390,7 @@ Iterable* concatenate(Iterable* fst, Iterable* snd){
 			
 			temp2 = (Iterable*) x3malloc(sizeof(Iterable)); 
 			temp2->nrefs = 1;
+			temp2->isStr = 0;
 			temp2->isIter = 1;
 			temp2->value = temp->value;
 			if (temp2->value!= NULL)
@@ -418,6 +428,7 @@ Iterable* Integer_onwards(void* head){
 	last = (Iterable*) head;
 	this = x3malloc(sizeof(Iterable));
 	this->isIter = 1;
+	this->isStr = 0;				
 	this->nrefs=0; 
 	(((Integer*)(last->value))->value)++;
 	this->value = last->value;
@@ -484,6 +495,7 @@ String* concatChars(Iterable *charIter){
 	String* new = (String*) x3malloc(sizeof(String));
 	new->nrefs = 0;
 	new->isIter = 0;
+	new->isStr = 1;
 	new->value = (char*) x3malloc(sizeof(char)*count);
 	mystrcpy(new->value, combined);
 	x3free(combined);
@@ -497,6 +509,7 @@ Iterable* strToIter (char* input, int length){
   Iterable *curr;
   curr=(Iterable*) x3malloc(sizeof(Iterable));
   curr->isIter = 1;
+  curr->isStr = 0;
   Iterable *result;
   result=curr;
   int i=0;
@@ -504,11 +517,14 @@ Iterable* strToIter (char* input, int length){
     Iterable* temp;
     temp = (Iterable*) x3malloc(sizeof(Iterable));
     temp->isIter = 1;
+    temp->isStr = 0;
     Character* v;
     v = (Character*) x3malloc(sizeof(Character));
     v->value = input[i];
     temp->value=v;
     v->nrefs = 1;
+    v->isStr = 0;
+    v->isIter = 0;
     temp->nrefs=1;
     temp->next=NULL;
     temp->concat=NULL;
