@@ -4230,8 +4230,10 @@ Helper.P(" 1mapping is " + mapping.toString());
 				//String iterNew = Helper.getVarName();
 				iter = "input_";
 								
-				if(!initialized) {
+				//if(!initialized) {
 					iter = "input_";
+					
+					name += "if (!initialized_pqr) {\n";
 				
 					name += "int " + len + ";\n"
 					    //commented out by Yinglei because input is a global variable
@@ -4257,31 +4259,33 @@ Helper.P(" 1mapping is " + mapping.toString());
 						+ iter + "->value = " + temp + ";\n\t"
 						+ iter + "->additional = NULL;\n\t"
 						+ iter + "->next = &input_onwards;\n\t"
-						+ iter + "->concat = NULL;\n}\n";
-				
+						+ iter + "->concat = NULL;\n}\n"
+						+ "initialized_pqr = 1;\n}\n";
+					
+					
 		
 					Helper.cVarType.put(temp, "String");
 				
 					Helper.cVarType.put(iter, "Iterable");
 					cText = iter;
-					initialized = true;
+//					initialized = true;
 					
 					//def.add(temp);
-				}
-				else {
-					/*name += "Iterable* " + iterNew + ";\n"
-							+ iterNew + " = (Iterable*) x3malloc(sizeof(Iterable));\n"
-							+ iterNew + "->isIter = 1;\n"
-							+ iterNew + "->nrefs = 0;\n"
-							+ iterNew + "->value = " + temp + ";\n"
-							+ iterNew + "->additional = ((Iterable*)" + iter + ")->additional;\n"
-							+ iterNew + "->next = NULL;\n"
-							+ iterNew + "->concat = NULL;\n";
-								
-					name += Helper.incrRefCount(temp);
-					*/
-					cText = iter;//iterNew;
-				}
+//				}
+//				else {
+//					/*name += "Iterable* " + iterNew + ";\n"
+//							+ iterNew + " = (Iterable*) x3malloc(sizeof(Iterable));\n"
+//							+ iterNew + "->isIter = 1;\n"
+//							+ iterNew + "->nrefs = 0;\n"
+//							+ iterNew + "->value = " + temp + ";\n"
+//							+ iterNew + "->additional = ((Iterable*)" + iter + ")->additional;\n"
+//							+ iterNew + "->next = NULL;\n"
+//							+ iterNew + "->concat = NULL;\n";
+//								
+//					name += Helper.incrRefCount(temp);
+//					*/
+//					cText = iter;//iterNew;
+//				}
 				
 				//use.add(val);
 				return super.toC(localVars);

@@ -482,6 +482,7 @@ String* concatChars(Iterable *charIter){
 	x3free((char*)prev);
 	combined[count]='\0';
 	String* new = (String*) x3malloc(sizeof(String));
+	new->nrefs = 0;
 	new->isIter = 0;
 	new->value = (char*) x3malloc(sizeof(char)*count);
 	mystrcpy(new->value, combined);
