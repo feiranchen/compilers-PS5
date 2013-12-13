@@ -1,0 +1,7 @@
+i:=1;
+c:=[7];
+ret := [];
+for (j in c)
+	ret := ret ++ "hello";
+
+return ret; 
