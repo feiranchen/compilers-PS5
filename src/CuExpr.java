@@ -920,7 +920,7 @@ class CInteger extends CuExpr {
 				+ "%s->nrefs = 0;\n"
 				+ "%s->isStr = 0;\n"
 				+ "%s->isIter = 0;\n"
-				+ "%s->value = %d;\n", temp, temp, temp, temp, val);		
+				+ "%s->value = %d;\n", temp, temp, temp, temp, temp, temp, val);		
 		super.cText = temp;
 		super.castType = "Integer";
 		//if (!localVars.contains(temp))
@@ -3079,7 +3079,7 @@ class PlusExpr extends CuExpr{
 				+ "%s->nrefs = 0;\n"
 				+ "%s->isStr = 0;\n"
 				+ "%s->isIter = 0;\n"
-				+ "%s->value=", temp, temp, temp, temp);
+				+ "%s->value=", temp, temp, temp, temp, temp, temp);
 		super.name += String.format("((%s*)%s)->value + ((%s*)%s)->value;\n", "Integer", leftToC, "Integer", rightToC);			
 		
 		/*if (!localVars.contains(temp))
@@ -4513,7 +4513,7 @@ Helper.P(" 1mapping is " + mapping.toString());
 			//}
 			
 			//added by Yinglei, should also set isIter isString field
-			if (this.retype!=null) {
+			/*if (this.retype!=null) {
 				if (this.retype.id.equals("String")) {
 					name += "((String*)" + varName + ")->isIter=0;\n";
 					name += "((String*)" + varName + ")->isStr=1;\n";
@@ -4534,7 +4534,7 @@ Helper.P(" 1mapping is " + mapping.toString());
 					name += "((Character*)" + varName + ")->isIter=0;\n";
 					name += "((Character*)" + varName + ")->isStr=0;\n";
 				}
-			}
+			}*/
 			super.cText= varName;
 			
 			//def.add(varName);
