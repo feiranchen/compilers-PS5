@@ -3364,7 +3364,7 @@ class ThroughExpr extends CuExpr{
 				
 				String ret = Helper.getVarName();
 				
-				name += ret + "checkIter(" + iter + ")"; 
+				name += "void* " + ret + "checkIter(" + iter + ");\n"; 
 				cText = ret;
 			}
 		}
@@ -3437,7 +3437,7 @@ class ThroughExpr extends CuExpr{
 				
 				String ret = Helper.getVarName();
 				
-				name += ret + "checkIter(" + iter + ")"; 
+				name += "void* " + ret + "checkIter(" + iter + ");\n"; 
 				cText = ret;
 			}
 		}
@@ -3511,7 +3511,12 @@ class ThroughExpr extends CuExpr{
 				if(leftC.equals(""))
 					name += Helper.incrRefCount(leftToC);
 				
-				cText = iter;
+				String ret = Helper.getVarName();
+				
+				name += "void* " + ret + "checkIter(" + iter + ");\n"; 
+				cText = ret;
+				
+				//cText = iter;
 			}					
 		}
 		else {
@@ -3568,7 +3573,7 @@ class ThroughExpr extends CuExpr{
 				
 				String ret = Helper.getVarName();
 				
-				name += ret + "checkIter(" + iter + ")"; 
+				name += "void* " + ret + "checkIter(" + iter + ");\n"; 
 				cText = ret;
 			}
 		}
