@@ -514,6 +514,7 @@ Helper.P("common parent of types is " + type.toString());
 			iterType = rightIterType;
 		else if (rightIterType.equals("Empty"))
 			iterType = leftIterType;
+		//this only applies to basic types, if we were to include classes, this has to be changed
 		else
 			iterType = "Thing";
 		
@@ -4215,10 +4216,21 @@ Helper.P(" 1mapping is " + mapping.toString());
 			super.castType = Helper.cVarType.get(val.toString());
 			super.iterType = Helper.iterType.get(val.toString());
 			
-			if(castType == null)
-				castType = "";
-			if(super.iterType == null)
-				super.iterType = "";
+			//added by Yinglei
+			if (this.retype!=null){
+				super.castType = this.retype.id;
+				super.iterType = this.retype.type.id;
+			}
+			else {
+				super.castType = Helper.cVarType.get(val.toString());
+				super.iterType = Helper.iterType.get(val.toString());
+				
+				
+				if(castType == null)
+					castType = "";
+				if(super.iterType == null)
+					super.iterType = "";
+			}
 			
 			//use.add(val);
 			
@@ -4372,8 +4384,10 @@ Helper.P(" 1mapping is " + mapping.toString());
 				super.castType = this.retype.id;
 				super.iterType = this.retype.type.id;
 			}
-			else
+			else {
 				super.castType = Helper.cFunType.get(val);
+				super.iterType = Helper.iterType.get(val);
+			}
 			
 			
 			super.name += "\n";
@@ -4412,7 +4426,7 @@ Helper.P(" 1mapping is " + mapping.toString());
 			//}
 			
 			//added by Yinglei, should also set isIter isString field
-			if (this.retype!=null) {
+			/*if (this.retype!=null) {
 				if (this.retype.id.equals("String")) {
 					name += "((String*)" + varName + ")->isIter=0;\n";
 					name += "((String*)" + varName + ")->isStr=1;\n";
@@ -4433,12 +4447,23 @@ Helper.P(" 1mapping is " + mapping.toString());
 					name += "((Character*)" + varName + ")->isIter=0;\n";
 					name += "((Character*)" + varName + ")->isStr=0;\n";
 				}
-			}
+			} */
 			super.cText= varName;
 			
 			//def.add(varName);
 			//use.add(val);
 		}
 		return super.toC(localVars);
+	}
+	
+	@Override
+	public String getIterType() {
+		
+		if (this.retype == null)
+			return iterType;
+		else {
+			return this.retype.type.id;
+		}
+		
 	}
 }
