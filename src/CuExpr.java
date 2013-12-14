@@ -2274,7 +2274,7 @@ class ModuloExpr extends CuExpr{
 				+ "\t%s->nrefs = 0;\n"
 				+ "\t%s->isIter = 0;\n"
 				+ "\t%s->isStr = 0;\n"
-				+ "\t%s->value=", intName, intName, intName);
+				+ "\t%s->value=", intName, intName, intName, intName, intName);
 		super.name += String.format("((%s*)%s)->value %% ((%s*)%s)->value;\n", "Integer", leftToC, "Integer", rightToC);	
 		
 		super.name += "\t" + temp + " = (Iterable*) x3malloc(sizeof(Iterable));\n\t"
