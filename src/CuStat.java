@@ -1051,10 +1051,16 @@ class ReturnStat extends CuStat{
 		return new HashSet<String>();
 	}
 	@Override public CuStat toHIR() {
-		//this is the only place I didn't assign an expression to a variable, I think this is OK
 		Pair<List<CuStat>, CuExpr> pa =  e.toHIR();
 		List<CuStat> curHIR = pa.getFirst();
-		curHIR.add(new ReturnStat(pa.getSecond()));
+		//added for fix
+		String name1 = Helper.getVarName();
+		CuVvc temp1 = new Vv(name1);
+		CuStat a = new AssignStat(temp1, pa.getSecond());
+		curHIR.add(a);
+		CuExpr temp_expr = new VvExp(name1);
+		curHIR.add(new ReturnStat(temp_expr));
+		//end of added for fix
 		super.HIR = new Stats(curHIR);
 		return super.HIR;
 	}
