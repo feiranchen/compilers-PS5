@@ -114,15 +114,15 @@ public class CuContext {
 		HashMap<String, CuType> arg = new LinkedHashMap<String, CuType>();
 		arg.put("unicode",CuType.integer);
 		TypeScheme chararcterFunTemp = new TypeScheme(new ArrayList<String>(), arg, CuType.character); 
-		mFunctions.put("character", chararcterFunTemp);
+		mFunctions.put("character_", chararcterFunTemp);
 		//string
 		arg = new LinkedHashMap<String, CuType>();
 		arg.put("characters",new Iter(CuType.character));
 		TypeScheme stringFunTemp = new TypeScheme(new ArrayList<String>(), arg, CuType.string); 
-		mFunctions.put("string", stringFunTemp);
+		mFunctions.put("string_", stringFunTemp);
 		
 		//=====Type init===========
-		mVariables.put("input",CuType.iterable(new ArrayList<CuType>(){{add(CuType.string);}}));
+		mVariables.put("input_",CuType.iterable(new ArrayList<CuType>(){{add(CuType.string);}}));
 	}
 }
 

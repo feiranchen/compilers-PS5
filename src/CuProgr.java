@@ -78,28 +78,9 @@ class FullPrg extends CuProgr {
 	}
 	
 	@Override public void buildSets() {
-		
-		//first build the use def sets
-		//the same way as dealing with stats
-		CuStat temp = new Stats(statements);
-		temp.setUseDef();
-		
-		//next, iteratively build the in out sets
-		nodes = Helper.buildSet(entry);
-		//dead code elimination
 		boolean nothingDies = false;
-		while (!nothingDies) {
-			nothingDies = true;
-			for (CuStat cs : nodes) {
-				cs.resetInOutSet();
-			}
-			nodes = Helper.buildSet(entry);
-			for (CuStat cs : nodes) {
-				if (cs.dies())
-					nothingDies = false;
-			}
-		}
-		
+		//first do functions, because we need to know the global variables that
+		//each function uses
 		for (CuProgr pr : elements) {
 			if (pr instanceof ClassPrg) {
 				//TO Do, probably never do
@@ -107,6 +88,7 @@ class FullPrg extends CuProgr {
 			else if (pr instanceof FunPrg) {
 				((FunPrg) pr).statement.setUseDef();
 				pr.nodes = Helper.buildSet(pr.entry);
+				
 				nothingDies = false;
 				while (!nothingDies) {
 					nothingDies = true;
@@ -119,6 +101,38 @@ class FullPrg extends CuProgr {
 							nothingDies = false;
 					}
 				}
+				ArrayList<String> gvars_used = new ArrayList<String>();
+				for (String str : pr.entry.inV) {
+					//for in set elements, if it is not in the argument list, it 
+					//should be a global variable
+					if (!((FunPrg) pr).typeScheme.data_tc.keySet().contains(str)) {
+						gvars_used.add(str);
+					}
+				}
+				Helper.fun_gvars.put(((FunPrg) pr).name, gvars_used);
+				
+				//global variables should all go out
+				CuStat lastnode = ((FunPrg) pr).statement.getLast();
+				if (Helper.debug) {
+					System.out.println("last node of the function is " + lastnode.toString());
+				}
+				for(String str : gvars_used) {
+					if (!lastnode.useV.contains(str)) {
+						lastnode.useV.add(str);
+					}
+					//if (!lastnode.outV.contains(str)) {
+					//	lastnode.outV.add(str);
+					//}
+				}
+				//needs to build set again
+				pr.nodes = Helper.buildSet(pr.entry);
+				//added it to outV so that they won't get deallocated
+				for(String str : gvars_used) {
+					if (!lastnode.outV.contains(str)) {
+						lastnode.outV.add(str);
+					}
+				} 
+				
 				
 				//if the argument variable is not in the in set, put it in the in set
 				for (String str : ((FunPrg) pr).typeScheme.data_tc.keySet()) {
@@ -128,6 +142,28 @@ class FullPrg extends CuProgr {
 				}
 			}
 		}
+		
+		//first build the use def sets
+		//the same way as dealing with stats
+		CuStat temp = new Stats(statements);
+		temp.setUseDef();
+		
+		//next, iteratively build the in out sets
+		nodes = Helper.buildSet(entry);
+		//dead code elimination
+		nothingDies = false;
+		while (!nothingDies) {
+			nothingDies = true;
+			for (CuStat cs : nodes) {
+				cs.resetInOutSet();
+			}
+			nodes = Helper.buildSet(entry);
+			for (CuStat cs : nodes) {
+				if (cs.dies())
+					nothingDies = false;
+			}
+		}
+		
 	}
 	
 	@Override public String toC(ArrayList<String> localVars) {
@@ -167,6 +203,10 @@ class FullPrg extends CuProgr {
 				  "#include \"cubex_main.h\"\n"
 				+ "#include \"cubex_external_functions.h\"\n"
 				+ "#include \"cubex_lib.h\"\n\n";
+		
+		//input is a global variable
+		super.ctext += "Iterable* " + "input_" + "= NULL;\n"
+				+ "int initialized_pqr = 0;\n";
 		
     	for (String str : gVars) {
     		super.ctext += "void * " + str + " = NULL;\n";

@@ -2,6 +2,8 @@
 #include "cubex_main.h"
 #include "cubex_private.h"
 
+#include <stdio.h>
+
 extern int nmalloc = 0;
 extern int nfree = 0;
 

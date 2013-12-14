@@ -11,7 +11,9 @@ import java.util.regex.*;
 
 public class Helper {
 	//change this to false when submit
-	protected static boolean debug = false;
+	protected static boolean debug = true;
+	//fix for use set of function calls, global variables used in the function call
+	protected static HashMap<String, List<String>> fun_gvars = new HashMap<String, List<String>>();
 	//switch for primitive optimization
 	protected static boolean opt_primitive = true;
 	//added for primitive optimization, unboxed variables, from name to type

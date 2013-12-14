@@ -113,7 +113,7 @@ public class CubexParser2 extends Parser {
 			enterOuterAlt(_localctx, 1);
 			{
 			setState(37); ((VvContext)_localctx).vvv = match(VAR);
-			((VvContext)_localctx).v =  new Vv((((VvContext)_localctx).vvv!=null?((VvContext)_localctx).vvv.getText():null));
+			((VvContext)_localctx).v =  new Vv((((VvContext)_localctx).vvv!=null?((VvContext)_localctx).vvv.getText():null) + "_");
 			}
 		}
 		catch (RecognitionException re) {
@@ -246,7 +246,7 @@ public class CubexParser2 extends Parser {
 				setState(59); ((TypecontextContext)_localctx).VAR = match(VAR);
 				setState(60); match(COLON);
 				setState(61); ((TypecontextContext)_localctx).t = type();
-				 _localctx.tc.put((((TypecontextContext)_localctx).VAR!=null?((TypecontextContext)_localctx).VAR.getText():null), ((TypecontextContext)_localctx).t.t); 
+				 _localctx.tc.put((((TypecontextContext)_localctx).VAR!=null?((TypecontextContext)_localctx).VAR.getText():null) + "_", ((TypecontextContext)_localctx).t.t); 
 				setState(71);
 				_errHandler.sync(this);
 				_la = _input.LA(1);
@@ -257,7 +257,7 @@ public class CubexParser2 extends Parser {
 					setState(64); ((TypecontextContext)_localctx).VAR = match(VAR);
 					setState(65); match(COLON);
 					setState(66); ((TypecontextContext)_localctx).t = type();
-					 _localctx.tc.put((((TypecontextContext)_localctx).VAR!=null?((TypecontextContext)_localctx).VAR.getText():null), ((TypecontextContext)_localctx).t.t); 
+					 _localctx.tc.put((((TypecontextContext)_localctx).VAR!=null?((TypecontextContext)_localctx).VAR.getText():null) + "_", ((TypecontextContext)_localctx).t.t); 
 					}
 					}
 					setState(73);
@@ -644,7 +644,7 @@ public class CubexParser2 extends Parser {
 			case VAR:
 				{
 				setState(139); ((ExprContext)_localctx).VAR = match(VAR);
-				((ExprContext)_localctx).e =  new VvExp((((ExprContext)_localctx).VAR!=null?((ExprContext)_localctx).VAR.getText():null));
+				((ExprContext)_localctx).e =  new VvExp((((ExprContext)_localctx).VAR!=null?((ExprContext)_localctx).VAR.getText():null) + "_");
 				setState(147);
 				switch ( getInterpreter().adaptivePredict(_input,11,_ctx) ) {
 				case 1:

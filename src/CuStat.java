@@ -199,9 +199,9 @@ class AssignStat extends CuStat{
 	}
 	
 	@Override public String toC(ArrayList<String> localVars) {
-		//if dead, don't print anything
+		//if dead, we still need to print the definition
 		if (dead) {
-			super.ctext = "";
+			super.ctext = "void * " + var.toString() +" = NULL;\n";;
 			return super.ctext;
 		}
 		String exp_toC = ee.toC(localVars);
@@ -462,6 +462,9 @@ class ForStat extends CuStat{
 	private CuVvc var;
 	private CuExpr e;
 	private CuStat s1;
+	
+	private CuType iter_type;
+	
 	public ForStat(CuVvc v, CuExpr ee, CuStat ss) {
 		var = v;
 		e = ee;
@@ -509,7 +512,7 @@ class ForStat extends CuStat{
 		curHIR.add(new ConvertToIter(var.toString()));
 		//we need to call it here to get the name
 		String iter_name = Helper.getVarName();
-		CuStat temp = new ForToWhileStat(var.toString(), iter_name, s1, e.getIterType());
+		CuStat temp = new ForToWhileStat(var.toString(), iter_name, s1, this.iter_type.id);
 		curHIR.add(temp.toHIR());
 		super.HIR = new Stats(curHIR);
 		return super.HIR;
@@ -608,7 +611,7 @@ Helper.P(String.format("FOR %s is %s<%s>", e, eType, eType.map));
     		throw new NoSuchTypeException(Helper.getLineInfo()); 
     	}
     	//System.out.println("etype is " + eType.toString());
-    	CuType iter_type = eType.type;
+    	iter_type = eType.type;
     	//System.out.println("variable type is " + iter_type.id);
     	CuContext s_context = new CuContext(context);
     	s_context.updateMutType(this.var.toString(), iter_type);
@@ -735,11 +738,13 @@ class IfStat extends CuStat{
 	
     
 	@Override public void buildCFG() {
-		s1.getLast().successors = super.successors;
+		s1.getLast().successors = new ArrayList<CuStat>();
+		s1.getLast().successors.addAll(super.successors);
 		//recursively buildCFG
 		s1.buildCFG();
 		if (s2!=null) {
-			s2.getLast().successors = super.successors;
+			s2.getLast().successors = new ArrayList<CuStat>();
+			s2.getLast().successors.addAll(super.successors);
 			super.successors = new ArrayList<CuStat>();
 			super.successors.add(s2.getFirst());
 			//s1 is always the second successor
@@ -1046,10 +1051,16 @@ class ReturnStat extends CuStat{
 		return new HashSet<String>();
 	}
 	@Override public CuStat toHIR() {
-		//this is the only place I didn't assign an expression to a variable, I think this is OK
 		Pair<List<CuStat>, CuExpr> pa =  e.toHIR();
 		List<CuStat> curHIR = pa.getFirst();
-		curHIR.add(new ReturnStat(pa.getSecond()));
+		//added for fix
+		String name1 = Helper.getVarName();
+		CuVvc temp1 = new Vv(name1);
+		CuStat a = new AssignStat(temp1, pa.getSecond());
+		curHIR.add(a);
+		CuExpr temp_expr = new VvExp(name1);
+		curHIR.add(new ReturnStat(temp_expr));
+		//end of added for fix
 		super.HIR = new Stats(curHIR);
 		return super.HIR;
 	}
