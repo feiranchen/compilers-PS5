@@ -1,0 +1,29 @@
+#Test: stage1test9
+#arithmetic operators
+#[Stage 1]
+
+#Program:
+bools := [(-6 < -90), (11 + 1 == 100), (36 - 6 == 3), (3 * 89 == 267)];
+
+bool := false;
+for (x in 484%9) {
+	if (x == 7) {
+		bool := true;
+	}
+}
+for (x in 73%0) {
+	bool := false;
+}
+bools := bools++[bool];
+
+str := "";
+for (b in bools) {
+	if (b) {
+		str := str++"t";
+	}
+	else {
+		str := str++"f";
+	}
+}
+return [string(str)];
+

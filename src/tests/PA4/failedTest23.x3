@@ -1,0 +1,7 @@
+#Test: stage1test2
+#multi-line output
+#[Stage 1]
+
+#Program:
+return ["What"]++["Up"]++["Tho?"];
+

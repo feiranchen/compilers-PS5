@@ -1,0 +1,8 @@
+#Test: stage2test2a
+#non-generic functions
+#[Stage 2]
+
+#Program:
+fun myinitial() : String = "Hello World!";
+
+return [myinitial()];

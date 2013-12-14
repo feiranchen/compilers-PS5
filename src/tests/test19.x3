@@ -1,3 +1,0 @@
-fun myinitial() : String = string([character(66)]);
-
-return [myinitial()];

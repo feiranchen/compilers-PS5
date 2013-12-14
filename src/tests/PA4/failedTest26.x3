@@ -1,0 +1,7 @@
+#Test: stage1test1
+#one-line output
+#[Stage 1]
+
+#Program:
+return ["Hello world!!..."];
+
