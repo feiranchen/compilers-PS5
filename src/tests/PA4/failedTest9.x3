@@ -1,0 +1,7 @@
+#Test: stage1test3
+#reading and printing input
+#[Stage 1]
+
+#Program:
+return input;
+

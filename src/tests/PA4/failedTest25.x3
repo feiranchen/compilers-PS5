@@ -1,0 +1,8 @@
+#Test: stage3test6
+#generic functions
+#[Stage 3]
+
+#Program:
+fun id<T>(x : T) : T = x;
+return [id<String>("Hi World!")];
+

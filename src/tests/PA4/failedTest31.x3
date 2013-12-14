@@ -1,0 +1,13 @@
+#Test: X3Test1
+#(No description)
+#[Stage 1]
+
+#Program:
+# Cubex Compiler Test 1 - Stage 1
+ret := [];
+for ( i in input)
+{
+	ret := [i] ++ ret ++ [i];
+}
+return ret;
+
