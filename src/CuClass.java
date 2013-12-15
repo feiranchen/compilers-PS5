@@ -121,7 +121,8 @@ class Cls extends CuClass {
 			localprint.append("void* "+e.getKey()+"=(("+name+"*)this)->"+e.getKey()+";\n");
 		}
 		
-		fun.append(temp.toC(name,localprint.toString()));
+		//commented by Nikash because it is throwing an exception		
+//		fun.append(temp.toC(name,localprint.toString()));
 		vtable.append(String.format("%s_Tbl->%s=&%s; \n", name, v, name+"_"+v));
 //		StringBuilder tempSB=new StringBuilder().append("void* this");
 //		for (Entry<String, CuType> e : fieldTypes.entrySet()){

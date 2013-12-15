@@ -415,6 +415,12 @@ class Iter extends VClass {
 		return re;
 	}
 	@Override public boolean isIterable() {return true;}
+	
+	//added by Nikash
+	@Override
+	public boolean isClassOrInterface() {
+		return false;
+	}
 	@Override public boolean equals(CuType that) {
 //Helper.P("inside Iter equals function, this is " + this.toString() + " that is " + that.toString());
 		if (!that.isIterable()) return false;

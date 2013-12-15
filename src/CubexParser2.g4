@@ -50,7 +50,7 @@ expr returns [CuExpr e]
 | VAR {$e = new VvExp($VAR.text + "_");}
   (pt=paratype LPAREN es=exprs RPAREN {$e.add($pt.pt, $es.cu);})?
 | CLSINTF pt=paratype LPAREN es=exprs RPAREN {$e = new VcExp($CLSINTF.text, $pt.pt, $es.cu);}
-| ex=expr DOT VAR pt=paratype LPAREN es=exprs RPAREN {$e = new VarExpr($ex.e, $VAR.text, $pt.pt, $es.cu);} 
+| ex=expr DOT VAR pt=paratype LPAREN es=exprs RPAREN {$e = new VarExpr($ex.e, $VAR.text + "_", $pt.pt, $es.cu);} 
 | TRUE {$e = new CBoolean(true);}
 | FALSE {$e = new CBoolean(false);}
 | INTEGER {$e = new CInteger($INTEGER.int);}
@@ -113,7 +113,7 @@ intf returns [CuClass c] // add to classList? add to funlist
 : INTERFACE CLSINTF p=kindcontext {$c = new Intf($CLSINTF.text, $p.kc); } 
   (EXTENDS t=type {$c.addSuper($t.t);})?
   LBRACE (FUN VAR ts=typescheme f=funBody 
-            {$c.add($VAR.text, $ts.ts, $f.body); })* 
+            {$c.add($VAR.text + "_", $ts.ts, $f.body); })* 
   RBRACE;
 
 cls returns [CuClass c] 
@@ -121,7 +121,7 @@ cls returns [CuClass c]
   (EXTENDS t=type {$c.addSuper($t.t);})?
      LBRACE (s=stat {$c.add($s.s);})* 
        (SUPER LPAREN es=exprs RPAREN SEMICOLON {$c.add($es.cu); })? 
-       (FUN VAR ts=typescheme f=funBody {$c.add($VAR.text, $ts.ts, $f.body);  })* 
+       (FUN VAR ts=typescheme f=funBody {$c.add($VAR.text + "_", $ts.ts, $f.body);  })* 
      RBRACE;
 
 program returns [CuProgr p]
