@@ -1,0 +1,9 @@
+#Test: stage2test2
+#non-generic functions
+#[Stage 2]
+
+#Program:
+fun myinitial() : String = string([character(66)]);
+
+return [myinitial()];
+

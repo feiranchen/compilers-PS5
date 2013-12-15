@@ -1,0 +1,10 @@
+#Test: stage1test4
+#assignment
+#[Stage 1]
+
+#Program:
+retVal := "";
+s := "The Return Value.";
+retVal := s;
+return [retVal];
+

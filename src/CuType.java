@@ -18,7 +18,6 @@ public abstract class CuType {
 	protected CuType type = CuType.bottom; // for Iterable<E>
 	CuType(){ changeParent(top); }
 	//copy Constructor, added by Yinglei
-	//man, what terrible code I wrote!!!!!
 	CuType getcopy() {
 		return this;
 	}
