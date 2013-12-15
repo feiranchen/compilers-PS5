@@ -7,7 +7,7 @@ test6 -> return [x.set1("world").pi1()];	//plug-in problem. Map is empty.
 test7 -> class RaceCar(pos: Land) extends Car 	//Not sure where it's getting rejected.
 test9 -> for (p in lst) 	//plug-in problem
 test10 -> fun makeItADouble() : Pizza<Pizza<A>> = Pizza<Pizza<A>>(Pizza<A>(y));		//plug-in problem.
-test14 -> 					//Unsure why it is rejected because we fixed a couple of things. But don't think it's a plug-in problem
+test14 -> l:=[m1,m2,m4];		//When this statement is typechecked, l becomes an Iterable<top> but it should be Iterable<MyInterface> I think
 test15 -> return [x];		//plug-in problem. Map is empty.											
 test16 -> x := SuperSingleton<String>("hello").set("foo").get();		//Plug-in problem. The superclass for this class has an empty map.
 test17 -> lst := [x, y];		//lst is stored as an Iterable<Thing> but it should be an Iterable of Foo.
