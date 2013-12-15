@@ -1,0 +1,17 @@
+You don't need to look into any test cases not mentioned here. If you fix something, mention so in the comments.
+Format for this file is as specified in the next line.
+filename -> line in the code that is causing trouble	//my intuition as to what's wrong
+
+test5 -> return [x.get()];		//plug-in problem. Map is empty.
+test6 -> return [x.set1("world").pi1()];	//plug-in problem. Map is empty.
+test7 -> class RaceCar(pos: Land) extends Car 	//Unable to parse the program successfully.
+test9 -> for (p in lst) 	//plug-in problem
+test10 -> fun makeItADouble() : Pizza<Pizza<A>> = Pizza<Pizza<A>>(Pizza<A>(y));		//plug-in problem.
+test14 -> fun getT() : Integer = getRandom();		//The method getRandom from the interface is not in the context of the MyClass2. 
+													//One of the functions of the class is calling another function of the same class. 
+													//We might need to add the functions to the context as soon as we come across it.
+test15 -> return [x];		//plug-in problem. Map is empty.											
+test16 -> x := SuperSingleton<String>("hello").set("foo").get();		//Plug-in problem. The superclass for this class has an empty map.
+test17 -> lst := [x, y];		//lst is stored as an Iterable<Thing> but it should be an Iterable of Foo.
+test19 -> fun lol(ab : Aa&Bb) : String 			//When we have Aa&Bb as parent type for CuType, it's id is not set. 
+
