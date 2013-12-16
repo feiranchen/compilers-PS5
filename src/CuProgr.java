@@ -46,7 +46,7 @@ class FullPrg extends CuProgr {
 		for (CuProgr pr : elements) 
 			pr.toHIR();
 			s = s.toHIR();
-		if (Helper.debug) {
+		if (Helper.DEBUG) {
 			System.out.println(s.toString());
 		}
 	}
@@ -113,7 +113,7 @@ class FullPrg extends CuProgr {
 				
 				//global variables should all go out
 				CuStat lastnode = ((FunPrg) pr).statement.getLast();
-				if (Helper.debug) {
+				if (Helper.DEBUG) {
 					System.out.println("last node of the function is " + lastnode.toString());
 				}
 				for(String str : gvars_used) {
@@ -248,7 +248,7 @@ class FullPrg extends CuProgr {
 			//System.out.println("finished one");
 		}
 		HReturn re = this.s.calculateType(context);
-Helper.P("program return, type is " + re.tau.toString());
+		Helper.P("______%s, %s, %s, __%s__", re, re.b, re.tau, Helper.getLineInfo());
 		if (!re.tau.isSubtypeOf(new Iter(CuType.string)) || (re.b== false)) {
 			throw new NoSuchTypeException(Helper.getLineInfo());
 		}
@@ -296,7 +296,7 @@ class FunPrg extends CuProgr {
 	
 	@Override public void toHIR() {
 		this.statement = this.statement.toHIR();
-		if (Helper.debug) {
+		if (Helper.DEBUG) {
 			System.out.println("fun " + name + this.typeScheme.toString() + "{\n");
 			System.out.println(this.statement.toString());
 			System.out.println("}\n");
@@ -389,7 +389,7 @@ class StatPrg extends CuProgr {
 	}
 	@Override public void toHIR() {
 		stat = stat.toHIR();
-		if (Helper.debug) {
+		if (Helper.DEBUG) {
 			System.out.println(stat.toString());
 		}
 	}

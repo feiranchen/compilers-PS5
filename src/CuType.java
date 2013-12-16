@@ -17,8 +17,8 @@ public abstract class CuType {
 	protected Map<String, CuType> map = new LinkedHashMap<String, CuType>();// typeParameter->non-generic type arguments
 	protected CuType type = CuType.bottom; // for Iterable<E>
 	CuType(){ changeParent(top); }
-	//copy Constructor, added by Yinglei
-	CuType getcopy() {
+	//copy Constructor, added by Yinglei, copy includes the mapping by Yunhan
+	CuType getcopy(String caller, Map<String, CuType> m) {
 		return this;
 	}
 
@@ -46,6 +46,7 @@ public abstract class CuType {
 	public boolean equals(Object that) { return equals((CuType)that); }
 	abstract public boolean equals(CuType that);
 	public boolean isSubtypeOf(CuType that) {
+		Helper.P("__%s__", Helper.getLineInfo());
 		if (this.equals(that) || this.isBottom() || that.isTop()) return true;
 		for (CuType p : this.parentType) {
 			if (p.isSubtypeOf(that)) return true;
@@ -83,7 +84,8 @@ public abstract class CuType {
 		//System.out.println("returned top");
 		return top;
 	}
-	public CuType calculateType(CuContext context) throws NoSuchTypeException { return null;}
+	public CuType calculateType(CuContext context) throws NoSuchTypeException { 
+		return null;}
 	// find all the super types of n, including itself
 	public static List<CuType> superTypeList(CuType n) {
 		Queue<CuType> l = new LinkedList<CuType>();
@@ -132,14 +134,15 @@ class VClass extends CuType {
 		}
 	}
 	//added by Yinglei
-	//copy Constructor, added by Yinglei
-	@Override CuType getcopy() {
+	//copy Constructor, added by Yinglei, including the mapping if possible by Yunhan
+	@Override CuType getcopy(String caller, Map<String, CuType> m) {
+		Helper.P(" copy, %s, called from %s",Helper.getLineInfo(), caller);
 		CuType re = new VClass(super.id, iniArgs);
 		re.parentType = new ArrayList<CuType>(this.parentType);
 		re.iniArgs = new ArrayList<CuType> (this.iniArgs);
 		re.id = new String (this.id);
 		re.text = new String(this.text);
-		re.map = new LinkedHashMap<String, CuType>(this.map);
+		re.map = new LinkedHashMap<String, CuType>(m);
 		//change of reference should not change the value it is pointing to, ie re.type = Bottom doesn't make the 
 		//this.type to be bottom
 		re.type = this.type;
@@ -156,11 +159,15 @@ class VClass extends CuType {
 		// get the generic types when declared
 		List<String> typePara = c.kindCtxt;
 		if (typePara.size() != iniArgs.size()) throw new NoSuchTypeException(Helper.getLineInfo()); 
+		// set map by Yunhan, inherit the mapping from its parent types
+		for (CuType t: this.parentType) {
+			map.putAll(t.map); // by Yunhan
+		}
 		for (int i = 0; i < iniArgs.size(); i++) {
 			iniArgs.get(i).calculateType(context);
 			map.put(typePara.get(i), iniArgs.get(i));
 		}
-		
+		Helper.P("***** map %s, super %s", map, this.parentType);
 		//special process for iterable TODO: delete this
 		if(id.equals("Iterable")) {
 			List <CuType> iter_parrents = new ArrayList<CuType>();
@@ -226,6 +233,7 @@ class VClass extends CuType {
 */
 	@Override public boolean isClassOrInterface() {return true;}
 	@Override public boolean isSubtypeOf(CuType that) {
+		Helper.P("    %s<%s> isSubtypeOf %s<%s>? __%s__", this,this.map, that,that.map, Helper.getLineInfo());
 		// TODO: make sure calculateType is called already
 		//System.out.println("in vclass is subtype of " + this.toString() + " that is " + that.toString() + " that type is " + that.type.toString());
 		//System.out.println("map is " + this.map.toString());
@@ -233,10 +241,9 @@ class VClass extends CuType {
 		if (this.equals(that)) return true;
 		if (this.isBottom()) return true;
 		for (CuType p : this.parentType) {
+			Helper.P("        check parent %s isSubtypeOf %s", p, that, Helper.getLineInfo());
 			p.plugIn(this.map);
-			//System.out.println("p is " + p.toString());
 			if (p.isSubtypeOf(that) || p.equals(that)) {
-Helper.P(String.format("%s isSubTypeOf %s", this, that));
 				return true;
 			}	
 		}
@@ -278,15 +285,15 @@ class VTypeInter extends CuType {
 		parentType.add(t);
 		super.text += " \u222A "+t.toString();
 	}
-	//added by Yinglei
-	//copy Constructor, added by Yinglei
-	@Override CuType getcopy() {
+	//copy Constructor, added by Yinglei, included the mapping by Yunhan, mapping does nothing
+	@Override CuType getcopy(String caller, Map<String, CuType> m) {
+		Helper.P(" copy, %s, called from %s",Helper.getLineInfo(), caller);
 		CuType re = new VTypeInter();
 		re.parentType = new ArrayList<CuType>(this.parentType);
 		re.iniArgs = new ArrayList<CuType> (this.iniArgs);
 		re.id = new String (this.id);
 		re.text = new String(this.text);
-		re.map = new LinkedHashMap<String, CuType>(this.map);
+		re.map = new LinkedHashMap<String, CuType>(m);
 		//change of reference should not change the value it is pointing to, ie re.type = Bottom doesn't make the 
 		//this.type to be bottom
 		re.type = this.type;
@@ -349,16 +356,22 @@ class VTypePara extends CuType {
 	}
 
 	//copy Constructor, added by Yinglei
-	@Override CuType getcopy() {
+	// including mapping, if mapping matches, return the mapped type rather than generic, by Yunhan
+	@Override CuType getcopy(String caller, Map<String, CuType> m) {
+		Helper.P(" copy, %s, called from %s",Helper.getLineInfo(), caller);
+		if (m.containsKey(this.text)){ // mostly this case, return the mapped type, by Yunhan
+			return m.get(this.text);
+		}
 		CuType re = new VTypePara(super.id);
 		re.parentType = new ArrayList<CuType>(this.parentType);
 		re.iniArgs = new ArrayList<CuType> (this.iniArgs);
 		re.id = new String (this.id);
 		re.text = new String(this.text);
-		re.map = new LinkedHashMap<String, CuType>(this.map);
+		re.map = new LinkedHashMap<String, CuType>(m);
 		//change of reference should not change the value it is pointing to, ie re.type = Bottom doesn't make the 
 		//this.type to be bottom
 		re.type = this.type;
+		Helper.P("  parentType %s\n  iniArgs %s\n  id %s\n  text %s\n  map %s",this.parentType, this.iniArgs, this.id, this.text, m);
 		return re;
 	}
 	public CuType calculateType(CuContext context) throws NoSuchTypeException {
@@ -401,14 +414,15 @@ class Iter extends VClass {
 		//System.out.println("in iter end");
 	}
 	//added by Yinglei
-	//copy Constructor, added by Yinglei
-	@Override CuType getcopy() {
+	//copy Constructor, added by Yinglei, including mapping by Yunhan (mapping does nothing)
+	@Override CuType getcopy(String caller, Map<String, CuType> m) {
+		Helper.P(" copy, %s, called from %s",Helper.getLineInfo(), caller);
 		CuType re = new Iter(this.iniArg);
 		re.parentType = new ArrayList<CuType>(this.parentType);
 		re.iniArgs = new ArrayList<CuType> (this.iniArgs);
 		re.id = new String (this.id);
 		re.text = new String(this.text);
-		re.map = new LinkedHashMap<String, CuType>(this.map);
+		re.map = new LinkedHashMap<String, CuType>(m);
 		//change of reference should not change the value it is pointing to, ie re.type = Bottom doesn't make the 
 		//this.type to be bottom
 		re.type = this.type;
@@ -447,7 +461,7 @@ Helper.P(String.format("map %s", map));
 		return this;
 	}
 	@Override public boolean isSubtypeOf(CuType that) {
-Helper.P("Iterable subtyping begin: this type is " + this.type + " that type is" + that.type);
+Helper.P("    %s.isSubtypeOf(%s)? __%s__",this.type,that.type,Helper.getLineInfo());
 		//added by Yinglei to fix PA3, String is iterable, but only string is subtype of string
 		if (that.isString() && !this.isString()) return false;
 		if (that.isString() && this.isString()) return true;
@@ -522,6 +536,7 @@ class Top extends CuType{
 	@Override public boolean isTop() {return true;}
 	@Override public boolean equals(CuType that) { return that.isTop();}
 	@Override public boolean isSubtypeOf(CuType t) { 
+		Helper.P("__%s__", Helper.getLineInfo());
 		if (t.isTop()) {
 			return true;
 		}
@@ -538,7 +553,7 @@ class Bottom extends CuType {
 	@Override public CuType calculateType(CuContext context) { return this;}
 	@Override public boolean isBottom() {return true;}
 	@Override public boolean isSubtypeOf(CuType t) { 
-		//System.out.println("in class Bottom"); 
+		Helper.P("__%s__", Helper.getLineInfo());
 		return true;}
 	@Override public boolean equals(CuType that) { return that.isBottom();}
 }

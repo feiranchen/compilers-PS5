@@ -280,7 +280,7 @@ class Cls extends CuClass {
 		if (!tau_hat.id.equals(CuVvc.TOP)) {
 			//System.out.println("in CuClass cls " + super.name + " point xx");
 			CuExpr temp_expr = new VcExp(tau_hat.id, tau_hat.iniArgs, this.superArg);
-			CuType retype = temp_expr.calculateType(cur_context);
+			CuType retype = temp_expr.calculateType(Helper.getLineInfo(), cur_context);
 			if (!retype.equals(tau_hat)) {
 				throw new NoSuchTypeException(Helper.getLineInfo());
 			}

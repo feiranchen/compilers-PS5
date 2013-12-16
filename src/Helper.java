@@ -7,11 +7,12 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Map.Entry;
 import java.util.regex.*;
+import java.util.logging.*;;
 
 
 public class Helper {
 	//change this to false when submit
-	protected static boolean debug = true;
+	protected static boolean DEBUG = false;
 	protected static boolean PA3 = true;
 	protected static boolean PA4 = false;
 	protected static boolean PA5 = false;
@@ -101,10 +102,10 @@ public class Helper {
 	}
 	
 	protected static void P(Object s) {
-		//System.out.println(s.toString());
+		if (DEBUG) System.out.println(s.toString());
 	}
 	protected static void P(String s, Object...args) {
-		//System.out.println(String.format(s, args));
+		if (DEBUG) System.out.println(String.format(s, args));
 	}
 	/* thoughts coming, to implement later on */
 	protected static void ToDo(String comment){
@@ -114,10 +115,14 @@ public class Helper {
 	 * @return int - Current line number.
 	 */
 	public static String getLineInfo() {
-        String fullClassName = Thread.currentThread().getStackTrace()[3].getClassName();            
-        String methodName = Thread.currentThread().getStackTrace()[3].getMethodName();
-        int lineNumber = Thread.currentThread().getStackTrace()[3].getLineNumber();
-	    return fullClassName + "." + methodName + "(): line " + lineNumber;
+		if (DEBUG) {
+		StackTraceElement err = Thread.currentThread().getStackTrace()[2];
+        String fullClassName = err.getClassName();            
+        String methodName = err.getMethodName();
+        int lineNumber = err.getLineNumber();
+        return fullClassName + "." + methodName + "(): line " + lineNumber;
+		}
+		else return "";
 	}
 	
 	protected static CuType getTypeForIterable(String s){
@@ -158,7 +163,7 @@ public class Helper {
 			nodes.add(cur);
 		}
 		
-		if (debug) {
+		if (DEBUG) {
 			int i = 0;
 			System.out.println("printing the CFG");
 			for (CuStat cs : nodes) {
@@ -219,7 +224,7 @@ public class Helper {
 		}
 		
 		//print out the in out use def sets
-		if (debug) {
+		if (DEBUG) {
 			int i = 0;
 			System.out.println("printing the CFG with in out use def sets");
 			for (CuStat cs : nodes) {
@@ -321,5 +326,22 @@ public class Helper {
 		name += "(" + reName + "->nrefs) = 0;\n";
 		name += reName + "->value = " + value + ";\n";
 		return name;
+	}
+	/* apply all the transitions in m.
+	 * e.g. m={A=B, B=String  <>"{}"}, return {A=String  <>"{}", B=String  <>"{}"}
+	 * by Yunhan
+	 */
+	public static Map<String, CuType> getMapAfterTransition(Map<String, CuType> m) {
+		Map<String, CuType> newMap = new HashMap<String, CuType>(m);
+		for (Entry<String, CuType> e : m.entrySet()) {
+			String key = e.getKey();
+			CuType val = e.getValue();
+			//P("########## %s, m containsKey(%s)=%b", e, val, m.containsKey(val.id));
+			if (val.isTypePara() & m.containsKey(val.id)) {
+				newMap.put(key, m.get(val.id));
+			}
+		}
+		//P("########>> new %s, ori %s", newMap, m);
+		return newMap;
 	}
 }

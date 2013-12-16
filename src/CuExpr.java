@@ -29,11 +29,14 @@ public abstract class CuExpr {
 	protected boolean boxed = true;
 	public void add(List<CuType> pt, List<CuExpr> es) {}
 	public final CuType getType(CuContext context) throws NoSuchTypeException {
-		if(type == null) { type = calculateType(context); }
-		Helper.P("return expression type " + type);
+		if(type == null) { type = calculateType(Helper.getLineInfo(), context); }
 		return type;
 	}
-	protected CuType calculateType(CuContext context) throws NoSuchTypeException { return null;};
+	protected CuType calculateType(String caller, CuContext context) throws NoSuchTypeException {
+		Helper.P(">> calc: %s, %s, called from %s", this, Helper.getLineInfo(), caller);
+		Helper.P("<< return: %s, %s", "null", Helper.getLineInfo());
+		return null;
+		};
 	@Override public String toString() {return text;}
 	
 	public CuExpr copyFieldsTo(CuExpr that){
@@ -155,7 +158,7 @@ public abstract class CuExpr {
         	t = map.get(t.id);
         }
         //System.out.println("t type is " + t.type.toString());
-        Helper.P(String.format("this=%s<%s> parent %s, that=%s<%s>, map=%s", type,type.map,type.parentType, t,t.map, map));
+        Helper.P("    %s<%s> parent %s isTypeOf %s<%s>? map=%s, __%s__", type,type.map,type.parentType, t,t.map, map,Helper.getLineInfo());
         return type.isSubtypeOf(t);
     }
     
@@ -221,10 +224,12 @@ class AndExpr extends CuExpr{
 		return super.text;
 	}
 	
-	@Override protected CuType calculateType(CuContext context) throws NoSuchTypeException {
+	@Override protected CuType calculateType(String caller, CuContext context) throws NoSuchTypeException {
 		//right should pass in a type
-		
-		return binaryExprType(context, left.getType(context).id, super.methodId, right.getType(context));
+		Helper.P(">> calc: %s, %s, called from %s", this, Helper.getLineInfo(), caller);
+		CuType type = binaryExprType(context, left.getType(context).id, super.methodId, right.getType(context));
+		Helper.P("<< return: %s, %s", type, Helper.getLineInfo());
+		return type;
 	}
 	
 	@Override
@@ -374,9 +379,10 @@ class AppExpr extends CuExpr {
 		super.text = left.toString() + " ++ " + right.toString();
 		return super.text;
 	}
-	@Override protected CuType calculateType(CuContext context) throws NoSuchTypeException {
-		CuType t1 = left.calculateType(context);
-		CuType t2 = right.calculateType(context);
+	@Override protected CuType calculateType(String caller, CuContext context) throws NoSuchTypeException {
+		Helper.P(">> calc: %s, %s, called from %s", this, Helper.getLineInfo(), caller);
+		CuType t1 = left.calculateType(Helper.getLineInfo(), context);
+		CuType t2 = right.calculateType(Helper.getLineInfo(), context);
 		if (!t1.isIterable() || !t2.isIterable()) {
 			throw new NoSuchTypeException(Helper.getLineInfo());
 		}
@@ -388,8 +394,8 @@ class AppExpr extends CuExpr {
 			t2 = new Iter(CuType.character);
 		}
 Helper.P("t1 is " + t1.toString() + " t2 is " + t2.toString() + ", t1 type is " + t1.type.toString() + " t2 type is " + t2.type.toString());
-		CuType type = CuType.commonParent(t1.type, t2.type);
-Helper.P("common parent of types is " + type.toString());
+		CuType type = new Iter(CuType.commonParent(t1.type, t2.type));
+		Helper.P("<< return: %s, %s", type, Helper.getLineInfo());
 		return new Iter(type);		
 	}
 	
@@ -598,8 +604,8 @@ class BrkExpr extends CuExpr {
 		super.text=Helper.printList("[", val, "]", ",");
 		return super.text;
 	}
-	@Override protected CuType calculateType(CuContext context) {
-		//System.out.println("in bracket expression, start");
+	@Override protected CuType calculateType(String caller, CuContext context) {
+		Helper.P(">> calc: %s, %s, called from %s", this, Helper.getLineInfo(), caller);
 		if (val == null || val.isEmpty()) return new Iter(CuType.bottom);
 		CuType t = val.get(0).getType(context);
 		//System.out.println("type id is " + t.id);
@@ -607,9 +613,9 @@ class BrkExpr extends CuExpr {
 			t = CuType.commonParent(val.get(i).getType(context), val.get(i+1).getType(context));
 		} // find the common parent type of all expressions here
 		
-		//System.out.println("in bracket expression end");
-		
-		return new Iter(t);
+		CuType type = new Iter(t);
+		Helper.P("<< return: %s, %s", type, Helper.getLineInfo());
+		return type;
 	}
 	
 	@Override
@@ -811,9 +817,12 @@ class CBoolean extends CuExpr{
 		return super.text;
 	}
 	
-	@Override protected CuType calculateType(CuContext context) {
+	@Override protected CuType calculateType(String caller, CuContext context) {
+		Helper.P(">> calc: %s, %s, called from %s", this, Helper.getLineInfo(), caller);
 		if (val == null) { throw new NoSuchTypeException(Helper.getLineInfo());}
-		return CuType.bool;
+		CuType type = CuType.bool;
+		Helper.P("<< return: %s, %s", type, Helper.getLineInfo());
+		return type;
 	}
 
 	@Override
@@ -901,9 +910,12 @@ class CInteger extends CuExpr {
 		else 
 			return false;
 	}
-	@Override protected CuType calculateType(CuContext context) {
+	@Override protected CuType calculateType(String caller, CuContext context) {
+		Helper.P(">> calc: %s, %s, called from %s", this, Helper.getLineInfo(), caller);
 		if (val == null) { throw new NoSuchTypeException(Helper.getLineInfo());}
-		return CuType.integer;
+		CuType type = CuType.integer;
+		Helper.P("<< return: %s, %s", type, Helper.getLineInfo());
+		return type;
 	}
 	
 	@Override
@@ -967,9 +979,12 @@ class CString extends CuExpr {
 		else 
 			return false;
 	}
-	@Override protected CuType calculateType(CuContext context) {
+	@Override protected CuType calculateType(String caller, CuContext context) {
+		Helper.P(">> calc: %s, %s, called from %s", this, Helper.getLineInfo(), caller);
 		if (val == null) { throw new NoSuchTypeException(Helper.getLineInfo());}
-		return CuType.string;
+		CuType type = CuType.string;
+		Helper.P("<< return: %s, %s", type, Helper.getLineInfo());
+		return type;
 	}
 	
 	public Pair<List<CuStat>, CuExpr> toHIR() {
@@ -1070,8 +1085,12 @@ class DivideExpr extends CuExpr{
 		super.text = String.format("%s . %s < > ( %s )", left.toString(), super.methodId, right.toString());
 		return super.text;
 	}
-	@Override protected CuType calculateType(CuContext context) throws NoSuchTypeException {
-		return binaryExprType(context, left.getType(context).id, super.methodId, right.getType(context));
+	@Override protected CuType calculateType(String caller, CuContext context) throws NoSuchTypeException {
+		Helper.P(">> calc: %s, %s, called from %s", this, Helper.getLineInfo(), caller);
+
+		CuType type = binaryExprType(context, left.getType(context).id, super.methodId, right.getType(context));
+		Helper.P("<< return: %s, %s", type, Helper.getLineInfo());
+		return type;
 	}
 	/*
 	@Override protected CuType calculateType(CuContext context) throws NoSuchTypeException {
@@ -1346,12 +1365,14 @@ class EqualExpr extends CuExpr{
 			return false;
 	}
 	
-	@Override protected CuType calculateType(CuContext context) throws NoSuchTypeException {
+	@Override protected CuType calculateType(String caller, CuContext context) throws NoSuchTypeException {
+		Helper.P(">> calc: %s, %s, called from %s", this, Helper.getLineInfo(), caller);
 		CuType t = binaryExprType(context, left.getType(context).id, super.methodId, right.getType(context));
 		if (method2 != null) {
 			CuClass cur_class = context.mClasses.get(t.id);
 			return cur_class.mFunctions.get(method2).data_t;
 		}
+		Helper.P("<< return: %s, %s", t, Helper.getLineInfo());
 		return t;
 	}
 	
@@ -1686,12 +1707,15 @@ class GreaterThanExpr extends CuExpr{
 			return false;
 	}
 	
-	@Override protected CuType calculateType(CuContext context) throws NoSuchTypeException {
+	@Override protected CuType calculateType(String caller, CuContext context) throws NoSuchTypeException {
+		Helper.P(">> calc: %s, %s, called from %s", this, Helper.getLineInfo(), caller);
 		boolean b1 = left.isTypeOf(context, CuType.integer) && right.isTypeOf(context, CuType.integer);
 		boolean b2 = left.isTypeOf(context, CuType.bool) && right.isTypeOf(context, CuType.bool);
 		if ((!b1) && (!b2))
 			throw new NoSuchTypeException(Helper.getLineInfo());
-		return CuType.bool;
+		CuType type = CuType.bool;
+		Helper.P("<< return: %s, %s", type, Helper.getLineInfo());
+		return type;
 	}
 	
 	@Override
@@ -1861,12 +1885,16 @@ class LessThanExpr extends CuExpr{
 		super.text = String.format("%s . %s < > ( %s, %s )", left.toString(), super.methodId, right.toString(), b);
 		return super.text;
 	}
-	@Override protected CuType calculateType(CuContext context) throws NoSuchTypeException {
+	@Override protected CuType calculateType(String caller, CuContext context) throws NoSuchTypeException {
+		Helper.P(">> calc: %s, %s, called from %s", this, Helper.getLineInfo(), caller);
 		boolean b1 = left.isTypeOf(context, CuType.integer) && right.isTypeOf(context, CuType.integer);
 		boolean b2 = left.isTypeOf(context, CuType.bool) && right.isTypeOf(context, CuType.bool);
 		if ((!b1) && (!b2))
 			throw new NoSuchTypeException(Helper.getLineInfo());
-		return CuType.bool;
+		
+		CuType type = CuType.bool;
+		Helper.P("<< return: %s, %s", type, Helper.getLineInfo());
+		return type;
 	}
 	
 	@Override
@@ -2040,8 +2068,12 @@ class MinusExpr extends CuExpr{
 			return false;
 	}
 	
-	@Override protected CuType calculateType(CuContext context) throws NoSuchTypeException {
-		return binaryExprType(context, left.getType(context).id, super.methodId, right.getType(context));
+	@Override protected CuType calculateType(String caller, CuContext context) throws NoSuchTypeException {
+		Helper.P(">> calc: %s, %s, called from %s", this, Helper.getLineInfo(), caller);
+
+		CuType type = binaryExprType(context, left.getType(context).id, super.methodId, right.getType(context));
+		Helper.P("<< return: %s, %s", type, Helper.getLineInfo());
+		return type;
 	}
 	/*
 	@Override protected CuType calculateType(CuContext context) throws NoSuchTypeException {
@@ -2203,8 +2235,12 @@ class ModuloExpr extends CuExpr{
 		super.text = String.format("%s . %s < > ( %s )", left.toString(), super.methodId, right.toString());
 		return super.text;
 	}
-	@Override protected CuType calculateType(CuContext context) throws NoSuchTypeException {
-		return binaryExprType(context, left.getType(context).id, super.methodId, right.getType(context));
+	@Override protected CuType calculateType(String caller, CuContext context) throws NoSuchTypeException {
+		Helper.P(">> calc: %s, %s, called from %s", this, Helper.getLineInfo(), caller);
+
+		CuType type = binaryExprType(context, left.getType(context).id, super.methodId, right.getType(context));
+		Helper.P("<< return: %s, %s", type, Helper.getLineInfo());
+		return type;
 	}
 	
 	@Override
@@ -2374,8 +2410,12 @@ class NegateExpr extends CuExpr{
 		super.text = String.format("%s . %s < > ( )", val.toString(), super.methodId);
 		return super.text;
 	}
-	@Override protected CuType calculateType(CuContext context) throws NoSuchTypeException {
-		return unaryExprType(context, val.getType(context).id, super.methodId);
+	@Override protected CuType calculateType(String caller, CuContext context) throws NoSuchTypeException {
+		Helper.P(">> calc: %s, %s, called from %s", this, Helper.getLineInfo(), caller);
+
+		CuType type = unaryExprType(context, val.getType(context).id, super.methodId);
+		Helper.P("<< return: %s, %s", type, Helper.getLineInfo());
+		return type;
 	}
 	
 	@Override
@@ -2493,8 +2533,12 @@ class NegativeExpr extends CuExpr{
 		return super.text;
 	}
 	
-	@Override protected CuType calculateType(CuContext context) throws NoSuchTypeException {
-		return unaryExprType(context, val.getType(context).id, super.methodId);
+	@Override protected CuType calculateType(String caller, CuContext context) throws NoSuchTypeException {
+		Helper.P(">> calc: %s, %s, called from %s", this, Helper.getLineInfo(), caller);
+
+		CuType type = unaryExprType(context, val.getType(context).id, super.methodId);
+		Helper.P("<< return: %s, %s", type, Helper.getLineInfo());
+		return type;
 	}
 	/*
 	@Override protected CuType calculateType(CuContext context) throws NoSuchTypeException {
@@ -2616,8 +2660,12 @@ class OnwardsExpr extends CuExpr{
 		super.text = String.format("%s . %s < > ( %s )", val.toString(), super.methodId, inclusive);
 		return super.text;
 	}
-	@Override protected CuType calculateType(CuContext context) throws NoSuchTypeException {
-		return binaryExprType(context, val.getType(context).id, super.methodId, CuType.bool);
+	@Override protected CuType calculateType(String caller, CuContext context) throws NoSuchTypeException {
+		Helper.P(">> calc: %s, %s, called from %s", this, Helper.getLineInfo(), caller);
+
+		CuType type = binaryExprType(context, val.getType(context).id, super.methodId, CuType.bool);
+		Helper.P("<< return: %s, %s", type, Helper.getLineInfo());
+		return type;
 	}
 	
 	@Override
@@ -2851,8 +2899,12 @@ class OrExpr extends CuExpr{
 		return super.text;
 	}
 	
-	@Override protected CuType calculateType(CuContext context) throws NoSuchTypeException {
-		return binaryExprType(context, left.getType(context).id, super.methodId, right.getType(context));
+	@Override protected CuType calculateType(String caller, CuContext context) throws NoSuchTypeException {
+		Helper.P(">> calc: %s, %s, called from %s", this, Helper.getLineInfo(), caller);
+
+		CuType type = binaryExprType(context, left.getType(context).id, super.methodId, right.getType(context));
+		Helper.P("<< return: %s, %s", type, Helper.getLineInfo());
+		return type;
 	}
 	
 	@Override
@@ -3010,15 +3062,17 @@ class PlusExpr extends CuExpr{
 			return false;
 	}
 	
-	@Override protected CuType calculateType(CuContext context) throws NoSuchTypeException {
-		//System.out.println("in plus expr begin");
+	@Override protected CuType calculateType(String caller, CuContext context) throws NoSuchTypeException {
+		Helper.P(">> calc: %s, %s, called from %s", this, Helper.getLineInfo(), caller);
 		CuType lt = left.getType(context);
 		Helper.P("PlusExpr: %s is class %b", lt, lt instanceof VClass);
 		if (lt.isClassOrInterface()) {
 			VClass lc = (VClass)lt;
 			Helper.P("PlusExpr: %s mapping %s", lc, lc.map);
 		}
-		return binaryExprType(context, left.getType(context).id, super.methodId, right.getType(context));
+		CuType type = binaryExprType(context, left.getType(context).id, super.methodId, right.getType(context));
+		Helper.P("<< return: %s, %s", type, Helper.getLineInfo());
+		return type;
 	}
 	
 	@Override
@@ -3176,15 +3230,19 @@ class ThroughExpr extends CuExpr{
 			return false;
 	}
 	
-	@Override protected CuType calculateType(CuContext context) throws NoSuchTypeException {
+	@Override protected CuType calculateType(String caller, CuContext context) throws NoSuchTypeException {
+		Helper.P(">> calc: %s, %s, called from %s", this, Helper.getLineInfo(), caller);
 		boolean b1 = left.isTypeOf(context, CuType.integer) && right.isTypeOf(context, CuType.integer);
 		boolean b2 = left.isTypeOf(context, CuType.bool) && right.isTypeOf(context, CuType.bool);
+		CuType type;
 		if ((!b1) && (!b2))
 			throw new NoSuchTypeException(Helper.getLineInfo());
 		if (b1)
-			return new Iter(CuType.integer);
+			type = new Iter(CuType.integer);
 		else
-			return new Iter(CuType.bool);
+			type = new Iter(CuType.bool);
+		Helper.P("<< return: %s, %s", type, Helper.getLineInfo());
+		return type;
 	}
 	
 	@Override
@@ -3621,8 +3679,12 @@ class TimesExpr extends CuExpr{
 		return super.text;
 	}
 	
-	@Override protected CuType calculateType(CuContext context) throws NoSuchTypeException {
-		return binaryExprType(context, left.getType(context).id, super.methodId, right.getType(context));
+	@Override protected CuType calculateType(String caller, CuContext context) throws NoSuchTypeException {
+		Helper.P(">> calc: %s, %s, called from %s", this, Helper.getLineInfo(), caller);
+
+		CuType type = binaryExprType(context, left.getType(context).id, super.methodId, right.getType(context));
+		Helper.P("<< return: %s, %s", type, Helper.getLineInfo());
+		return type;
 	}
 	
 	@Override
@@ -3783,10 +3845,9 @@ class VarExpr extends CuExpr{// e.vv<tao1...>(e1,...)
 	@Override public boolean isFunCall () {
 		return true;
 	}
-	@Override protected CuType calculateType(CuContext context) throws NoSuchTypeException {
-//System.out.println("in VarExp, begin");
+	@Override protected CuType calculateType(String caller, CuContext context) throws NoSuchTypeException {
+		Helper.P(">> calc: val=%s, %s, called from %s", val, Helper.getLineInfo(), caller);
         CuType tHat = val.getType(context); // 1st line in Figure 5 exp
-//System.out.println("t_hat is " + tHat.id);
         CuClass cur_class = context.mClasses.get(tHat.id);
         if (cur_class == null) {
         	throw new NoSuchTypeException(Helper.getLineInfo());
@@ -3799,7 +3860,7 @@ class VarExpr extends CuExpr{// e.vv<tao1...>(e1,...)
         
         if (ts.data_kc.size() != types.size()) throw new NoSuchTypeException(Helper.getLineInfo());
         Map<String, CuType> mapping = new HashMap<String, CuType>();
-        Helper.P(String.format("kc=%s. types=%s. eMap=%s",ts.data_kc, types,val.calculateType(context).map));
+        Helper.P("kc=%s. types=%s. eMap=%s",ts.data_kc, types,val.calculateType(Helper.getLineInfo(), context).map);
         for (int i = 0; i < types.size(); i++) {
         	mapping.put(ts.data_kc.get(i), types.get(i));
         }
@@ -3815,21 +3876,20 @@ class VarExpr extends CuExpr{// e.vv<tao1...>(e1,...)
         		//System.out.println(es.get(i).toString() + " doesnt match " + tList.get(i).toString() );
         		throw new NoSuchTypeException(Helper.getLineInfo());
         	}
-        }        	
-        //System.out.println("in VarExp, end");
+        }
         /*ts.data_t.plugIn(mapping);
         Helper.P(String.format("%s returns %s<%s>, mapping %s", this, ts.data_t,ts.data_t.map, mapping));
         return ts.data_t;*/
         //Yinglei: should not change data_t, should make a copy
-        CuType reType = ts.data_t.getcopy();
-        reType.plugIn(mapping);
-//Helper.P(String.format("VvExp returns %s<%s>", cur_ts.data_t, cur_ts.data_t.map));
+        CuType reType = ts.data_t.getcopy(Helper.getLineInfo(), mapping);
+        //reType.plugIn(mapping);
+        Helper.P("# %s\n tHat, %s\n class: %s\n typescheme: %s\n map %s\n reType %s", this, tHat, cur_class, ts, mapping, reType);
         //return cur_ts.data_t;
+        Helper.P("<< return: %s, %s", reType, Helper.getLineInfo());
 		return reType;
 	}
 	
-	@Override
-		public Pair<List<CuStat>, CuExpr> toHIR() {
+	@Override public Pair<List<CuStat>, CuExpr> toHIR() {
 			Pair<List<CuStat>, CuExpr> temp = new Pair<List<CuStat>, CuExpr>();
 			List<CuStat> stats = new ArrayList<CuStat>();
 			List<CuExpr> newEs = new ArrayList<CuExpr>();
@@ -3963,8 +4023,8 @@ class VcExp extends CuExpr {// vc<tao1...>(e1,...)
 	@Override public boolean isFunCall () {
 		return true;
 	}
-	@Override protected CuType calculateType(CuContext context)  throws NoSuchTypeException{
-		//System.out.println("in VcExp, begin val is " + val);
+	@Override protected CuType calculateType(String caller, CuContext context)  throws NoSuchTypeException{
+		Helper.P(">> calc: val=%s, %s, called from %s", val, Helper.getLineInfo(), caller);
 		//type check each tao_i // check tao in scope
 		for (CuType ct : types) {
 			ct.calculateType(context);
@@ -3978,10 +4038,12 @@ class VcExp extends CuExpr {// vc<tao1...>(e1,...)
             tList.add(cur_type);
         }
         Map<String, CuType> mapping = new HashMap<String, CuType>();
+        mapping.putAll(cur_ts.data_t.map); // by Yunhan
         for (int i = 0; i < types.size(); i++) {
         	mapping.put(cur_ts.data_kc.get(i), types.get(i));
         }
-  Helper.P(String.format("mapping=%s. types=%s. data_kc=%s ", mapping, types, cur_ts.data_kc));
+        mapping = Helper.getMapAfterTransition(mapping);
+        Helper.P(String.format("mapping=%s, typescheme=%s, data_t=%s, types=%s. data_kc=%s ", mapping, cur_ts, cur_ts.data_t, types, cur_ts.data_kc));
   		//added by Yinglei
         if (es.size() != cur_ts.data_tc.size()) throw new NoSuchTypeException(Helper.getLineInfo());
         for (int i = 0; i < es.size(); i++) {
@@ -3990,15 +4052,10 @@ class VcExp extends CuExpr {// vc<tao1...>(e1,...)
             	throw new NoSuchTypeException(Helper.getLineInfo());
             }
         }
-        //System.out.println("in VcExp, end");
-       /* cur_ts.data_t.plugIn(mapping);
- Helper.P(String.format("VcExp return %s<%s>", cur_ts.data_t, cur_ts.data_t.map));
-        return cur_ts.data_t;*/
         //Yinglei: should not change data_t, should make a copy
-        CuType reType = cur_ts.data_t.getcopy();
-        reType.plugIn(mapping);
-//Helper.P(String.format("VvExp returns %s<%s>", cur_ts.data_t, cur_ts.data_t.map));
-        //return cur_ts.data_t;
+        CuType reType = cur_ts.data_t.getcopy(Helper.getLineInfo(), mapping);
+        //reType.plugIn(mapping);
+        Helper.P("<< return: %s, %s", reType, Helper.getLineInfo());
 		return reType;
 	}
 	
@@ -4166,11 +4223,12 @@ class VvExp extends CuExpr{//varname or function call
 			return true;
 	}
 
-	@Override protected CuType calculateType(CuContext context) {
-Helper.P("in VvExp typechecker, var is " + val.toString());
+	@Override protected CuType calculateType(String caller, CuContext context) {
+		Helper.P(">> calc: var=%s, %s, called from %s", val, Helper.getLineInfo(), caller);
 		//System.out.println(String.format("in VvExp %s, begin %s", text, val));
 		if (es == null) {
 			this.retype = context.getVariable(val);
+			Helper.P("<< return: %s, %s", retype, Helper.getLineInfo());
 			return this.retype;
 		}
 Helper.P("es is not null, es is " + es.toString());
@@ -4212,14 +4270,15 @@ Helper.P(String.format("calculated %s", es.get(i)));
         }
 Helper.P(" 1mapping is " + mapping.toString());
         //Yinglei: should not change data_t, should make a copy
-        CuType reType = cur_ts.data_t.getcopy();
-        reType.plugIn(mapping);
+        CuType reType = cur_ts.data_t.getcopy(Helper.getLineInfo(), mapping);
+        //reType.plugIn(mapping);
         Helper.P("   VvExp reType %s isTypePara %b, mapping %s get %s", reType, reType.isTypePara(), mapping, mapping.get(reType.id));
 		if (reType.isTypePara() && mapping.containsKey(reType.id)) {
 			this.retype = mapping.get(reType.id);
 			return this.retype;
 		}
 		this.retype = reType;
+		Helper.P("<< return: %s, %s",reType, Helper.getLineInfo());
 		return reType;
 	}
 
