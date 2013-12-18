@@ -237,16 +237,41 @@ class FullPrg extends CuProgr {
 		return super.ctext;
 	}
 	public void calculateType(CuContext context) throws NoSuchTypeException {
-		int i = 0;
-		for (CuProgr prg : elements) { 
-			//System.out.println(prg.toString());
+		
+		for (int i=0; i<elements.size(); i++) {
+			CuProgr prg = elements.get(i);
+			if (prg instanceof FunPrg) {
+				for (int j=i; j<elements.size(); j++) {
+					CuProgr cur_prg = elements.get(j);
+					if (cur_prg instanceof FunPrg) {
+						//added by Yinglei, only check this when first add this in
+						if (((FunPrg)cur_prg).inContext == false) {
+							if (context.mFunctions.containsKey(((FunPrg)cur_prg).name)) {
+								throw new NoSuchTypeException(Helper.getLineInfo());
+							}
+							else {
+								context.updateFunction(((FunPrg)cur_prg).name, ((FunPrg)cur_prg).typeScheme);
+							}
+							((FunPrg)cur_prg).inContext = true;
+						}
+						else {
+							//else, do nothing
+						}						
+					}
+					//if not function
+					else {
+						break;
+					}
+				}
+			}
+			prg.calculateType(context);
 		}
-		for (CuProgr prg1 : elements) {
-			//System.out.println(i + ":" + prg1.toString());
-			i++;
+		
+		/*for (CuProgr prg1 : elements) {
+			
 			prg1.calculateType(context);
-			//System.out.println("finished one");
-		}
+			
+		}*/
 		HReturn re = this.s.calculateType(context);
 		Helper.P("______%s, %s, %s, __%s__", re, re.b, re.tau, Helper.getLineInfo());
 		if (!re.tau.isSubtypeOf(new Iter(CuType.string)) || (re.b== false)) {
@@ -285,6 +310,9 @@ class FunPrg extends CuProgr {
 	String name;
 	CuTypeScheme typeScheme;
 	CuStat statement;
+	
+	//added by Yinglei in pa5 fixing--type checking
+	boolean inContext = false;
 
 	public FunPrg(CuVvc var, CuTypeScheme ts, CuStat s) {
 		//System.out.println("in fun program constructor, begin");
@@ -328,10 +356,13 @@ Helper.P("in func program " + name);
 		//System.out.println(this.statement.toString());
 		//update the function context
 		context.mergeVariable();
-		if (context.mFunctions.containsKey(this.name)) {
-			throw new NoSuchTypeException(Helper.getLineInfo());
+		//added by Yinglei, only check this when first add this in
+		if (this.inContext == false) {
+			if (context.mFunctions.containsKey(this.name)) {
+				throw new NoSuchTypeException(Helper.getLineInfo());
+			}
+			context.updateFunction(this.name, this.typeScheme);
 		}
-		context.updateFunction(this.name, this.typeScheme);
 		//type check typeschemes and statements
 		this.typeScheme.calculateType(context);
 		CuContext temp_context = new CuContext (context);

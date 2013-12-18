@@ -12,10 +12,10 @@ import java.util.logging.*;;
 
 public class Helper {
 	//change this to false when submit
-	protected static boolean DEBUG = false;
-	protected static boolean PA3 = true;
+	protected static boolean DEBUG = true;
+	protected static boolean PA3 = false;
 	protected static boolean PA4 = false;
-	protected static boolean PA5 = false;
+	protected static boolean PA5 = true;
 	
 	//fix for use set of function calls, global variables used in the function call
 	protected static HashMap<String, List<String>> fun_gvars = new HashMap<String, List<String>>();
