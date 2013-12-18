@@ -253,6 +253,8 @@ Helper.P("program return, type is " + re.tau.toString());
 			throw new NoSuchTypeException(Helper.getLineInfo());
 		}
 	}
+	
+	
 }
 
 class ClassPrg extends CuProgr {
