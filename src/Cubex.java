@@ -59,7 +59,7 @@ public class Cubex {
 	        // *********for the first optimization, put your method here***************
 	        
 	        //after cse, print out the HIR four debugging
-	        if (Helper.debug){
+	        if (Helper.DEBUG){
 	        	System.out.println("PRINT HIR========================================");
 	        	ourProgram.printHIR();
 	        }
@@ -67,7 +67,7 @@ public class Cubex {
 	        ourProgram.buildSets();
 	        
 	        //after cse, print out the HIR four debugging
-	        if (Helper.debug){
+	        if (Helper.DEBUG){
 	        	System.out.println("PRINT HIR, after deadcode elimination====================");
 	        	ourProgram.printHIR();
 	        }
@@ -75,7 +75,7 @@ public class Cubex {
 			ArrayList<String> localVars = new ArrayList<String>();
 			PrintWriter writer = new PrintWriter("C:\\Users\\Nikash\\Documents\\SharedWithUbuntu\\Compilers\\PA5\\out.c", "UTF-8");
 			String cProgram = ourProgram.toC(localVars);
-			if (Helper.debug) {
+			if (Helper.DEBUG) {
 				cProgram = "#include<stdio.h>\n" + cProgram;
 			}
 			writer.println(cProgram);
@@ -102,7 +102,7 @@ public class Cubex {
 	        // *********for the first optimization, put your method here***************
 	        
 	        //after cse, print out the HIR four debugging
-	        if (Helper.debug){
+	        if (Helper.DEBUG){
 	        	System.out.println("PRINT HIR========================================");
 	        	ourProgram.printHIR();
 	        }
@@ -110,7 +110,7 @@ public class Cubex {
 	        ourProgram.buildSets();
 	        
 	        //after cse, print out the HIR four debugging
-	        if (Helper.debug){
+	        if (Helper.DEBUG){
 	        	System.out.println("PRINT HIR, after deadcode elimination====================");
 	        	ourProgram.printHIR();
 	        }
@@ -118,7 +118,7 @@ public class Cubex {
 			ArrayList<String> localVars = new ArrayList<String>();
 			PrintWriter writer = new PrintWriter("C:\\Users\\Nikash\\Documents\\SharedWithUbuntu\\Compilers\\PA5\\out.c", "UTF-8");
 			String cProgram = ourProgram.toC(localVars);
-			if (Helper.debug) {
+			if (Helper.DEBUG) {
 				cProgram = "#include<stdio.h>\n" + cProgram;
 			}
 			writer.println(cProgram);

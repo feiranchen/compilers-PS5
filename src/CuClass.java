@@ -121,7 +121,8 @@ class Cls extends CuClass {
 			localprint.append("void* "+e.getKey()+"=(("+name+"*)this)->"+e.getKey()+";\n");
 		}
 		
-		fun.append(temp.toC(name,localprint.toString()));
+		//commented by Nikash because it is throwing an exception		
+//		fun.append(temp.toC(name,localprint.toString()));
 		vtable.append(String.format("%s_Tbl->%s=&%s; \n", name, v, name+"_"+v));
 //		StringBuilder tempSB=new StringBuilder().append("void* this");
 //		for (Entry<String, CuType> e : fieldTypes.entrySet()){
@@ -279,7 +280,7 @@ class Cls extends CuClass {
 		if (!tau_hat.id.equals(CuVvc.TOP)) {
 			//System.out.println("in CuClass cls " + super.name + " point xx");
 			CuExpr temp_expr = new VcExp(tau_hat.id, tau_hat.iniArgs, this.superArg);
-			CuType retype = temp_expr.calculateType(cur_context);
+			CuType retype = temp_expr.calculateType(Helper.getLineInfo(), cur_context);
 			if (!retype.equals(tau_hat)) {
 				throw new NoSuchTypeException(Helper.getLineInfo());
 			}

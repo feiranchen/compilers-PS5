@@ -51,7 +51,6 @@ public abstract class CuStat {
 	}
 	public void add (CuStat st){}
 	public HReturn calculateType(CuContext context) throws NoSuchTypeException {
-		
 		HReturn re = new HReturn();
 		return re;
 	}
@@ -307,8 +306,7 @@ Helper.P("assign stat begin " + ee.toString() );
 		CuContext tcontext = new CuContext (context);
 		tcontext.mergeVariable();
 		//System.out.println("In assig stat, before expr check");
-		CuType exprType = ee.calculateType(tcontext);
-Helper.P("ee type is " + exprType);
+		CuType exprType = ee.calculateType(Helper.getLineInfo(),tcontext);
 		//System.out.println("In assig stat, after expr check");
 		context.updateMutType(var.toString(), exprType);
 		HReturn re = new HReturn();
@@ -316,6 +314,7 @@ Helper.P("ee type is " + exprType);
 		re.tau = CuType.bottom;
 		//System.out.println("In assignment statement end");
 Helper.P("assign stat end " + ee.toString());
+Helper.P("%s, %s, %s, __%s__", re, re.b, re.tau, Helper.getLineInfo());
 		return re;
 	}
 }
@@ -490,14 +489,14 @@ class ForStat extends CuStat{
 		
 		
 		//after converting to HIR, this method should never be called
-		if (Helper.debug) {
+		if (Helper.DEBUG) {
 			System.out.println("in ForStat buildCFG, error");
 		}
 	}
 	
 	@Override public void setUseDef() {
 		//after converting to HIR, this method should never be called
-		if (Helper.debug) {
+		if (Helper.DEBUG) {
 			System.out.println("in ForStat setUseDef, error");
 		}
 	}
@@ -522,7 +521,7 @@ class ForStat extends CuStat{
 	@Override public String toC(ArrayList<String> localVars)
 	{
 		//after converting to HIR, this method should never be called
-		if (Helper.debug) {
+		if (Helper.DEBUG) {
 			System.out.println("in ForStat toC, error");
 		}
 		/*
@@ -598,7 +597,7 @@ class ForStat extends CuStat{
 		CuContext tcontext = new CuContext (context);
 		tcontext.mergeVariable();		
     	//check whether e is an iterable of tau
-    	CuType eType = e.calculateType(tcontext);
+    	CuType eType = e.calculateType(Helper.getLineInfo(), tcontext);
 Helper.P(String.format("FOR %s is %s<%s>", e, eType, eType.map));
 
  		Boolean flag = eType.isIterable();
@@ -873,7 +872,7 @@ Helper.P("if begin, e is " + e.toString());
 		tcontext.mergeVariable();		
     	//check whether e is boolean
 Helper.P(tcontext.mVariables.toString());
-    	CuType eType = e.calculateType(tcontext);
+    	CuType eType = e.calculateType(Helper.getLineInfo(), tcontext);
 Helper.P("e type is " + eType);
     	if (!eType.isBoolean()) {
     		throw new NoSuchTypeException(Helper.getLineInfo()); 
@@ -1019,7 +1018,7 @@ class WhileStat extends CuStat{
     	//check whether e is boolean
 		//System.out.println("in while, before checking expr");
 		//System.out.println(this.e.toString());
-    	CuType eType = e.calculateType(tcontext);
+    	CuType eType = e.calculateType(Helper.getLineInfo(), tcontext);
     	//System.out.println("in while, after checking expr");
     	if (!eType.isBoolean()) {
     		//System.out.println("in while, expr is not boolean");
@@ -1124,7 +1123,7 @@ Helper.P("return begin " + e.toString());
 		//immutable variables
 		CuContext tcontext = new CuContext (context);
 		tcontext.mergeVariable();	
-		re.tau = e.calculateType(tcontext);
+		re.tau = e.calculateType(Helper.getLineInfo(), tcontext);
 Helper.P("e type is " + re.tau);
 		//System.out.println("in return stat, exp is " + e.toString() + " end");
 		return re;

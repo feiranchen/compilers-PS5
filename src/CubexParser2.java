@@ -879,7 +879,7 @@ public class CubexParser2 extends Parser {
 						setState(215); match(LPAREN);
 						setState(216); ((ExprContext)_localctx).es = exprs();
 						setState(217); match(RPAREN);
-						((ExprContext)_localctx).e =  new VarExpr(((ExprContext)_localctx).ex.e, (((ExprContext)_localctx).VAR!=null?((ExprContext)_localctx).VAR.getText():null), ((ExprContext)_localctx).pt.pt, ((ExprContext)_localctx).es.cu);
+						((ExprContext)_localctx).e =  new VarExpr(((ExprContext)_localctx).ex.e, (((ExprContext)_localctx).VAR!=null?((ExprContext)_localctx).VAR.getText():null) + "_", ((ExprContext)_localctx).pt.pt, ((ExprContext)_localctx).es.cu);
 						}
 						break;
 
@@ -1318,7 +1318,7 @@ public class CubexParser2 extends Parser {
 				setState(320); ((IntfContext)_localctx).VAR = match(VAR);
 				setState(321); ((IntfContext)_localctx).ts = typescheme();
 				setState(322); ((IntfContext)_localctx).f = funBody();
-				_localctx.c.add((((IntfContext)_localctx).VAR!=null?((IntfContext)_localctx).VAR.getText():null), ((IntfContext)_localctx).ts.ts, ((IntfContext)_localctx).f.body); 
+				_localctx.c.add((((IntfContext)_localctx).VAR!=null?((IntfContext)_localctx).VAR.getText():null) + "_", ((IntfContext)_localctx).ts.ts, ((IntfContext)_localctx).f.body); 
 				}
 				}
 				setState(329);
@@ -1463,7 +1463,7 @@ public class CubexParser2 extends Parser {
 				setState(362); ((ClsContext)_localctx).VAR = match(VAR);
 				setState(363); ((ClsContext)_localctx).ts = typescheme();
 				setState(364); ((ClsContext)_localctx).f = funBody();
-				_localctx.c.add((((ClsContext)_localctx).VAR!=null?((ClsContext)_localctx).VAR.getText():null), ((ClsContext)_localctx).ts.ts, ((ClsContext)_localctx).f.body);  
+				_localctx.c.add((((ClsContext)_localctx).VAR!=null?((ClsContext)_localctx).VAR.getText():null) + "_", ((ClsContext)_localctx).ts.ts, ((ClsContext)_localctx).f.body);  
 				}
 				}
 				setState(371);
