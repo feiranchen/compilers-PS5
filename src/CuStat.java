@@ -181,6 +181,13 @@ class AssignStat extends CuStat{
 		List<CuStat> curHIR = pa.getFirst();
 		CuStat temp = new AssignStat(var, pa.getSecond());
 		curHIR.add(temp);
+		
+		//yinglei added this dummy statement in fixing pa5 cse
+		String temp_name = Helper.getVarName();
+		CuExpr temp_expr = new VvExp(var.text);
+		curHIR.add(new AssignStat(new Vv(temp_name), temp_expr));
+		//end of dummy statement
+		
 		//every time we create a new assign statement, we need to do that
 		temp.setUnboxType();
 		super.HIR = new Stats(curHIR);
@@ -200,7 +207,13 @@ class AssignStat extends CuStat{
 	@Override public String toC(ArrayList<String> localVars) {
 		//if dead, we still need to print the definition
 		if (dead) {
-			super.ctext = "void * " + var.toString() +" = NULL;\n";;
+			//super.ctext = "void * " + var.toString() +" = NULL;\n";;
+			if (!Helper.funArgList.contains(var.toString())) {
+				super.ctext += "void * " + var.toString() +" = NULL;\n";
+			}
+			if (!Helper.funArgList.contains(var.toString()))
+				super.newVars.add(var.toString());
+			
 			return super.ctext;
 		}
 		String exp_toC = ee.toC(localVars);
@@ -507,6 +520,13 @@ class ForStat extends CuStat{
 		List<CuStat> curHIR = pa.getFirst();
 		//v = e part
 		curHIR.add(new AssignStat(var, pa.getSecond()));
+		
+		//yinglei added this dummy statement in fixing pa5 cse
+		String temp_name = Helper.getVarName();
+		CuExpr temp_expr = new VvExp(var.text);
+		curHIR.add(new AssignStat(new Vv(temp_name), temp_expr));
+		//end of dummy statement
+		
 		//check if e is string, if so, conver to iter part
 		curHIR.add(new ConvertToIter(var.toString()));
 		//we need to call it here to get the name

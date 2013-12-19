@@ -1,12 +1,12 @@
-for ($i=1; $i<4; $i++) {
+for ($i=1; $i<13; $i++) {
 		 print "testcase $i\n";
-		 $re = `java Cubex tests/PA5/LVA/c$i.x3`;
+		 $re = `java Cubex tests/PA5/CSE/c$i.x3`;
          $make = `make clean`;
 		 $make = `make > temp 2>&1`;
 		 print "make\n";
-		 $hasinfile = `ls tests/PA5/LVA/c$i.in`;
-		 if($hasinfile eq "tests/PA5/LVA/c$i.in\n") {
-			$response = `cat tests/PA5/LVA/c$i.in | xargs ./a.out`;
+		 $hasinfile = `ls tests/PA5/CSE/c$i.in`;
+		 if($hasinfile eq "tests/PA5/CSE/c$i.in\n") {
+			$response = `cat tests/PA5/CSE/c$i.in | xargs ./a.out`;
          }
 		 else {
 			$response = `time ./a.out`;
