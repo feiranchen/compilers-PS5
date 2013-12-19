@@ -209,7 +209,7 @@ class FullPrg extends CuProgr {
 		
 		//input is a global variable
 		super.ctext += "Iterable* " + "input_" + "= NULL;\n"
-				+ "int initialized_pqr = 0;\n";
+				+ "int initialized_pqr = 0;\n\n";
 		
     	for (String str : gVars) {
     		super.ctext += "void * " + str + " = NULL;\n";
