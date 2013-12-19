@@ -204,6 +204,9 @@ class FullPrg extends CuProgr {
 				+ "#include \"cubex_external_functions.h\"\n"
 				+ "#include \"cubex_lib.h\"\n\n";
 		
+		//added by Yinglei for pa5 fix, we should declare all of the functions first
+		super.ctext += Helper.fun_declaration;
+		
 		//input is a global variable
 		super.ctext += "Iterable* " + "input_" + "= NULL;\n"
 				+ "int initialized_pqr = 0;\n";
@@ -399,6 +402,11 @@ Helper.P("in func program " + name);
 			Helper.funArgList.add(e.getKey());
 		}
 		sb.append(inputs);
+		
+		//added by Yinglei for pa5 fix
+		Helper.fun_declaration += sb.toString() + ");\n";
+		//end of what yinglei added
+		
 		sb.append(") {\n");
 		for (String str : this.typeScheme.data_tc.keySet()) {
 			sb.append(Helper.incrRefCount(str));

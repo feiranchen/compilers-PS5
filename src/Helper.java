@@ -11,6 +11,8 @@ import java.util.logging.*;;
 
 
 public class Helper {
+	//added for pa5 fix by yinglei
+	protected static String fun_declaration = "";
 	//change this to false when submit
 	protected static boolean DEBUG = true;
 	protected static boolean PA3 = false;

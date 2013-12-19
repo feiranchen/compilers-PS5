@@ -314,7 +314,7 @@ Helper.P("assign stat begin " + ee.toString() );
 		re.tau = CuType.bottom;
 		//System.out.println("In assignment statement end");
 Helper.P("assign stat end " + ee.toString());
-Helper.P("%s, %s, %s, __%s__", re, re.b, re.tau, Helper.getLineInfo());
+Helper.P("var type is %s , __%s__", exprType, Helper.getLineInfo());
 		return re;
 	}
 }

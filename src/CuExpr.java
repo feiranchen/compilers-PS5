@@ -394,7 +394,8 @@ class AppExpr extends CuExpr {
 			t2 = new Iter(CuType.character);
 		}
 Helper.P("t1 is " + t1.toString() + " t2 is " + t2.toString() + ", t1 type is " + t1.type.toString() + " t2 type is " + t2.type.toString());
-		CuType type = new Iter(CuType.commonParent(t1.type, t2.type));
+		//Yunhan, there is no new iter here, you modified it wrong and I corrected it
+		CuType type = CuType.commonParent(t1.type, t2.type);
 		Helper.P("<< return: %s, %s", type, Helper.getLineInfo());
 		return new Iter(type);		
 	}
