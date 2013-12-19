@@ -480,7 +480,8 @@ String* concatChars(Iterable *charIter){
 		const char* prev=(const char* )combined;
 		combined = x3malloc((count+1)*sizeof(char)); 
 		mystrcpy(combined,prev);
-		x3free((char*)prev);
+		if (prev!=NULL)
+		    x3free((char*)prev);
 		char newChar=((Character*)charIter->value)->value;
 		combined[count]=newChar;
 		count++;
@@ -490,7 +491,8 @@ String* concatChars(Iterable *charIter){
 	const char* prev=(const char*)combined;
 	combined = x3malloc((count+1)*sizeof(char)); 
 	mystrcpy(combined,prev);
-	x3free((char*)prev);
+	if (prev != NULL)
+	      x3free((char*)prev);
 	combined[count]='\0';
 	String* new = (String*) x3malloc(sizeof(String));
 	new->nrefs = 0;
