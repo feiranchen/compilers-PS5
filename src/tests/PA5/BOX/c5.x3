@@ -1,0 +1,16 @@
+fun multfun(n : Integer,m : Integer):Integer
+{
+	if(n==0)
+	{
+		return 0;
+	}
+	else
+	{
+		return (multfun(n-1,m)+1)*m;
+	}
+}
+if(multfun(10000,1)==10000)
+{
+	return ["Yes"];
+}
+return ["No"]; 

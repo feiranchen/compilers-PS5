@@ -26,7 +26,7 @@ public class Cubex {
 		parser.addErrorListener(new ParserErrorListener(false)); //prevent printing debugging messages
 		
 		CuProgr ourProgram = null;
-		
+
 		if (Helper.PA3) {
 			ourProgram = parser.program().p;
 			Helper.P("parser succeeded");
@@ -90,7 +90,8 @@ public class Cubex {
 		else if (Helper.PA5) {
 			try {
 				ourProgram = parser.program().p;
-				Helper.P("parser succeeded");
+				if (Helper.DEBUG)
+					System.out.println("parser succeeded");
 				ourProgram.calculateType(context);
 				//Helper.ToDo("comment out accept when we submit");
 				System.out.println("accept");
@@ -104,7 +105,7 @@ public class Cubex {
 	        //next, build CFG, use and def sets are built here
 	        ourProgram.buildCFG();
 	
-	        //CSE.startCSE((FullPrg)ourProgram);
+	        CSE.startCSE((FullPrg)ourProgram);
 	        // *********for the first optimization, put your method here***************
 	        
 	        //after cse, print out the HIR four debugging
@@ -122,7 +123,7 @@ public class Cubex {
 	        }
 	        
 			ArrayList<String> localVars = new ArrayList<String>();
-			PrintWriter writer = new PrintWriter("C:\\Users\\Nikash\\Documents\\SharedWithUbuntu\\Compilers\\PA5\\out.c", "UTF-8");
+			PrintWriter writer = new PrintWriter("out.c", "UTF-8");
 			String cProgram = ourProgram.toC(localVars);
 			if (Helper.DEBUG) {
 				cProgram = "#include<stdio.h>\n" + cProgram;
