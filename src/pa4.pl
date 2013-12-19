@@ -1,18 +1,16 @@
-for ($i=1; $i<22; $i++) {
- if($i<7 or $i>10) { 
+for ($i=1; $i<4; $i++) {
 		 print "testcase $i\n";
-		 $re = `java -jar x3c.jar ctests/x3_test$i.x3`;
+		 $re = `java Cubex tests/PA5/LVA/c$i.x3`;
          $make = `make clean`;
-		 $make = `make`;
+		 $make = `make > temp 2>&1`;
 		 print "make\n";
-		 $hasinfile = `ls ctests/x3_test$i.in`;
-		 if($hasinfile eq "ctests/x3_test$i.in\n") {
-			$response = `cat ctests/x3_test$i.in | xargs ./a.out`;
+		 $hasinfile = `ls tests/PA5/LVA/c$i.in`;
+		 if($hasinfile eq "tests/PA5/LVA/c$i.in\n") {
+			$response = `cat tests/PA5/LVA/c$i.in | xargs ./a.out`;
          }
 		 else {
-			$response = `./a.out`;
+			$response = `time ./a.out`;
          }
 		 print "run result\n\n\n\n", $response;
- }
 }
 
