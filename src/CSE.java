@@ -250,7 +250,12 @@ public class CSE {
 				if(myContainsKey(varMap, optVar))
 					replaceVar=myGet(varMap, optVar).get(0);
 			}
+			//change by Yinglei, we don't want to replace with an expression that is not an integer or string
+			//return replaceVar;
+			if (!(replaceVar instanceof CInteger) && !(replaceVar instanceof CString))
+				replaceVar = new VvExp(optVar.text);
 			return replaceVar;
+			
 		}else{
 			CuExpr newE=null;
 			if (orgE instanceof AndExpr){
