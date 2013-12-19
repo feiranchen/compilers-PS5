@@ -21,7 +21,7 @@ fun empty(s : String) : String {
 	}
 	return "";
 }
-for (c in empty(build(23)))
+for (c in empty(build(1000)))
 	return ["No"];
 return ["Yes"];
  
