@@ -14,10 +14,10 @@ public class Helper {
 	//added for pa5 fix by yinglei
 	protected static String fun_declaration = "";
 	//change this to false when submit
-	protected static boolean DEBUG = true;
+	protected static boolean DEBUG = false;
 	protected static boolean PA3 = false;
-	protected static boolean PA4 = false;
-	protected static boolean PA5 = true;
+	protected static boolean PA4 = true;
+	protected static boolean PA5 = false;
 	
 	//fix for use set of function calls, global variables used in the function call
 	protected static HashMap<String, List<String>> fun_gvars = new HashMap<String, List<String>>();
