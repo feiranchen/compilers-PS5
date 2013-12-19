@@ -1,0 +1,16 @@
+fun id(n : Integer,b : Boolean):Boolean
+{
+	if(n==0)
+	{
+		return b;
+	}
+	else
+	{
+		return id(n-1,b)|b;
+	}
+}
+if(id(10000,true)& !id(10000,false))
+{
+	return ["Yes"];
+}
+return ["No"]; 

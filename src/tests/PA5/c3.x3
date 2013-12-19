@@ -1,0 +1,32 @@
+fun upTo(n : Integer):Iterable<Integer>
+{
+	ret:=[];
+	for(i in 1..n)
+	{
+		ret:=ret++[i];
+	}
+	return ret;
+}
+fun length(iter : Iterable<Thing>) : Integer
+{
+	ret:=0;
+	for(e in iter)
+	{
+		ret:=ret+1;
+	}
+	return ret;
+}
+fun stepper(n : Integer, m : Integer):Boolean
+{
+	iter := upTo(n);
+	if(length(iter)==m)
+	{
+		return true;
+	}
+	return stepper(n,m+1);
+}
+if(stepper(500,0))
+{
+	return ["Yes"];
+}
+return ["No"]; 
