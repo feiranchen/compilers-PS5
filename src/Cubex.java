@@ -79,7 +79,7 @@ public class Cubex {
 	        }
 	        
 			ArrayList<String> localVars = new ArrayList<String>();
-			PrintWriter writer = new PrintWriter("C:\\Users\\Nikash\\Documents\\SharedWithUbuntu\\Compilers\\PA5\\out.c", "UTF-8");
+			PrintWriter writer = new PrintWriter("out.c", "UTF-8");
 			String cProgram = ourProgram.toC(localVars);
 			if (Helper.DEBUG) {
 				cProgram = "#include<stdio.h>\n" + cProgram;
