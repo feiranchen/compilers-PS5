@@ -154,8 +154,12 @@ public abstract class CuExpr {
         //System.out.println("in isType of, after type check, type is " + type.toString());
         
         t.plugIn(map);
-        if (t instanceof VTypePara) {
+        Helper.P("    %s isinstanceof VP = %b, map = %s", t, t instanceof VTypePara, map );
+        if (t instanceof VTypePara && map.containsKey(t.id)) {
         	t = map.get(t.id);
+        }
+        if (type instanceof VTypePara && map.containsKey(type.id)){
+        	type = map.get(type.id);// by Yunhan
         }
         //System.out.println("t type is " + t.type.toString());
         Helper.P("    %s<%s> parent %s isTypeOf %s<%s>? map=%s, __%s__", type,type.map,type.parentType, t,t.map, map,Helper.getLineInfo());
@@ -4049,7 +4053,7 @@ class VcExp extends CuExpr {// vc<tao1...>(e1,...)
         if (es.size() != cur_ts.data_tc.size()) throw new NoSuchTypeException(Helper.getLineInfo());
         for (int i = 0; i < es.size(); i++) {
             if (!es.get(i).isTypeOf(context, tList.get(i), mapping)) {
-            	//System.out.println(es.get(i).toString() + " doesnt match " + tList.get(i).toString() );
+            	Helper.P("* %s not isTypeOf(%s), map=%s",es.get(i),tList.get(i),mapping);
             	throw new NoSuchTypeException(Helper.getLineInfo());
             }
         }

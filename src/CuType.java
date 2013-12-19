@@ -167,7 +167,7 @@ class VClass extends CuType {
 			iniArgs.get(i).calculateType(context);
 			map.put(typePara.get(i), iniArgs.get(i));
 		}
-		Helper.P("***** map %s, super %s", map, this.parentType);
+		Helper.P("    map %s, super %s", map, this.parentType);
 		//special process for iterable TODO: delete this
 		if(id.equals("Iterable")) {
 			List <CuType> iter_parrents = new ArrayList<CuType>();
