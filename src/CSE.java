@@ -166,7 +166,8 @@ public class CSE {
 			return orgS.getNext();
 		}
 		else {
-			System.out.println("\nDid not process stat: "+orgS.toString());
+			if (Helper.DEBUG)
+				System.out.println("\nDid not process stat: "+orgS.toString());
 			return orgS.getNext();
 		}
 	}
@@ -390,7 +391,8 @@ public class CSE {
 				
 				return finalReturn(name,orgE,newE, exprMap, varMap);
 			}else {
-				System.out.println("Did not update expr: "+orgE.toString());
+				if (Helper.DEBUG)
+					System.out.println("Did not update expr: "+orgE.toString());
 			}
 			
 			return orgE;
