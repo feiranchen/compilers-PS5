@@ -28,6 +28,11 @@ public class Cubex {
 		CuProgr ourProgram = null;
 		
 		if (Helper.PA3) {
+			ourProgram = parser.program().p;
+			Helper.P("parser succeeded");
+			ourProgram.calculateType(context);
+			System.out.println("accept");
+			/*
 			try {
 				ourProgram = parser.program().p;
 				Helper.P("parser succeeded");
@@ -37,6 +42,7 @@ public class Cubex {
 				System.out.println("reject");
 				System.exit(-2);
 			}
+			*/
 		}
 		else if (Helper.PA4) {
 			try {

@@ -12,7 +12,7 @@ import java.util.logging.*;;
 
 public class Helper {
 	//change this to false when submit
-	protected static boolean DEBUG = false;
+	protected static boolean DEBUG = true;
 	protected static boolean PA3 = true;
 	protected static boolean PA4 = false;
 	protected static boolean PA5 = false;
